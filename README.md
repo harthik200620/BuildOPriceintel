@@ -568,6 +568,45 @@ The honest limitation is there too: the unattended job can refresh only what ans
 
 ---
 
+## Deployed
+
+Live at **https://buildo-priceintel.vercel.app**, from `main` of
+[harthik200620/BuildOPriceintel](https://github.com/harthik200620/BuildOPriceintel).
+A push to `main` builds and promotes to production on its own.
+
+The store ships *with* the deployment — there is no database server, and the
+query path has no network hop in production either. Two details make that work:
+
+- **The snapshot is what deploys, not the working store.** `data/buildo.db`
+  keeps `journal_mode = WAL`, so the file on its own is behind whatever the
+  collector last wrote, and the pair is ~130 MB — past the 100 MB per-file
+  upload limit. `npm run db:snapshot` reads through the WAL and `VACUUM INTO`s
+  a single self-contained 24.5 MB file, `data/buildo.prod.db`. That one is
+  committed, and it is the one a deployment opens.
+
+- **It is opened read-only.** A serverless function filesystem is read-only, so
+  `lib/db.ts` sets `readonly` and skips `journal_mode`/`synchronous` whenever
+  `VERCEL` or `BUILDO_READONLY=1` is set — either pragma would fail before the
+  first query ran. `temp_store = MEMORY` stays, so a sort that spills does not
+  try to open a temp file next to the database. The only write on the query
+  path is `logSearch`, which already swallows its own errors, so `trending`
+  simply stops growing in production.
+
+So a refresh is three steps, and skipping the first ships yesterday's prices:
+
+```bash
+npm run collect && npm run db:snapshot
+git commit -am "Refresh catalogue" && git push
+```
+
+To reproduce the read-only path locally before pushing:
+
+```bash
+BUILDO_READONLY=1 npm run dev
+```
+
+---
+
 ## Deliberately simplified
 
 Listed in full, with the production path, in [`BuildO_Search_ProductionApp_PROMPT.md`](BuildO_Search_ProductionApp_PROMPT.md). The short version: no signed quote ledger, no learning-to-rank reranker, no price-shock event bus, no verify-now vendor spend breaker, no zone model beyond two cities, and entity resolution is a deterministic attribute tuple rather than the precision-first scorer with a human review queue.
