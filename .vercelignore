@@ -1,0 +1,20 @@
+# The CLI does not apply .gitignore to a linked project, so the working store
+# and its 128 MB journal have to be excluded again here. `data/buildo.prod.db`
+# — the snapshot the deployment actually opens — is deliberately not listed.
+node_modules
+.next
+.git
+*.tsbuildinfo
+
+data/buildo.db
+data/buildo.db-wal
+data/buildo.db-shm
+data/logs
+
+# Collector inputs and run outputs. Nothing on the query path reads these; the
+# catalogue they produced is already inside the snapshot.
+collector/raw
+collector/fixtures
+data/snapshots
+screenshots
+tests

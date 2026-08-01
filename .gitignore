@@ -17,3 +17,6 @@ data/logs/
 # Build artefacts of the local demo, not inputs to it.
 screenshots/
 ~$*
+
+.vercel
+.env*
