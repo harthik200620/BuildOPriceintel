@@ -1,0 +1,942 @@
+<title>BuildO Price Intelligence — how it works</title>
+
+<style>
+  :root {
+    --canvas:      #ECE7DE;
+    --canvas-deep: #E3DCD1;
+    --panel:       rgba(255,255,255,.74);
+    --panel-solid: #FBF9F6;
+    --ink:         #14161A;
+    --ink-2:       #4C5158;
+    --ink-3:       #5D636C;
+    --rule:        rgba(22,20,18,.13);
+    --rule-soft:   rgba(22,20,18,.07);
+    --accent:      #A8431B;
+    --accent-lift: #C9561F;
+    --accent-bg:   rgba(168,67,27,.075);
+    --pass:        #276843;
+    --pass-bg:     rgba(39,104,67,.09);
+    --bound:       #8A6410;
+    --bound-bg:    rgba(138,100,16,.10);
+    --shadow:      0 1px 2px rgba(28,25,22,.05), 0 12px 34px -18px rgba(28,25,22,.22);
+
+    --display: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --body:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono:    ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas:      #16140F;
+      --canvas-deep: #100E0A;
+      --panel:       rgba(40,36,29,.72);
+      --panel-solid: #221E18;
+      --ink:         #EFE9DE;
+      --ink-2:       #B6AEA1;
+      --ink-3:       #8E8579;
+      --rule:        rgba(239,233,222,.16);
+      --rule-soft:   rgba(239,233,222,.08);
+      --accent:      #E07A44;
+      --accent-lift: #F0925A;
+      --accent-bg:   rgba(224,122,68,.13);
+      --pass:        #6DB88A;
+      --pass-bg:     rgba(109,184,138,.13);
+      --bound:       #D2A33C;
+      --bound-bg:    rgba(210,163,60,.13);
+      --shadow:      0 1px 2px rgba(0,0,0,.35), 0 12px 34px -18px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --canvas:      #16140F;
+    --canvas-deep: #100E0A;
+    --panel:       rgba(40,36,29,.72);
+    --panel-solid: #221E18;
+    --ink:         #EFE9DE;
+    --ink-2:       #B6AEA1;
+    --ink-3:       #8E8579;
+    --rule:        rgba(239,233,222,.16);
+    --rule-soft:   rgba(239,233,222,.08);
+    --accent:      #E07A44;
+    --accent-lift: #F0925A;
+    --accent-bg:   rgba(224,122,68,.13);
+    --pass:        #6DB88A;
+    --pass-bg:     rgba(109,184,138,.13);
+    --bound:       #D2A33C;
+    --bound-bg:    rgba(210,163,60,.13);
+    --shadow:      0 1px 2px rgba(0,0,0,.35), 0 12px 34px -18px rgba(0,0,0,.7);
+  }
+  :root[data-theme="light"] {
+    --canvas:      #ECE7DE;
+    --canvas-deep: #E3DCD1;
+    --panel:       rgba(255,255,255,.74);
+    --panel-solid: #FBF9F6;
+    --ink:         #14161A;
+    --ink-2:       #4C5158;
+    --ink-3:       #5D636C;
+    --rule:        rgba(22,20,18,.13);
+    --rule-soft:   rgba(22,20,18,.07);
+    --accent:      #A8431B;
+    --accent-lift: #C9561F;
+    --accent-bg:   rgba(168,67,27,.075);
+    --pass:        #276843;
+    --pass-bg:     rgba(39,104,67,.09);
+    --bound:       #8A6410;
+    --bound-bg:    rgba(138,100,16,.10);
+    --shadow:      0 1px 2px rgba(28,25,22,.05), 0 12px 34px -18px rgba(28,25,22,.22);
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 700px at 12% -8%, rgba(200,150,105,.16), transparent 60%),
+      radial-gradient(900px 620px at 92% 108%, rgba(122,140,190,.13), transparent 60%),
+      var(--canvas);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px, 4vw, 44px) 120px; }
+
+  /* ── masthead ─────────────────────────────────────────────── */
+  .mast { padding: clamp(56px, 9vw, 104px) 0 clamp(30px, 5vw, 52px); border-bottom: 1px solid var(--rule); }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(38px, 6.4vw, 74px); line-height: 1.02; letter-spacing: -.022em;
+    margin: 0 0 22px; text-wrap: balance;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .standfirst {
+    font-size: clamp(17px, 2.1vw, 20.5px); line-height: 1.55; color: var(--ink-2);
+    max-width: 65ch; margin: 0;
+  }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  .vitals { display: flex; flex-wrap: wrap; gap: 0; margin: 40px 0 0; border-top: 1px solid var(--rule-soft); }
+  .vital { flex: 1 1 150px; padding: 18px 20px 4px 0; border-right: 1px solid var(--rule-soft); }
+  .vital:last-child { border-right: 0; }
+  .vital dt {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px;
+  }
+  .vital dd {
+    margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 21px; color: var(--ink); letter-spacing: -.01em;
+  }
+  .vital dd small { font-size: 12.5px; color: var(--ink-3); font-family: var(--body); letter-spacing: 0; }
+
+  /* ── layout: spine + column ───────────────────────────────── */
+  .shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: clamp(28px, 5vw, 68px); margin-top: 56px; }
+  @media (max-width: 900px) { .shell { grid-template-columns: 1fr; gap: 0; } .spine { display: none; } }
+
+  .spine { position: sticky; top: 28px; align-self: start; max-height: calc(100vh - 56px); overflow-y: auto; }
+  .spine h2 {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 16px; font-weight: 500;
+  }
+  .spine ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--rule); }
+  .spine li { margin: 0; }
+  .spine a {
+    display: grid; grid-template-columns: 30px 1fr; gap: 6px; align-items: baseline;
+    padding: 7px 0 7px 14px; margin-left: -1px; border-left: 2px solid transparent;
+    color: var(--ink-2); text-decoration: none; font-size: 13.5px; line-height: 1.35;
+  }
+  .spine a .n {
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .spine a:hover, .spine a:focus-visible { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); }
+  .spine a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* ── sections ─────────────────────────────────────────────── */
+  section { scroll-margin-top: 24px; padding: 0 0 clamp(44px, 6vw, 74px); }
+  .sec-head { display: flex; gap: 16px; align-items: baseline; margin: 0 0 8px; }
+  .sec-num {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    font-variant-numeric: tabular-nums; padding-top: 6px; flex: none;
+  }
+  h2.sec {
+    font-family: var(--display); font-weight: 400; font-size: clamp(27px, 3.6vw, 39px);
+    line-height: 1.12; letter-spacing: -.017em; margin: 0; text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--body); font-size: 15px; font-weight: 650; letter-spacing: -.005em;
+    margin: 34px 0 10px; color: var(--ink);
+  }
+  p { margin: 0 0 15px; max-width: 68ch; }
+  p, li { color: var(--ink-2); }
+  p strong, li strong { color: var(--ink); font-weight: 620; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  ul { margin: 0 0 16px; padding-left: 20px; max-width: 68ch; }
+  li { margin: 0 0 8px; }
+  code {
+    font-family: var(--mono); font-size: .875em; background: var(--accent-bg);
+    color: var(--accent); padding: .1em .34em; border-radius: 3px;
+    word-break: break-word;
+  }
+
+  /* the contract line: what enters, what leaves */
+  .contract {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 12px; color: var(--ink-3);
+    padding: 11px 0; margin: 0 0 22px;
+    border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft);
+  }
+  .contract b { color: var(--ink-2); font-weight: 500; }
+  .contract .arrow { color: var(--accent); }
+
+  /* panels */
+  .panel {
+    position: relative; background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 13px; box-shadow: var(--shadow); padding: 22px 24px; margin: 0 0 20px;
+  }
+  .panel > :last-child { margin-bottom: 0; }
+  .panel::before, .panel::after {
+    content: ""; position: absolute; width: 9px; height: 9px; pointer-events: none;
+    border-color: var(--accent); opacity: .5;
+  }
+  .panel::before { top: 9px; left: 9px; border-top: 1.5px solid; border-left: 1.5px solid; }
+  .panel::after  { bottom: 9px; right: 9px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+  .panel h3:first-child { margin-top: 0; }
+
+  .panel.law   { border-left: 3px solid var(--accent); }
+  .panel.note  { background: var(--bound-bg); border-color: rgba(138,100,16,.25); }
+  .panel.note::before, .panel.note::after { border-color: var(--bound); }
+
+  .kicker {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 8px; display: block;
+  }
+
+  /* code blocks */
+  pre {
+    font-family: var(--mono); font-size: 12.6px; line-height: 1.62;
+    background: var(--panel-solid); border: 1px solid var(--rule); border-radius: 10px;
+    padding: 16px 18px; margin: 0 0 18px; overflow-x: auto; color: var(--ink-2);
+    tab-size: 2;
+  }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre i { color: var(--ink-3); font-style: normal; }
+  pre em { color: var(--pass); font-style: normal; }
+
+  /* tables */
+  .tw { overflow-x: auto; margin: 0 0 20px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.6px; min-width: 480px; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  th {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 500; white-space: nowrap;
+  }
+  td { color: var(--ink-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.k { color: var(--ink); font-weight: 560; white-space: nowrap; }
+
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em;
+    padding: 2px 7px; border-radius: 999px; white-space: nowrap;
+  }
+  .tag.ok   { background: var(--pass-bg);  color: var(--pass); }
+  .tag.warn { background: var(--bound-bg); color: var(--bound); }
+  .tag.acc  { background: var(--accent-bg); color: var(--accent); }
+
+  /* the pipeline diagram */
+  .flow { display: grid; gap: 8px; margin: 0 0 22px; }
+  .flow-row {
+    display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: start;
+    padding: 13px 16px; background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  .flow-row .fn {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    font-variant-numeric: tabular-nums; padding-top: 2px;
+  }
+  .flow-row .ft { font-size: 14px; color: var(--ink); font-weight: 600; margin: 0 0 3px; }
+  .flow-row .fd { font-size: 13.2px; color: var(--ink-3); margin: 0; line-height: 1.5; }
+  .flow-row .fd code { font-size: .92em; }
+  .flow-join {
+    font-family: var(--mono); font-size: 12px; color: var(--accent); opacity: .55;
+    padding-left: 12px; line-height: 1;
+  }
+
+  hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 0 0 40px; }
+
+  footer {
+    border-top: 1px solid var(--rule); margin-top: 20px; padding-top: 26px;
+    font-size: 13.2px; color: var(--ink-3); max-width: 68ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Hyderabad · Vijayawada — cement, TMT steel, water pipes, bricks &amp; blocks</p>
+  <h1>A price engine that would rather <em>say nothing</em> than say something it cannot source.</h1>
+  <p class="standfirst">
+    BuildO Price Intelligence answers one question that fifteen Indian construction platforms currently
+    cannot: <strong>what does this material actually cost, delivered to my pincode, with GST stated and the
+    unit normalised, as of a timestamp I can see?</strong> Everything below is how that answer gets built —
+    from an HTTP request against a marketplace to the figure rendered on a card — and, just as importantly,
+    every point in the chain where the system refuses to guess.
+  </p>
+
+  <dl class="vitals">
+    <div class="vital"><dt>Offers</dt><dd>1,755<small> · 629 vendors</small></dd></div>
+    <div class="vital"><dt>Query layer p95</dt><dd>14.9<small> ms</small></dd></div>
+    <div class="vital"><dt>Network calls per search</dt><dd>0</dd></div>
+    <div class="vital"><dt>Assertions</dt><dd>111<small> passing</small></dd></div>
+    <div class="vital"><dt>Runs on</dt><dd>1<small> SQLite file</small></dd></div>
+  </dl>
+</header>
+
+<div class="shell">
+
+  <nav class="spine" aria-label="Contents">
+    <h2>The pipeline</h2>
+    <ol>
+      <li><a href="#laws"><span class="n">§</span><span>Three laws</span></a></li>
+      <li><a href="#flow"><span class="n">§</span><span>End to end</span></a></li>
+      <li><a href="#collect"><span class="n">01</span><span>Collection</span></a></li>
+      <li><a href="#normalise"><span class="n">02</span><span>Normalisation</span></a></li>
+      <li><a href="#load"><span class="n">03</span><span>Load</span></a></li>
+      <li><a href="#price"><span class="n">04</span><span>Price surface</span></a></li>
+      <li><a href="#search"><span class="n">05</span><span>Retrieval &amp; rank</span></a></li>
+      <li><a href="#facets"><span class="n">06</span><span>Filters</span></a></li>
+      <li><a href="#ui"><span class="n">07</span><span>Interface</span></a></li>
+      <li><a href="#proof"><span class="n">§</span><span>Proof</span></a></li>
+      <li><a href="#honest"><span class="n">§</span><span>What is honest</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <!-- ── LAWS ──────────────────────────────────────────────── -->
+  <section id="laws">
+    <div class="sec-head"><span class="sec-num">§</span><h2 class="sec">Three laws that shape everything downstream</h2></div>
+    <p>
+      These are not aspirations written in a README. Each is enforced by code and asserted by the test suite,
+      and each one rules out a whole class of design that would otherwise be tempting.
+    </p>
+
+    <div class="panel law">
+      <span class="kicker">Law 1</span>
+      <h3>The query path never calls out.</h3>
+      <p>
+        No <code>/api/*</code> route issues an outbound request. The alternative — fanning out to sixty
+        marketplaces when a user types — was measured at a p95 of 2.8 s for plain HTML and 8.0 s for
+        JS-rendered pages, against a 200 ms budget. That is 84× over, and two orders of magnitude is not a
+        tuning problem, it is a different architecture. So collection is a scheduled job and search reads
+        only what is already on disk.
+      </p>
+      <p>
+        Enforced rather than promised: <code>lib/no-network.ts</code> replaces <code>globalThis.fetch</code>
+        on the request path with one that throws and records the URL, and a test proves it fires.
+      </p>
+    </div>
+
+    <div class="panel law">
+      <span class="kicker">Law 2</span>
+      <h3>Every displayed price carries a unit basis and a freshness timestamp.</h3>
+      <p>
+        The <code>&lt;Money&gt;</code> component cannot be called without a unit, and a card cannot render
+        without <code>{unit, delivery_scope, gst_treatment, priced_as_of, freshness_state}</code>. There is
+        deliberately no code path that puts a bare rupee figure on screen — “₹340” with no basis is the
+        single most common way a price comparison misleads.
+      </p>
+    </div>
+
+    <div class="panel law">
+      <span class="kicker">Law 3</span>
+      <h3>The price search shows is the price the cart would bill.</h3>
+      <p>
+        One function, <code>resolvePrice()</code> in <code>lib/price.ts</code>, is the only code permitted to
+        state a rupee figure. The search card, the detail sheet, the vendor table and the list total all call
+        it, and the tests assert they agree <em>to the paise</em>. A second pricing path is how the number on
+        the card and the number at checkout drift apart.
+      </p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── FLOW ──────────────────────────────────────────────── -->
+  <section id="flow">
+    <div class="sec-head"><span class="sec-num">§</span><h2 class="sec">End to end, in one view</h2></div>
+    <p>
+      Data moves in exactly one direction. The left column below is a real sequence — each stage consumes
+      only what the stage above it produced, which is what makes any figure on screen traceable back to the
+      HTTP response that carried it.
+    </p>
+
+    <div class="flow">
+      <div class="flow-row"><span class="fn">01</span><div><p class="ft">Collection</p><p class="fd">Six adapters sweep marketplaces and directories on a schedule. Output: <code>RawOffer</code> rows, written verbatim to <code>collector/raw/*.jsonl</code> before anything touches them.</p></div></div>
+      <div class="flow-join">↓</div>
+      <div class="flow-row"><span class="fn">02</span><div><p class="ft">Normalisation</p><p class="fd">Category guard, brand resolution, typed attribute extraction, unit conversion to a canonical basis, and the missing-data ladder. Refuses rather than guesses.</p></div></div>
+      <div class="flow-join">↓</div>
+      <div class="flow-row"><span class="fn">03</span><div><p class="ft">Load</p><p class="fd">One transaction. Vendors, products and offers are upserted on stable hashes; anything the normaliser refused is counted and reported, never quietly dropped.</p></div></div>
+      <div class="flow-join">↓</div>
+      <div class="flow-row"><span class="fn">04</span><div><p class="ft">Price surface</p><p class="fd">Landed price per canonical unit, in integer paise: base + GST + freight + handling + loading. The absurdity gate quarantines outliers before publication.</p></div></div>
+      <div class="flow-join">↓</div>
+      <div class="flow-row"><span class="fn">05</span><div><p class="ft">Retrieval &amp; rank</p><p class="fd">FTS5 + trigram retrieval, a typed-constraint grammar, compiled faceting, nine ranking features, then one card per vendor.</p></div></div>
+      <div class="flow-join">↓</div>
+      <div class="flow-row"><span class="fn">06</span><div><p class="ft">Filters</p><p class="fd">Facet definitions reconciled against real aggregates, so the parameters disclosed to the buyer are the parameters actually applied.</p></div></div>
+      <div class="flow-join">↓</div>
+      <div class="flow-row"><span class="fn">07</span><div><p class="ft">Interface</p><p class="fd">Server-rendered results, glass surfaces, every figure carrying its unit and its age.</p></div></div>
+    </div>
+
+    <h3>The shape on disk</h3>
+    <pre>collector/            adapters -&gt; RawOffer -&gt; normalise -&gt; load (transactional)
+  sources/            indiamart · exportersindia · platforms · directories · tgpred · assisted
+  fixtures/           archived source pages, so a parser change is testable offline
+  normalize.ts        typed attributes, canonical units, entity resolution
+  ladder.ts           the missing-data ladder
+lib/
+  schema.sql          19 tables + FTS5 + trigram  <i>(offer_price = per-seller money)</i>
+  price.ts            <b>resolvePrice</b> — the one pricing contract
+  rebuild.ts          the materialised price surface + the absurdity gate
+  freight.ts          the deterministic freight model
+  rank.ts             nine features, four penalties
+  search.ts           retrieval, faceting, the zero-result ladder
+  query/parse.ts      typed-constraint grammar (units, trade terms, te/hi)
+app/                  Next.js routes and the UI
+filters/              the four filter trees, counts reconciled from real data</pre>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 01 COLLECTION ─────────────────────────────────────── -->
+  <section id="collect">
+    <div class="sec-head"><span class="sec-num">01</span><h2 class="sec">Collection — and the discipline of recording every refusal</h2></div>
+    <p class="contract"><b>enters</b> a category and a city <span class="arrow">→</span> <b>leaves</b> <code>RawOffer[]</code> + one <code>SourceResult</code> per source</p>
+
+    <p>
+      Six adapters implement a single interface. Each declares which
+      <code>(category, region)</code> pairs it can serve, and the runner walks
+      <em>pass → adapter → category → region</em> until two consecutive passes surface nothing new.
+    </p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Adapter</th><th>Class</th><th>What it reaches</th></tr></thead>
+      <tbody>
+        <tr><td class="k">indiamart</td><td>b2b_directory</td><td>The long-tail dealer supply for both cities. Seeded slugs plus a crawl frontier that discovers sibling categories. Produces most of the volume.</td></tr>
+        <tr><td class="k">exportersindia</td><td>b2b_directory</td><td>Slug vocabulary with real pagination, driven by a record count the page publishes about itself.</td></tr>
+        <tr><td class="k">platforms</td><td>platform</td><td>Regional retail platforms, a small fixed target list.</td></tr>
+        <tr><td class="k">directories</td><td>b2b_directory</td><td>TradeIndia and Justdial, on a tolerant generic parser.</td></tr>
+        <tr><td class="k">tgpred</td><td>government</td><td>Telangana PRED monthly rate circulars — the government reference line.</td></tr>
+        <tr><td class="k">assisted</td><td>marketplace</td><td>Replays typed browser-assisted captures for sources that refuse a scripted client.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Politeness is a budget, not a courtesy</h3>
+    <p>
+      The fetch layer keeps a per-host gap and widens it on a 429, tripping a circuit breaker rather than
+      hammering. This matters more than it sounds: IndiaMART throttles on volume, and because the runner
+      walks Hyderabad before Vijayawada, a category with deep Hyderabad stock can spend the whole per-host
+      window before the second city is ever asked. That reads in the data as <em>“Vijayawada has no
+      supply”</em> when it means <em>“we never got to ask.”</em> A <code>--region=</code> flag exists to put
+      the starved city first — though it cannot reset the budget, because the throttle is wall-clock per
+      host and a fresh process inherits the window the last one left behind.
+    </p>
+
+    <h3>Eight outcomes, and why the distinction earns its keep</h3>
+    <p>
+      Every attempt records an outcome and an estimate of the volume behind it. The vocabulary is
+      <code>ok</code>, <code>blocked</code>, <code>rate_limited</code>, <code>login_wall</code>,
+      <code>captcha</code>, <code>parse_fail</code>, <code>empty</code>, <code>skipped</code>.
+    </p>
+    <div class="panel note">
+      <span class="kicker">A defect this actually caught</span>
+      <p>
+        <code>empty</code> and <code>parse_fail</code> look like the same thing and are not.
+        ExportersIndia was answering with a 503 KB page carrying 108 listings, and the shared parser
+        extracted <strong>zero</strong> — its container selector matched nothing, and its price regex
+        required a <code>₹</code> glyph that does not exist in the rendered text because the rupee sign on
+        that site is an <code>&lt;img&gt;</code>. Reported as <code>empty</code>, that read as an absent
+        market for the entire build. Reported as <code>parse_fail</code>, it reads as our bug. The source
+        now yields real supply.
+      </p>
+      <p>
+        The run headline used to count only <code>ok</code> and the blocked family, so
+        <code>empty</code>, <code>parse_fail</code> and <code>skipped</code> rows were attempted and then
+        vanished from the arithmetic. It now prints every outcome and asserts they sum to the number of
+        sources attempted.
+      </p>
+    </div>
+
+    <h3>The archive is the thing that makes parser changes cheap</h3>
+    <p>
+      Every <code>RawOffer</code> is appended to <code>collector/raw/&lt;source&gt;-&lt;date&gt;.jsonl</code>
+      <em>before</em> normalisation. That has two consequences worth the disk space. A rule change — say,
+      discovering that a brand roster was resolving a district name as a manufacturer — can be replayed
+      against the archive with <strong>zero network calls</strong> via
+      <code>scripts/rebuild-from-raw.ts</code>. And any figure on screen can be traced back to the exact text
+      the source published. Archived HTML bodies in <code>collector/fixtures/</code> go further still: a
+      parser can be proven end to end, including whether its rows survive normalisation, before a sweep is
+      spent finding out.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 02 NORMALISATION ──────────────────────────────────── -->
+  <section id="normalise">
+    <div class="sec-head"><span class="sec-num">02</span><h2 class="sec">Normalisation — where most of the honesty lives</h2></div>
+    <p class="contract"><b>enters</b> one <code>RawOffer</code> <span class="arrow">→</span> <b>leaves</b> a typed product + a canonical price, <em>or</em> a stated reason for refusing</p>
+
+    <p>
+      This is the stage that decides whether two listings are the same product, what unit a price is really
+      quoted in, and which claims are supported. It is also the stage most able to do quiet damage, so it is
+      built to fail loudly.
+    </p>
+
+    <h3>Gate 1 — is this even the category it was filed under?</h3>
+    <p>
+      A cement directory page links to waterproofing compound, tile adhesive and mortar. A pipe page links
+      to conduit and column pipe. Each category carries a rejection pattern, and a listing whose title names
+      a different product class is refused with that reason recorded — not filed under the wrong heading to
+      inflate a count.
+    </p>
+
+    <h3>Gate 2 — brand resolution, ranked by evidence</h3>
+    <p>
+      Brands are matched against a hand-verified roster, longest match first, in three tiers of evidence:
+      the listing <strong>title</strong>, then the seller’s <strong>brand field</strong>, then the
+      <strong>spec blob</strong>. Two rules earn their complexity:
+    </p>
+    <ul>
+      <li>
+        <strong>Cement is rostered by product line, not parent company.</strong> “Birla” is four different
+        companies’ brands — MP Birla Samrat, Birla Shakti, Birla Gold, Birla A1. Collapsing them to one
+        token merged four products into one whose floor price belonged to whichever was cheapest.
+      </li>
+      <li>
+        <strong>A name that only ever appears inside another name stays out.</strong> <code>Hindware</code>
+        occurs only within “Truflo by Hindware”; since matching is longest-first, adding it would relabel
+        Truflo’s own pipes as Hindware’s.
+      </li>
+    </ul>
+    <div class="panel note">
+      <span class="kicker">A place is not a brand</span>
+      <p>
+        <code>Karimnagar</code> and <code>Karnataka</code> were once roster entries, so “Clay Rectangular
+        Karimnagar Red Bricks” resolved to brand <em>Karimnagar</em> — and a Telangana <strong>district</strong>
+        became the single largest brick brand in the catalogue, ahead of every real manufacturer. A place of
+        firing is not a maker. Both were removed and those listings now carry no brand, which is what the
+        source actually supports. The qualified kiln names stay, because “Karimnagar ABN Bricks” <em>is</em>
+        a seller’s product name and the trade genuinely identifies kilns by their initials.
+      </p>
+    </div>
+
+    <h3>Gate 3 — the canonical unit, per category</h3>
+    <p>
+      Prices are only ever compared on one basis. Conversions are a <strong>table with tests</strong>, never
+      arithmetic, because the trade’s inch-to-millimetre mapping is not arithmetic: 1″ CPVC is 25 mm nominal
+      bore, but 4″ SWR is 110 mm outside diameter. Multiplying by 25.4 gets both wrong.
+    </p>
+    <div class="tw"><table>
+      <thead><tr><th>Category</th><th>Canonical unit</th><th>Why that one</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Cement</td><td>one 50 kg bag</td><td>The standard sale unit under LMPC Rule 3(a). A 25 kg pack is rescaled ×2, a 1 kg pack ×50.</td></tr>
+        <tr><td class="k">TMT steel</td><td>kg</td><td>Sold by weight; length is a spec, not a basis.</td></tr>
+        <tr><td class="k">Water pipes</td><td>running metre</td><td>A 3 m pipe and a 6 m pipe cannot share a price band.</td></tr>
+        <tr><td class="k">Bricks &amp; blocks</td><td>piece</td><td>₹/1000 ÷ 1000; ₹/m³ × the unit volume derived from its size.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel note">
+      <span class="kicker">Why “50 kg” is load-bearing</span>
+      <p>
+        <code>bag</code> was once treated as dimensionless, so a per-bag quote passed through unscaled — and
+        a ₹150 quote for a <strong>1 kg</strong> pack of Birla White became ₹150 <em>per bag</em>, the
+        cheapest cement in Hyderabad and the top result for <code>cement</code>. Every cement price now goes
+        through a single function that lands on the 50 kg basis, which pushes novelty packs past 10× the
+        category median where the absurdity gate quarantines them.
+      </p>
+    </div>
+
+    <h3>Refusing is a first-class outcome</h3>
+    <p>
+      When a unit cannot be mapped, the offer is <em>not loaded</em> and the reason is counted. Real
+      examples from the last sweep: <code>unmappable unit "8000 pieces"</code>,
+      <code>cannot convert ₹/kg to ₹/piece without inventing an attribute</code>,
+      <code>quoted per sqft — needs a wall-thickness assumption we will not make</code>. Every one of those
+      is a listing the system could have published with a plausible guess, and did not.
+    </p>
+
+    <h3>The missing-data ladder</h3>
+    <p>
+      Not every field is known, and pretending otherwise is the failure mode. Each field lands on one of
+      four rungs, and the rung is shown to the reader rather than hidden:
+    </p>
+    <div class="tw"><table>
+      <thead><tr><th>Rung</th><th>Meaning</th><th>How it renders</th></tr></thead>
+      <tbody>
+        <tr><td class="k"><span class="tag ok">quoted</span></td><td>The seller published it</td><td>Plain, no qualifier</td></tr>
+        <tr><td class="k"><span class="tag acc">derived</span></td><td>Computed from something they did publish</td><td>Labelled, with the arithmetic one tap away</td></tr>
+        <tr><td class="k"><span class="tag warn">typical</span></td><td>A category default stood in</td><td>Marked <em>estimated</em>, with the assumption named</td></tr>
+        <tr><td class="k"><span class="tag warn">unknown</span></td><td>Nobody knows</td><td>“Not published by seller”, with a link to the page</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Entity resolution — the identity key</h3>
+    <p>
+      A product’s identity is a hash of the attributes that actually distinguish it: brand, plus the
+      per-category discriminators (cement type and grade; pipe system, bore and pressure class; block type
+      and size). When the required attributes are missing, the listing gets an
+      <code>UNRESOLVED:&lt;source_ref&gt;</code> key — one product per offer — rather than being merged into
+      a neighbour on a guess. Under-merging costs a slightly higher product count; over-merging publishes
+      the wrong floor price, which is worse.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 03 LOAD ───────────────────────────────────────────── -->
+  <section id="load">
+    <div class="sec-head"><span class="sec-num">03</span><h2 class="sec">Load — one transaction, stable keys</h2></div>
+    <p class="contract"><b>enters</b> normalised rows <span class="arrow">→</span> <b>leaves</b> committed <code>vendor</code> / <code>product</code> / <code>offer</code> rows</p>
+
+    <p>
+      Identity is derived, never auto-incremented, so a re-run updates rather than duplicates:
+    </p>
+    <pre><b>offer_id</b>   = hash(source_id | source_ref)   <i>← stable across rebuilds</i>
+<b>product_id</b> = hash(item_code)               <i>← re-keys when resolution rules change</i>
+<b>vendor_id</b>  = hash(platform | name | locality)</pre>
+    <p>
+      That <code>offer_id</code> being stable is what lets <code>price_history</code> survive a full offline
+      rebuild: the ledger is append-only and its rows carry the offer id, so re-deriving every product from
+      the archive re-keys <code>product_id</code> without orphaning the history. The discontinuity is
+      reported and written to a diff log rather than left as silent dangling keys.
+    </p>
+    <p>
+      Vendor geocoding resolves a locality against a shipped 213-row pincode table with coordinates. Where
+      it cannot resolve, the fallback distance is derived from a hash of the vendor id — <strong>identical
+      on every page load and every refresh</strong>, because a delivery cost that changes when you reload
+      destroys the product’s credibility.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 04 PRICE ──────────────────────────────────────────── -->
+  <section id="price">
+    <div class="sec-head"><span class="sec-num">04</span><h2 class="sec">The price surface — integer paise, all the way down</h2></div>
+    <p class="contract"><b>enters</b> offers + a destination region <span class="arrow">→</span> <b>leaves</b> <code>offer_price</code> and <code>price_current</code>, materialised</p>
+
+    <p>
+      Every figure is <strong>integer paise</strong>. No float touches a rupee anywhere, because a cart total
+      that differs from the sum of its lines by a rupee is a dispute on a signed contract, and floating-point
+      rupees produce exactly that at scale. Even parsing is integer-safe — rupee text is read as two integers
+      rather than multiplied as a decimal, so <code>"8.70"</code> becomes 870 paise and never 869.
+    </p>
+
+    <pre><b>landed</b>     = base_ex_gst + gst + freight + handling + loading
+<b>normalised</b> = landed per canonical unit   <i>← the number ranked, filtered and banded on</i></pre>
+
+    <h3>Freight is deterministic, and shows its working</h3>
+    <p>
+      Distance band (vendor locality → your pincode) × chargeable weight (the greater of actual and
+      volumetric) × vehicle class (parcel / tempo / LCV / 6-tyre / 10-tyre) × a category minimum, with
+      free-delivery thresholds where a vendor publishes one, amortised across the seller’s MOQ. Never random,
+      never re-rolled. Every figure renders with an <em>estimated</em> badge and a one-tap breakdown
+      containing the arithmetic.
+    </p>
+
+    <h3>GST is effective-dated, not a constant</h3>
+    <p>
+      Rates are stored per HSN and category with an effective-from date and a citation, so a historical
+      price is reconstructed at the rate that applied then rather than the rate in force today.
+    </p>
+
+    <h3>The absurdity gate</h3>
+    <p>
+      Before publication, every normalised price is checked against the median for its category. Anything
+      outside <code>[0.1×, 10×]</code> is <strong>quarantined and never published</strong>, with the ratio
+      and the offending key printed in the run log. On the last sweep it caught 25 — a ₹3,922 “brick” at
+      109× the median, among others. This is the last line of defence against a unit-conversion error
+      reaching a buyer, and it is deliberately loud rather than silent.
+    </p>
+
+    <h3>Two tables, because a product price and a seller price are different things</h3>
+    <ul>
+      <li><code>price_current</code> — one row per <code>(product, region)</code>: the floor price and the offer count, for banding and comparison.</li>
+      <li><code>offer_price</code> — one row per <code>(offer, region, tier)</code>: what <em>this seller</em> charges. This is what the results list actually ranks, now that a card is a vendor rather than a product.</li>
+    </ul>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 05 SEARCH ─────────────────────────────────────────── -->
+  <section id="search">
+    <div class="sec-head"><span class="sec-num">05</span><h2 class="sec">Retrieval, faceting and rank — 14.9 ms with no network hop</h2></div>
+    <p class="contract"><b>enters</b> a typed query + pincode <span class="arrow">→</span> <b>leaves</b> ranked vendor cards + live facet counts</p>
+
+    <h3>Parsing what a builder actually types</h3>
+    <p>
+      The query grammar extracts typed constraints rather than treating the query as a bag of words:
+      <code>8mm tmt</code> yields a diameter, <code>4 inch cpvc</code> a bore and a pipe system,
+      <code>53 grade</code> a cement grade. It handles trade vernacular (<em>sariya</em>, <em>ఇటుక</em>),
+      fraction glyphs (<code>½"</code>), and misspellings within an edit distance of two — so
+      <code>ultratec</code> reaches UltraTech.
+    </p>
+
+    <h3>Two retrievers, fused</h3>
+    <p>
+      FTS5 for lexical matching and a trigram index for fuzzy matching, score-normalised and fused.
+      <code>sqlite-vec</code> was deliberately <strong>not</strong> added: the measurement came first, and
+      lexical plus trigram already answers the golden query set at 6.6 ms p95. A vector index would have
+      added a dependency and a build step to a stage that is not the bottleneck.
+    </p>
+
+    <h3>Nine ranking features, disclosed as they are applied</h3>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Feature</th><th class="num">Weight</th></tr></thead>
+      <tbody>
+        <tr><td class="k">f1</td><td>closest match to your search</td><td class="num">0.31</td></tr>
+        <tr><td class="k">f2</td><td>matches the exact spec you asked for</td><td class="num">0.16</td></tr>
+        <tr><td class="k">f3</td><td>lowest delivered price in your area</td><td class="num">0.16</td></tr>
+        <tr><td class="k">f4</td><td>in stock and deliverable to your pincode</td><td class="num">0.10</td></tr>
+        <tr><td class="k">f5</td><td>seller rating and reliability</td><td class="num">0.10</td></tr>
+        <tr><td class="k">f6</td><td>BIS certification</td><td class="num">0.07</td></tr>
+        <tr><td class="k">f7</td><td>fastest delivery</td><td class="num">0.06</td></tr>
+        <tr><td class="k">f8</td><td>most bought <span class="tag warn">cold start — 0</span></td><td class="num">0.00</td></tr>
+        <tr><td class="k">f9</td><td>most recently verified price</td><td class="num">0.04</td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      There is no order history in this build, so <code>f8</code> is honestly zero and its weight is
+      redistributed to relevance and price rather than left as a phantom term. Seller ratings are
+      <strong>shrunk toward the mean</strong> by review count, so a single five-star review does not outrank
+      a hundred four-star ones. The labels above are exactly what the interface prints under “Sorted on”,
+      because CP (E-Commerce) Rule 5(3)(f) requires the ranking parameters you disclose to be the ones you
+      apply.
+    </p>
+
+    <h3>One card per vendor</h3>
+    <p>
+      The results list is seller-led: ranking happens over offers, then offers collapse to one card per
+      vendor with a “+N more from this seller” roll-up that keeps every source URL reachable. Crucially the
+      grouping is applied <em>after</em> scoring and <em>after</em> facets, so a filtered view still shows
+      distinct sellers top to bottom rather than the same seller repeated.
+    </p>
+
+    <h3>Making 19.5 ms happen</h3>
+    <p>
+      Two rounds of optimisation, both triggered by work repeated in an inner loop, and both worth naming
+      because the fix was never to relax the target:
+    </p>
+    <ul>
+      <li>Facet labels were re-parsed per row; they now compile once per request. Faceting <strong>16.84 → 3.33 ms</strong>.</li>
+      <li>Going offer-level meant <code>JSON.parse</code> on each row’s attributes <em>per facet</em> — roughly 8,000 parses a query. Parsed attributes are now memoised on the row, and display columns are fetched only for the 24 rows actually rendered. Query layer <strong>26.04 → 15.57 ms</strong>.</li>
+    </ul>
+    <p>
+      A readable reference implementation of the comparison is kept alongside the fast path, and a test
+      decides every <code>(row, facet, value)</code> triple both ways and asserts they agree — an
+      optimisation that silently changed a count would be a worse defect than the latency it fixed.
+    </p>
+
+    <h3>The zero-result ladder</h3>
+    <p>
+      A query that matches nothing never returns a blank page. Constraints are relaxed in a defined order —
+      the most incidental first — and the interface states which constraint it dropped and offers to restore
+      it. The relaxation order is part of the grammar, not an afterthought.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 06 FACETS ─────────────────────────────────────────── -->
+  <section id="facets">
+    <div class="sec-head"><span class="sec-num">06</span><h2 class="sec">Filters — reconciled against the catalogue that exists</h2></div>
+    <p class="contract"><b>enters</b> authored filter trees + real aggregates <span class="arrow">→</span> <b>leaves</b> <code>filters/*.json</code> and a re-seeded <code>facet_definition</code></p>
+
+    <p>
+      The four filter trees were designed before any data existed, so their brand rosters, price bands and
+      counts began as illustrative. Reconciliation rewrites all three from measured aggregates: brand values
+      become the brands actually collected, ordered by result count, and price bands become
+      <strong>quartiles of the real distribution</strong> rather than round numbers — ₹0–500 / ₹500–1000 on a
+      catalogue whose middle half of cement bags falls between ₹350 and ₹420 gives you one useful band and
+      three empty ones.
+    </p>
+
+    <h3>A facet with nothing behind it ships disabled, never deleted</h3>
+    <p>
+      The gap stays visible. And the reason distinguishes two different facts that a single disabled pill
+      would conflate:
+    </p>
+    <ul>
+      <li><strong>Uncollected</strong> — nobody publishes it. Bulk pricing slabs: 0 of 1,755 offers declare a quantity break.</li>
+      <li><strong>Unnormalised</strong> — everybody publishes it, as prose. Cement <code>application</code> is populated on 124 of 627 listings, as “Construction”, “For Construction”, “Used For Constrution” — free text matching none of the five authored values. The data is there and an extractor would reach it; that is a different backlog item from a collection gap, and the reason string now says which.</li>
+    </ul>
+
+    <div class="panel note">
+      <span class="kicker">Disclosed must equal applied</span>
+      <p>
+        The query layer reads <code>facet_definition</code>; the JSON trees are what that table is seeded
+        <em>from</em> — but only database initialisation ever seeded it. So reconciliation rewrote four
+        documents and left the running rail on whatever was seeded last. Visibly: the published cement tree
+        said <code>Under ₹350 / ₹350–₹380 / ₹380–₹420</code> while the interface rendered
+        <code>Under ₹320 / ₹320–₹380 / ₹380–₹440</code>. Disclosed parameters that are not the applied ones
+        is precisely what CP (E-Commerce) Rule 5(3)(f) prohibits. The seeding now runs as the last step of
+        reconciliation, so the two are written by one command and cannot drift.
+      </p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 07 UI ─────────────────────────────────────────────── -->
+  <section id="ui">
+    <div class="sec-head"><span class="sec-num">07</span><h2 class="sec">The interface — “Alabaster”</h2></div>
+    <p class="contract"><b>enters</b> ranked cards + facet counts <span class="arrow">→</span> <b>leaves</b> a painted frame inside 200 ms of the keystroke</p>
+
+    <p>
+      One canvas, no light/dark toggle: a warm ivory ground with a soft colour wash, white frosted glass
+      surfaces, deep charcoal text and a single enriched copper accent — the colour of brick leaving the
+      kiln. The rule that makes it work is that <strong>the accent is spent once per view, on the unit
+      price.</strong>
+    </p>
+
+    <h3>Blur is rationed, and that is a performance decision</h3>
+    <p>
+      <code>backdrop-filter</code> is not free. Blurring 24 result cards plus a virtualised vendor table plus
+      a sticky rail puts real GPU cost on every scroll. So blur goes only on a few large persistent surfaces
+      — top bar, filter rail, detail sheet, compare tray, search dropdown — while the many repeated cards use
+      a non-blurred translucent white with an inner highlight. Over a near-flat canvas the two are visually
+      indistinguishable, and blur on everything reads as mush anyway.
+    </p>
+
+    <h3>Legibility is the product</h3>
+    <p>
+      This is a page of prices, so every foreground/background pair was measured against the
+      <em>composited</em> background — the colour after alpha blending, not the token — and anything under
+      4.5:1 was darkened until it passed. Two values needed it. Translucent panels under dense figures are
+      the classic way glass interfaces fail.
+    </p>
+
+    <h3>Pictures answer attention</h3>
+    <p>
+      Each card carries up to five photographs and rotates them only while the cursor is on it, returning to
+      the first frame when attention leaves — twenty-four cards animating at once is a fairground. Frames
+      two through five are not in the DOM until first hover, so a page load fetches 24 images rather than
+      120. Every picture is downloaded locally, so viewing a card makes no third-party request and the demo
+      works offline. Deduplication is keyed on the image path with its size suffix stripped, because the
+      same photograph served at five widths is one picture, not five.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── PROOF ─────────────────────────────────────────────── -->
+  <section id="proof">
+    <div class="sec-head"><span class="sec-num">§</span><h2 class="sec">How any of this is known to be true</h2></div>
+
+    <div class="tw"><table>
+      <thead><tr><th>Command</th><th>What it proves</th></tr></thead>
+      <tbody>
+        <tr><td class="k">npm test</td><td>111 assertions: the three laws, the unit table, money arithmetic, the GST table, freight determinism, the freshness ladder, facet equivalence, vendor uniqueness, and parser fixtures.</td></tr>
+        <tr><td class="k">npm run bench</td><td>1,000 queries; p50/p95/p99 per stage, per category, plus the zero-result and basis-error guardrails.</td></tr>
+        <tr><td class="k">scripts/coverage.ts</td><td>Every dataset number the documentation publishes, measured — so the tables are transcribed from a query rather than maintained by hand.</td></tr>
+        <tr><td class="k">scripts/parse-fixture.ts</td><td>A parser change, end to end, against an archived page with no network call.</td></tr>
+        <tr><td class="k">scripts/rebuild-from-raw.ts</td><td>A normalisation rule change, replayed over the whole archive offline.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Measured latency</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Stage</th><th class="num">p50</th><th class="num">p95</th><th class="num">p99</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Query layer</td><td class="num">6.13</td><td class="num">14.94</td><td class="num">16.80</td><td>p95 ≤ 20 ms <span class="tag ok">pass</span></td></tr>
+        <tr><td class="k">resolvePrice()</td><td class="num">0.25</td><td class="num">0.60</td><td class="num">0.82</td><td>p95 ≤ 10 ms <span class="tag ok">pass</span></td></tr>
+        <tr><td class="k">Full HTTP request</td><td class="num">21.52</td><td class="num">32.95</td><td class="num">45.15</td><td>p95 ≤ 120 ms <span class="tag ok">pass</span></td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      The reason this lands is architectural rather than clever: SQLite runs in-process, so there is no
+      network hop between the query and the data at all. The cloud design this was specified against budgets
+      55 ms for the search-cluster hop alone.
+    </p>
+    <h3>The last supply fix broke the budget, and the budget won</h3>
+    <p>
+      Those are the best numbers in the build, on the largest catalogue in the build — and an hour earlier
+      the same benchmark <strong>failed</strong>. Adding the ExportersIndia supply took the query layer to
+      <strong>21.56 ms p95 against a 20 ms target</strong>, with cement at 22.66 ms. Nothing had regressed;
+      every stage was simply in proportion to a catalogue that had grown from 306 products to 912.
+    </p>
+    <p>
+      The target was not moved. The fix came from noticing what the slowest stage actually was:
+      <code>fetch</code> — reading the candidate set out of SQLite — was 7.17 ms of it, and that set
+      <em>only changes when the price surface is rebuilt</em>. Search never writes. So it is now read once
+      per <code>(region, category)</code> and reused, keyed on <code>PRAGMA data_version</code>, which SQLite
+      bumps whenever another connection commits — so a collection run in a separate process invalidates the
+      cache without needing to signal the web process. A wall-clock TTL would have served a stale catalogue
+      for its duration; an in-process counter would never have seen the collector at all.
+    </p>
+    <p>
+      Sharing rows across requests is sound here for a specific reason: the only thing ever written to a row
+      is that memoised attribute parse — idempotent, and now paid once for the life of the catalogue instead
+      of once per request. <strong>Query layer 21.56 → 14.94 ms, cement 22.66 → 15.78 ms.</strong> And
+      because a cache is only worth having if it is invisible, the suite runs one query cold, warm and after
+      a flush, and asserts all three return identical offers, prices and facet counts.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── HONEST ────────────────────────────────────────────── -->
+  <section id="honest">
+    <div class="sec-head"><span class="sec-num">§</span><h2 class="sec">What is honest about the data</h2></div>
+    <p>
+      Collection ran against real sources and recorded every refusal. Nothing was capped silently and no
+      offer was ever invented. Three limitations are worth naming because they shape what the demo can
+      claim:
+    </p>
+    <ul>
+      <li>
+        <strong>The platform floor is the one guardrail still unmet.</strong> The target is four independent
+        platforms per category. Amazon, Flipkart, Meesho, JioMart, Moglix, BuildersMART and Infra.Market each
+        refuse a scripted client with a browser challenge or a JS wall — recorded with an estimate of what
+        sits behind each. Breadth is limited by what can be reached politely, and the shortfall is reported
+        rather than papered over by counting one platform twice.
+      </li>
+      <li>
+        <strong>The Telangana government circulars are scanned images.</strong> The monthly series resolves
+        and downloads correctly, but it is 1.5 MB of JPEG streams yielding 23 characters of extractable text.
+        The document is cited as the reference line with its month and URL; the rupee figures inside were not
+        machine-extracted and none was invented from them. Reading them needs OCR.
+      </li>
+      <li>
+        <strong>Andhra Pradesh publishes no current Schedule of Rates.</strong> The newest verifiable edition
+        is 2018-19, so Vijayawada has no in-state government anchor and the Telangana series is shown to it
+        as an explicitly cross-border cross-check.
+      </li>
+    </ul>
+    <p>
+      A fourth is a matter of reading: ExportersIndia sellers frequently quote a range. A listing reading
+      <em>“Rs 24 – Rs 28 per piece”</em> is stored at ₹24, with the full range kept verbatim and the original
+      string preserved. The low bound is a figure the seller actually printed; a midpoint would not be. Read
+      the ranked price on those rows as <em>“from”</em>.
+    </p>
+  </section>
+
+  <footer>
+    <p>
+      BuildO Price Intelligence runs entirely on one machine — one SQLite file, one Next.js process, one
+      scheduled task. Nothing touches the cloud, including the fonts, which are downloaded at build time and
+      self-hosted. Figures on this page are from the working dataset and move with each sweep; the coverage
+      script is the source of record for all of them.
+    </p>
+  </footer>
+
+  </main>
+</div>
+</div>

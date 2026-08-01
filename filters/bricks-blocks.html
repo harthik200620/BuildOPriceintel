@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bricks &amp; blocks — filter tree</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#FCFBF9;--tint:#F5F2EE;--ink:#171310;--ink60:#6A625B;--ink40:#9C948C;
+--hair:#E6E1DA;--hair2:#F0ECE6;--terra:#C4552D;--terra-t:#F7E9E2;--green:#2F6B4F;
+--amber:#9A6B14;--amber-t:#FBF2E0;
+--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;
+--mono:'SF Mono',Menlo,Consolas,monospace}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;
+line-height:1.6;-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;padding:44px 40px 120px}
+h1{font-family:Georgia,serif;font-size:38px;font-weight:400;letter-spacing:-.02em;
+line-height:1.15;margin-bottom:10px}
+h2{font-family:Georgia,serif;font-size:25px;font-weight:400;letter-spacing:-.015em;
+margin-bottom:8px}
+.eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.15em;color:var(--terra);
+font-weight:700;margin-bottom:10px}
+.sub{color:var(--ink60);max-width:74ch;margin-bottom:16px;font-size:14px}
+section{padding:38px 0;border-top:1px solid var(--hair)}
+header{padding-bottom:26px}
+.meta{display:flex;gap:30px;flex-wrap:wrap;margin-top:16px;padding:14px 18px;
+background:var(--tint);border:1px solid var(--hair);border-radius:7px}
+.meta div{font-size:12.5px;color:var(--ink60)}
+.meta b{display:block;font-size:17px;color:var(--ink);font-weight:600;
+letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.illus{margin-top:12px;padding:9px 14px;background:var(--amber-t);
+border-left:3px solid var(--amber);border-radius:0 4px 4px 0;font-size:12.5px;
+color:var(--amber)}
+.leadbox{margin-top:14px;padding:13px 17px;background:var(--terra-t);
+border-left:3px solid var(--terra);border-radius:0 5px 5px 0}
+.leadbox .t{font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+font-weight:700;color:var(--terra);margin-bottom:3px}
+.leadbox p{font-size:13.5px;color:var(--ink)}
+
+.split{display:grid;grid-template-columns:352px 1fr;gap:38px;align-items:start}
+@media(max-width:1000px){.split{grid-template-columns:1fr}}
+.rail{background:#fff;border:1px solid var(--hair);border-radius:9px;padding:24px 22px;
+box-shadow:0 1px 2px rgba(23,19,16,.04),0 8px 24px rgba(23,19,16,.05)}
+.railh{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--ink40);
+font-weight:700;padding-bottom:14px;border-bottom:1px solid var(--hair);margin-bottom:6px}
+.clus{font-size:9px;text-transform:uppercase;letter-spacing:.16em;color:var(--terra);
+font-weight:700;margin:20px 0 4px;padding-top:12px;border-top:1px dashed var(--hair)}
+.clus:first-of-type{border-top:none;padding-top:0;margin-top:14px}
+.f{margin-bottom:17px}
+.f.sub{margin-left:11px;padding-left:12px;border-left:2px solid var(--terra-t)}
+.fh{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink60);
+font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cond,.offb,.lead{font-size:8.5px;letter-spacing:.05em;padding:1.5px 6px;border-radius:3px;
+text-transform:none;font-weight:600}
+.cond{background:var(--terra-t);color:var(--terra)}
+.offb{background:var(--tint);color:var(--ink40);border:1px solid var(--hair)}
+.lead{background:var(--ink);color:var(--paper)}
+.fnote{font-size:11px;color:var(--ink40);margin-bottom:6px;line-height:1.45}
+.nv{font-size:10.5px;color:var(--amber);background:var(--amber-t);padding:5px 8px;
+border-radius:4px;margin-bottom:7px;line-height:1.45}
+.v{display:flex;align-items:baseline;gap:7px;padding:3.5px 0;font-size:13.5px;
+flex-wrap:wrap}
+.v.dis{opacity:.38;text-decoration:line-through}
+.bx{color:var(--ink40);font-size:12px}
+.sw{width:13px;height:13px;border-radius:50%;border:1px solid var(--hair);
+display:inline-block;flex:0 0 13px}
+.vl{color:var(--ink)}
+.vsub{font-size:11px;color:var(--ink40)}
+.vc{font-size:11.5px;color:var(--ink40);font-variant-numeric:tabular-nums}
+.rev{font-size:10px;color:var(--terra);width:100%;padding-left:19px}
+
+.fl{margin-bottom:22px;padding:17px 20px;background:#fff;border:1px solid var(--hair);
+border-radius:7px}
+.flp{font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:700;
+color:var(--ink);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--hair2)}
+.br{display:flex;align-items:baseline;gap:11px;padding:6px 0;font-size:13.5px}
+.brv{flex:0 0 128px;font-weight:600;color:var(--terra)}
+.bra{color:var(--ink40)}
+.brc b{display:block;font-size:13px}
+.brc span{font-size:12px;color:var(--ink60)}
+.always{padding:14px 20px;background:var(--tint);border:1px solid var(--hair);
+border-radius:7px;font-size:13px;color:var(--ink60)}
+.always b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink40);margin-bottom:4px}
+.empty{color:var(--ink60);font-style:italic}
+.morefold{margin-top:16px;padding-top:14px;border-top:1px dashed var(--hair)}
+.morefold summary{font-size:11px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink60);font-weight:700;cursor:pointer;list-style:none;display:flex;
+align-items:center;gap:7px}
+.morefold summary::-webkit-details-marker{display:none}
+.morefold summary::before{content:'+';font-size:14px;color:var(--terra)}
+.morefold[open] summary::before{content:'2'}
+.morefold .mc{background:var(--tint);border:1px solid var(--hair);border-radius:3px;
+font-size:9px;padding:1px 5px;color:var(--ink40)}
+.morebody{padding-top:14px}
+.budget{display:flex;gap:26px;flex-wrap:wrap;margin-top:12px;padding:11px 16px;
+border-radius:6px;font-size:12px}
+.budget.ok{background:#EDF3EF;border:1px solid #CFE0D6;color:var(--green)}
+.budget.over{background:var(--amber-t);border:1px solid #E8D6AC;color:var(--amber)}
+.budget b{font-variant-numeric:tabular-nums}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+color:var(--ink40);font-weight:700;padding:0 10px 8px 0;border-bottom:1px solid var(--ink)}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--hair2);vertical-align:top}
+tr:hover td{background:rgba(0,0,0,.014)}
+code{font-family:var(--mono);font-size:11px;background:var(--tint);padding:1px 5px;
+border-radius:3px}
+code.src{background:none;padding:0;color:var(--ink40)}
+.mut{color:var(--ink40)}
+.why{color:var(--ink60);max-width:34ch}
+ul.om,ul.warn{margin-left:19px;max-width:80ch}
+ul.om li,ul.warn li{margin-bottom:7px;color:var(--ink60);font-size:13.5px}
+ul.om li b{color:var(--ink)}
+ul.warn li{color:var(--amber)}
+footer{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair);
+font-size:11.5px;color:var(--ink40)}
+</style></head><body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">Filter &amp; sub-filter tree</div>
+  <h1>Bricks &amp; blocks</h1>
+  <div class="meta">
+    <div><b>16</b>filters</div>
+    <div><b>5</b>conditional</div>
+    <div><b>484</b>products</div>
+    <div><b>piece</b>canonical unit</div>
+    <div><b>commodity.masonry</b>taxonomy path</div>
+  </div>
+  <div class="budget ok"><span><b>7</b> / 8 visible filters</span><span><b>32</b> / 34 value rows</span><span>rail ≈ <b>1221</b> / 1350 px</span><span><b>4</b> behind “More filters”</span><span><b>5</b> conditional</span><span>fits one screen</span></div>
+  
+  <div class="leadbox"><div class="t">Lead filter — Type</div><p>These are entirely different products with different masonry practice, different mortar and different wall thickness — not variants of one thing. Nothing else on the panel is decidable until it is chosen.</p></div>
+</header>
+
+<section>
+  <h2>The panel</h2>
+  <p class="sub">As a customer sees it. Indented filters are sub-filters — they appear
+  only once their parent value is chosen.</p>
+  <div class="split">
+    <div class="rail">
+      <div class="railh">Narrow by</div>
+      <div class="clus">Specification</div>
+<div class="f"><div class="fh">Type<span class="lead">leads</span></div><div class="v"><span class="bx">☐</span><span class="vl">AAC block</span><span class="vsub">autoclaved aerated, lightweight</span><span class="vc">(33)</span><span class="rev">↳ opens size_aac, fly_ash_pct</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Red clay brick</span><span class="vsub">traditional burnt clay</span><span class="vc">(211)</span><span class="rev">↳ opens size_clay, finish_clay</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Fly ash brick</span><span class="vsub">IS 12894</span><span class="vc">(47)</span><span class="rev">↳ opens size_clay, fly_ash_pct</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Concrete solid block</span><span class="vsub">IS 2185 Part 1</span><span class="vc">(65)</span><span class="rev">↳ opens size_concrete</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Concrete hollow block</span><span class="vsub">lighter, cheaper per m²</span><span class="vc">(17)</span><span class="rev">↳ opens size_concrete</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">CLC block</span><span class="vsub">cellular lightweight concrete</span><span class="vc">(23)</span><span class="rev">↳ opens size_concrete</span></div></div>
+<div class="f sub"><div class="fh">Size<span class="cond">appears when block_type = AAC block</span></div><div class="v"><span class="bx">☐</span><span class="vl">600×200×100</span><span class="vsub">internal partition</span><span class="vc">(30)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">600×200×150</span><span class="vc">(3)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">600×200×200</span><span class="vsub">external wall</span><span class="vc">(1)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">600×200×75</span><span class="vc">(1)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">600×200×230</span><span class="vc">(1)</span></div></div>
+<div class="f sub"><div class="fh">Size<span class="cond">appears when block_type = Red clay brick</span></div><div class="v"><span class="bx">☐</span><span class="vl">230×110×75</span><span class="vsub">IS 1077 modular</span><span class="vc">(204)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">230×110×70</span><span class="vsub">common local size</span><span class="vc">(2)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Non-standard / kiln size</span><span class="vsub">dimension varies by lot</span><span class="vc">(0)</span></div></div>
+<div class="f sub"><div class="fh">Size<span class="cond">appears when block_type = Concrete solid block</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">400×200×100</span><span class="vc">(2)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">400×200×150</span><span class="vc">(4)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">400×200×200</span><span class="vc">(6)</span></div></div>
+<div class="f sub"><div class="fh">Fly ash content<span class="cond">appears when block_type = AAC block</span></div><div class="nv">⚑ needs verification — The &gt;50% fly-ash threshold comes from the 55th GST Council clarification as recorded in the spec&#x27;s Appendix C. Confirm against the notification text before this drives an invoice.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Over 50%</span><span class="vsub">HSN 6815 · 12% GST</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">50% or under</span><span class="vsub">HSN 6810 · 18% GST</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Not published by seller</span><span class="vsub">rate shown at the higher slab</span><span class="vc">(0)</span></div></div>
+<div class="f sub"><div class="fh">Finish<span class="cond">appears when block_type = Red clay brick</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">Wire-cut</span><span class="vsub">square edges, exposed work</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Table-moulded</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Machine-pressed</span><span class="vc">(0)</span></div></div>
+<div class="f"><div class="fh">Compressive strength</div><div class="v dis"><span class="bx">☐</span><span class="vl">3 – 4 N/mm²</span><span class="vsub">AAC, non-load-bearing</span><span class="vc">(1)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">5 – 7 N/mm²</span><span class="vsub">general masonry</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">7.5 – 10 N/mm²</span><span class="vsub">load-bearing</span><span class="vc">(1)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Over 10 N/mm²</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Not declared</span><span class="vsub">common on local kiln supply</span><span class="vc">(0)</span></div></div>
+<div class="clus">Price &amp; brand</div>
+<div class="f"><div class="fh">Brand</div><div class="fnote">Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12.</div><div class="v"><span class="bx">☐</span><span class="vl">Wienerberger</span><span class="vc">(4)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Greenstone</span><span class="vc">(3)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Ecotherm</span><span class="vc">(2)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Karimnagar PVC</span><span class="vc">(2)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Porotherm</span><span class="vc">(2)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Aerobild</span><span class="vc">(1)</span></div></div>
+<div class="f"><div class="fh">Price per piece, delivered</div><div class="fnote">Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.</div><div class="v"><span class="bx">○</span><span class="vl">Under ₹14</span><span class="vc">(138)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹14 – ₹33</span><span class="vc">(106)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹33 – ₹49</span><span class="vc">(128)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">Over ₹49</span><span class="vc">(112)</span></div></div>
+<div class="f"><div class="fh">Order quantity</div><div class="v dis"><span class="bx">○</span><span class="vl">Under 1,000</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">1,000 – 5,000</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">5,000 – 20,000</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">20,000+</span><span class="vc">(0)</span></div></div>
+<div class="clus">Trust &amp; certification</div>
+<div class="f"><div class="fh">BIS mark<span class="offb">default off</span></div><div class="fnote">Default off. &#x27;Not applicable&#x27; is the honest state for most local kiln supply, and it is neutral — not a failure.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Certified</span><span class="vsub">licence on file</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Not declared</span><span class="vsub">seller has not provided one</span><span class="vc">(26)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Not applicable</span><span class="vsub">no standard applies to this product</span><span class="vc">(458)</span></div></div>
+<div class="clus">Delivery</div>
+<div class="f"><div class="fh">Arrives</div><div class="v dis"><span class="bx">☐</span><span class="vl">Tomorrow</span><span class="vc">(129)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(312)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(43)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Scheduled delivery</span><span class="vsub">you pick the date</span><span class="vc">(0)</span></div></div>
+<details class="morefold"><summary>More filters <span class="mc">4</span></summary><div class="morebody"><div class="f"><div class="fh">Density</div><div class="v"><span class="bx">☐</span><span class="vl">Under 700 kg/m³</span><span class="vsub">AAC, CLC</span><span class="vc">(33)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">700 – 1,500 kg/m³</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Over 1,500 kg/m³</span><span class="vsub">clay, solid concrete</span><span class="vc">(211)</span></div></div><div class="f"><div class="fh">IS standard</div><div class="v"><span class="bx">☐</span><span class="vl">IS 1077</span><span class="vsub">burnt clay</span><span class="vc">(211)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">IS 2185 Pt 3</span><span class="vsub">AAC</span><span class="vc">(138)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">IS 2185 Pt 1</span><span class="vsub">concrete</span><span class="vc">(138)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">IS 12894</span><span class="vsub">fly ash</span><span class="vc">(47)</span></div></div><div class="f"><div class="fh">Seller quotes price</div><div class="v"><span class="bx">☐</span><span class="vl">Inclusive of GST</span><span class="vc">(15)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Exclusive of GST</span><span class="vc">(469)</span></div></div><div class="f"><div class="fh">Price verified</div><div class="v dis"><span class="bx">☐</span><span class="vl">Verified today</span><span class="vc">(484)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(0)</span></div></div></div></details>
+    </div>
+    <div>
+      <h2 style="font-size:19px;margin-bottom:6px">The flow</h2>
+      <p class="sub">Which selections reveal which sub-filters.</p>
+      <div class="fl"><div class="flp">Type</div><div class="br"><div class="brv">AAC block</div><div class="bra">→</div><div class="brc"><b>Size</b><span>600×200×100 · 600×200×150 · 600×200×200 · 600×200×75 · 600×200×230</span></div></div><div class="br"><div class="brv">Red clay brick</div><div class="bra">→</div><div class="brc"><b>Size</b><span>230×110×75 · 230×110×70 · Non-standard / kiln size</span></div></div><div class="br"><div class="brv">Concrete solid block</div><div class="bra">→</div><div class="brc"><b>Size</b><span>400×200×100 · 400×200×150 · 400×200×200</span></div></div><div class="br"><div class="brv">AAC block</div><div class="bra">→</div><div class="brc"><b>Fly ash content</b><span>Over 50% · 50% or under · Not published by seller</span></div></div><div class="br"><div class="brv">Red clay brick</div><div class="bra">→</div><div class="brc"><b>Finish</b><span>Wire-cut · Table-moulded · Machine-pressed</span></div></div></div><div class="always"><b>Always shown</b>Type · Compressive strength · Brand · Price per piece, delivered · Order quantity · BIS mark · Arrives · Density · IS standard · Seller quotes price · Price verified</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Implementation</h2>
+  <p class="sub">One row per filter, in display order.</p>
+  <table>
+    <thead><tr><th>id</th><th>Label</th><th>Cluster</th><th>Control</th><th>Values</th>
+    <th>Appears when</th><th>Default</th><th>Source field</th><th>Why it exists</th></tr></thead>
+    <tbody><tr><td><code>block_type</code></td><td><b>Type</b></td><td>Specification</td><td>checkbox</td><td>6</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.block_type</code></td><td class="why">The defining decision and the parent of the size ladder — clay, AAC and concrete blocks have completely different size vocabularies, so one flat Size filter would be meaningless.</td></tr>
+<tr><td><code>size_aac</code></td><td><b>Size</b></td><td>Specification</td><td>checkbox</td><td>5</td><td>block_type = AAC block</td><td>on</td><td><code class="src">offer.spec.size_mm</code></td><td class="why">AAC runs a 600×200 face with the thickness as the variable — the thickness is the wall decision (100 mm partition, 200 mm external).</td></tr>
+<tr><td><code>size_clay</code></td><td><b>Size</b></td><td>Specification</td><td>checkbox</td><td>3</td><td>block_type = Red clay brick</td><td>on</td><td><code class="src">offer.spec.size_mm</code></td><td class="why">The Indian standard modular brick is 230×110×75 mm; the traditional country brick varies by kiln and is sold as a separate value rather than pretending to a standard it does not meet.</td></tr>
+<tr><td><code>size_concrete</code></td><td><b>Size</b></td><td>Specification</td><td>checkbox</td><td>3</td><td>block_type = Concrete solid block</td><td>on</td><td><code class="src">offer.spec.size_mm</code></td><td class="why">Concrete blocks run a 400×200 face with thickness as the variable, the same shape of decision as AAC but a different ladder.</td></tr>
+<tr><td><code>compressive_strength</code></td><td><b>Compressive strength</b></td><td>Specification</td><td>checkbox</td><td>5</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.compressive_strength_nmm2</code></td><td class="why">The load-bearing decision. A 3.5 N/mm² block in a load-bearing wall is a structural failure, not a saving — so this is a safety filter and never folded.</td></tr>
+<tr><td><code>brand</code></td><td><b>Brand</b></td><td>Price &amp; brand</td><td>checkbox</td><td>6</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.brand</code></td><td class="why">Branded supply is real in AAC and almost absent in clay brick, where the market is local kilns. &#x27;Local / unbranded&#x27; is a first-class value here, not a fallback — it is most of the honest supply.</td></tr>
+<tr><td><code>price_per_piece</code></td><td><b>Price per piece, delivered</b></td><td>Price &amp; brand</td><td>radio</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.normalised_paise WHERE normalised_unit=&#x27;piece&#x27;</code></td><td class="why">₹/piece is the only band on which a ₹7 clay brick and a ₹58 AAC block are the same kind of number. Freight dominates here — a lorry of bricks is mostly transport — so the band is on the delivered figure.</td></tr>
+<tr><td><code>bulk_slab</code></td><td><b>Order quantity</b></td><td>Price &amp; brand</td><td>radio</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.bulk_slabs[].min_qty</code></td><td class="why">Masonry is bought by the lorry load, and the per-piece rate moves sharply with it. Most sellers here quote a minimum in thousands, so this facet also prevents a cart that cannot be fulfilled.</td></tr>
+<tr><td><code>bis</code></td><td><b>BIS mark</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>off</td><td><code class="src">offer.cert_state</code></td><td class="why">Labels, never hides — and this is the category where that matters most. Local clay bricks from a Krishna-district kiln are legal, ordinary, widely used material carrying no BIS mark. A default-on certification filter would delete most of the real supply and substitute our judgement for the buyer&#x27;s.</td></tr>
+<tr><td><code>arrives</code></td><td><b>Arrives</b></td><td>Delivery</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">serviceability.lead_time_days (computed per pincode)</code></td><td class="why">Computed per pincode from the freight model. Masonry is the most freight-sensitive category in the set — a kiln 60 km out can be cheaper ex-yard and dearer delivered.</td></tr>
+<tr><td><code>fly_ash_pct</code></td><td><b>Fly ash content</b></td><td>Specification</td><td>checkbox</td><td>3</td><td>block_type = AAC block</td><td>on</td><td><code class="src">offer.spec.fly_ash_pct</code></td><td class="why">This attribute decides the tax rate, not just the recipe: AAC with fly ash over 50% falls under HSN 6815 at 12%, below that under 6810 at 18%. A six-point GST difference on the same-looking block is exactly the kind of hidden basis error this engine exists to surface.</td></tr>
+<tr><td><code>finish_clay</code></td><td><b>Finish</b></td><td>Specification</td><td>checkbox</td><td>3</td><td>block_type = Red clay brick</td><td>on</td><td><code class="src">offer.spec.finish</code></td><td class="why">Wire-cut bricks have square arrises and take exposed brickwork; table-moulded do not. Only meaningful for clay.</td></tr>
+<tr><td><code>density_class</code></td><td><b>Density</b></td><td>Specification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.density_kg_m3</code></td><td class="why">AAC&#x27;s whole selling point is dead-load reduction — a 550 kg/m³ block against a 1,900 kg/m³ clay brick changes the structural design. Folded because it is largely implied by Type.</td></tr>
+<tr><td><code>standard</code></td><td><b>IS standard</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.cert_standards[]</code></td><td class="why">Specifying engineers work from the IS code. Folded because it maps one-to-one onto Type.</td></tr>
+<tr><td><code>gst_treatment</code></td><td><b>Seller quotes price</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.gst_treatment</code></td><td class="why">Clay bricks are 12% with ITC or 6% without — the 5% figure repeated across the web died on 2022-04-01 and would systematically under-price every BOQ built on it.</td></tr>
+<tr><td><code>price_freshness</code></td><td><b>Price verified</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.priced_as_of</code></td><td class="why">Bricks and blocks are volatility class V0 — a 24 h SLA, because they are freight-dominated and diesel-linked.</td></tr></tbody>
+  </table>
+</section>
+
+<section><h2>Deliberately left out</h2><p class="sub">A filter considered and rejected, with the reason, stops the same debate recurring in two weeks.</p><ul class="om"><li><b>In stock</b> — Moved to a toggle above the results. Single binary, and the rail slot is worth more to strength or size.</li><li><b>Colour</b> — Determined by material — clay is red, AAC is grey-white, concrete is grey. It restates Type and eliminates nothing.</li><li><b>Interlocking paver</b> — A real product but a paving item rather than masonry, with its own thickness/shape/traffic-class vocabulary. It belongs in an External Works tree, not here.</li><li><b>Water absorption %</b> — A genuine IS 1077 quality property, but no seller in either target city publishes it. A filter over a field that is empty on 90% of listings produces a broken experience — better to leave it out and say so than to ship a dead facet.</li><li><b>Seller rating</b> — Held back until there is a real ratings corpus.</li></ul></section>
+
+
+<footer>Generated by the <code>category-filters</code> skill.
+Counts and values should be confirmed against the live catalogue before build.</footer>
+</div></body></html>

@@ -1,0 +1,743 @@
+{
+  "category": "Water pipes",
+  "category_path": "plumbing.pipes",
+  "canonical_unit": "running_metre",
+  "canonical_unit_note": "₹/running metre. A 3 m CPVC length and a 6 m GI length cannot share a price band — length_m is a SKU attribute and the conversion is length → running_metre, never a guess.",
+  "scope_note": "Plumbing branch only. Electrical conduit (rigid PVC, flexible, FRLS, casing-capping, HDPE DWC, MS/GI conduit) is a separate L1 branch under Electrical › Conduit & raceway with its own tree — it shares the word 'pipe' and almost none of the filters.",
+  "result_count": 248,
+  "counts_are_illustrative": false,
+  "counts_note": "Counts measured from data/buildo.db on 2026-08-01 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "regions": [
+    "hyderabad",
+    "vijayawada"
+  ],
+  "lead_filter": "system",
+  "lead_reason": "The material decides which pressure-rating vocabulary even applies. SDR, Class, Type and PN are four unrelated systems, and a panel that flattens them into one 'Class' list lets a buyer express an impossible requirement.",
+  "panel_regime": "over 100 products — full tree, 7 primary + 5 conditional",
+  "filters": [
+    {
+      "id": "system",
+      "facet_key": "attrs.pipe_system",
+      "label": "System",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 10,
+      "source": "offer.spec.pipe_system",
+      "why": "The defining decision, and the parent of every pressure-class filter below. Choosing CPVC reveals SDR; choosing GI reveals Light/Medium/Heavy. They never appear together.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "CPVC",
+          "sublabel": "hot & cold potable — IS 15778",
+          "count": 59,
+          "reveals": [
+            "cpvc_sdr"
+          ],
+          "disabled": true
+        },
+        {
+          "label": "UPVC / PVC",
+          "sublabel": "cold water, low pressure — IS 4985",
+          "count": 67,
+          "reveals": [
+            "upvc_class"
+          ],
+          "disabled": true
+        },
+        {
+          "label": "SWR",
+          "sublabel": "soil, waste & drainage — IS 13592",
+          "count": 49,
+          "reveals": [
+            "swr_type"
+          ],
+          "disabled": true
+        },
+        {
+          "label": "GI",
+          "sublabel": "threaded, legacy & fire lines — IS 1239",
+          "count": 0,
+          "reveals": [
+            "gi_class"
+          ],
+          "disabled": true
+        },
+        {
+          "label": "HDPE",
+          "sublabel": "underground mains, borewell — IS 4984",
+          "count": 56,
+          "reveals": [
+            "hdpe_grade"
+          ],
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.pipe_system`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "nominal_bore",
+      "facet_key": "attrs.nominal_bore_mm",
+      "label": "Size (nominal bore)",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 20,
+      "source": "offer.spec.nominal_bore_mm",
+      "why": "The spec the plumber arrives with. Both vocabularies are shown because Indian sites use mm and inches interchangeably — a buyer told 'one inch' on site must find 1\" on the page.",
+      "note": "The mm↔inch mapping is nominal trade sizing, not arithmetic: 25 mm is called 1\" though 1\" is 25.4 mm, and 4\" SWR is 110 mm OD. It is a table with tests, never ×25.4. Top six by count shown; 50, 75, 160, 200 mm behind 'show all'.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "15 mm",
+          "sublabel": "½\"",
+          "unit": "mm",
+          "count": 17,
+          "disabled": true
+        },
+        {
+          "label": "20 mm",
+          "sublabel": "¾\"",
+          "unit": "mm",
+          "count": 19,
+          "disabled": true
+        },
+        {
+          "label": "25 mm",
+          "sublabel": "1\"",
+          "unit": "mm",
+          "count": 22,
+          "disabled": true
+        },
+        {
+          "label": "32 mm",
+          "sublabel": "1¼\"",
+          "unit": "mm",
+          "count": 5,
+          "disabled": true
+        },
+        {
+          "label": "63 mm",
+          "sublabel": "2\"",
+          "unit": "mm",
+          "count": 9,
+          "disabled": true
+        },
+        {
+          "label": "110 mm",
+          "sublabel": "4\"",
+          "unit": "mm",
+          "count": 25,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.nominal_bore_mm`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "cpvc_sdr",
+      "facet_key": "attrs.sdr",
+      "label": "Pressure class — SDR",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 25,
+      "source": "offer.spec.sdr",
+      "why": "Determines hot-water suitability — the second question after bore, and meaningless on any material other than CPVC.",
+      "depends_on": {
+        "filter": "system",
+        "value": "CPVC"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "SDR-11",
+          "sublabel": "hot & cold",
+          "count": 8,
+          "disabled": true
+        },
+        {
+          "label": "SDR-13.5",
+          "sublabel": "cold only",
+          "count": 4,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.sdr`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "upvc_class",
+      "facet_key": "attrs.pressure_class",
+      "label": "Pressure class",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 26,
+      "source": "offer.spec.pressure_class",
+      "why": "IS 4985 rates uPVC in working pressure classes. Showing these beside SDR-11 would be incoherent — they are different rating systems for different materials.",
+      "depends_on": {
+        "filter": "system",
+        "value": "UPVC / PVC"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "Class 1",
+          "sublabel": "2.5 kg/cm²",
+          "unit": "kg/cm²",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Class 2",
+          "sublabel": "4 kg/cm²",
+          "unit": "kg/cm²",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Class 3",
+          "sublabel": "6 kg/cm²",
+          "unit": "kg/cm²",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Class 4",
+          "sublabel": "10 kg/cm²",
+          "unit": "kg/cm²",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Class 5",
+          "sublabel": "12.5 kg/cm²",
+          "unit": "kg/cm²",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.pressure_class`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "swr_type",
+      "facet_key": "attrs.swr_type",
+      "label": "SWR type",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 27,
+      "source": "offer.spec.swr_type",
+      "why": "IS 13592 splits SWR by duty. Type B is the wall thickness for soil and waste; using Type A there is a failure in a few years.",
+      "depends_on": {
+        "filter": "system",
+        "value": "SWR"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "Type A",
+          "sublabel": "ventilation, rainwater",
+          "count": 2,
+          "disabled": true
+        },
+        {
+          "label": "Type B",
+          "sublabel": "soil & waste",
+          "count": 1,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.swr_type`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "gi_class",
+      "facet_key": "attrs.gi_class",
+      "label": "GI class",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 28,
+      "source": "offer.spec.gi_class",
+      "why": "IS 1239 classes are identified on site by their painted colour band. Printing the colour beside the class is the detail that makes a plumber trust the page.",
+      "depends_on": {
+        "filter": "system",
+        "value": "GI"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "Light",
+          "sublabel": "yellow band",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Medium",
+          "sublabel": "blue band",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Heavy",
+          "sublabel": "red band",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.gi_class`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "hdpe_grade",
+      "facet_key": "attrs.pe_grade",
+      "label": "PE grade",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 29,
+      "source": "offer.spec.pe_grade",
+      "why": "IS 4984 rates HDPE by resin grade, which sets the pressure rating at a given wall thickness.",
+      "depends_on": {
+        "filter": "system",
+        "value": "HDPE"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "PE 100",
+          "sublabel": "current standard",
+          "count": 9,
+          "disabled": true
+        },
+        {
+          "label": "PE 80",
+          "count": 4,
+          "disabled": true
+        },
+        {
+          "label": "PE 63",
+          "sublabel": "legacy",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.pe_grade`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "brand",
+      "facet_key": "product.brand",
+      "label": "Brand",
+      "cluster": "commercial",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 30,
+      "source": "product.brand",
+      "why": "Below spec here, unlike cement — a plumber arrives with a bore and a class, not a brand. Ordered by result count.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Ashirvad",
+          "count": 8
+        },
+        {
+          "label": "Astral",
+          "count": 5
+        },
+        {
+          "label": "Austro",
+          "count": 5
+        },
+        {
+          "label": "Truflo",
+          "count": 5
+        },
+        {
+          "label": "BRP",
+          "count": 4
+        },
+        {
+          "label": "Prince",
+          "count": 4
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No brand was resolvable on any collected listing for this category and city.",
+      "note": "Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21."
+    },
+    {
+      "id": "price_per_metre",
+      "facet_key": "price_current.normalised_paise",
+      "label": "Price per metre, delivered",
+      "cluster": "commercial",
+      "control": "radio",
+      "type": "range",
+      "sort_order": 40,
+      "source": "price_current.normalised_paise WHERE normalised_unit='running_metre'",
+      "why": "₹/metre, never ₹/length. A 3 m pipe and a 6 m pipe in one price band is the single most common failure in this market.",
+      "note": "Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Under ₹54",
+          "unit": "₹/m delivered",
+          "count": 63
+        },
+        {
+          "label": "₹54 – ₹98",
+          "unit": "₹/m delivered",
+          "count": 61
+        },
+        {
+          "label": "₹98 – ₹180",
+          "unit": "₹/m delivered",
+          "count": 65
+        },
+        {
+          "label": "Over ₹180",
+          "unit": "₹/m delivered",
+          "count": 59
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad carries a price for this category, so no band can be derived from a real distribution."
+    },
+    {
+      "id": "length",
+      "facet_key": "attrs.length_m",
+      "label": "Length",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 50,
+      "source": "offer.spec.length_m",
+      "why": "Kept primary rather than folded because it drives both freight and the ₹/length ↔ ₹/m conversion, and a site with a 3 m ceiling buys differently from one ordering coil.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "3 m",
+          "sublabel": "standard",
+          "unit": "m",
+          "count": 247,
+          "disabled": true
+        },
+        {
+          "label": "5 m",
+          "unit": "m",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "6 m",
+          "sublabel": "GI standard",
+          "unit": "m",
+          "count": 1,
+          "disabled": true
+        },
+        {
+          "label": "Coil",
+          "sublabel": "HDPE",
+          "unit": "m",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.length_m`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "bis",
+      "facet_key": "offer.cert_state",
+      "label": "BIS mark",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 60,
+      "source": "offer.cert_state",
+      "why": "Labels, never hides. Pipes are not under a quality-control order the way cement and rebar are, so an unmarked pipe is listed and ranked like any other — with the fact stated.",
+      "note": "Default off. Pre-applying it would be a decision we are not entitled to make on the buyer's behalf.",
+      "default_state": "off",
+      "default_open": false,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Certified",
+          "sublabel": "licence on file",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Not declared",
+          "sublabel": "seller has not provided one",
+          "count": 248,
+          "disabled": true
+        },
+        {
+          "label": "Not applicable",
+          "sublabel": "no standard for this product",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `offer.cert_state`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "arrives",
+      "facet_key": "serviceability.lead_time_days",
+      "label": "Arrives",
+      "cluster": "logistics",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 70,
+      "source": "serviceability.lead_time_days (computed per pincode)",
+      "why": "Computed per pincode from the freight model, not stored on the product.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Tomorrow",
+          "unit": "days",
+          "count": 56,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "days",
+          "count": 183,
+          "disabled": true
+        },
+        {
+          "label": "Within a week",
+          "unit": "days",
+          "count": 9,
+          "disabled": true
+        },
+        {
+          "label": "Scheduled delivery",
+          "sublabel": "you pick the date",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `serviceability.lead_time_days`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "joint_type",
+      "facet_key": "attrs.joint_type",
+      "label": "Joint",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 80,
+      "source": "offer.spec.joint_type",
+      "why": "Decides which fittings and which consumable (solvent cement vs thread seal) the buyer also needs. Folded because it is largely implied by System.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Solvent weld",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Threaded",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Push-fit / ring",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Fusion",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.joint_type`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "standard",
+      "facet_key": "product.cert_standards",
+      "label": "IS standard",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 90,
+      "source": "product.cert_standards[]",
+      "why": "Professional buyers specify by IS code. Folded because it is one-to-one with System for most of the catalogue.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "IS 15778",
+          "sublabel": "CPVC",
+          "count": 59,
+          "disabled": true
+        },
+        {
+          "label": "IS 4985",
+          "sublabel": "uPVC",
+          "count": 67,
+          "disabled": true
+        },
+        {
+          "label": "IS 13592",
+          "sublabel": "SWR",
+          "count": 49,
+          "disabled": true
+        },
+        {
+          "label": "IS 1239",
+          "sublabel": "GI",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "IS 4984",
+          "sublabel": "HDPE",
+          "count": 56,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `product.cert_standards`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "gst_treatment",
+      "facet_key": "offer.gst_treatment",
+      "label": "Seller quotes price",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 100,
+      "source": "offer.gst_treatment",
+      "why": "The worked example in the spec: an ex-GST ₹402 quoted against a delivered ₹502.36 understates by 25.0%. Making the basis filterable is how that comparison stops being possible.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Inclusive of GST",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Exclusive of GST",
+          "sublabel": "18%, HSN 3917",
+          "count": 248,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `offer.gst_treatment`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "price_freshness",
+      "facet_key": "price_current.freshness_state",
+      "label": "Price verified",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 110,
+      "source": "price_current.priced_as_of",
+      "why": "Pipes are volatility class V1 — a 7 day SLA, because PVC resin is commodity-linked and brands revise list prices several times a year.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Verified today",
+          "unit": "hours",
+          "count": 248,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Within a week",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `price_current.freshness_state`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "country_of_origin",
+      "facet_key": "product.country_of_origin",
+      "label": "Country of origin",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 120,
+      "source": "product.country_of_origin",
+      "why": "Indexed and sortable from day one — LMPC Rule 6(10A).",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "India",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Not published by seller",
+          "count": 248,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `product.country_of_origin`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    }
+  ],
+  "omitted": [
+    {
+      "filter": "In stock",
+      "reason": "Moved to a toggle above the results. Single binary, and the rail slot is worth more to a class filter."
+    },
+    {
+      "filter": "Colour",
+      "reason": "Fixed per material — CPVC is cream, uPVC white or grey, SWR usually white. One value per branch, so it eliminates nothing."
+    },
+    {
+      "filter": "Application",
+      "reason": "Restates pressure class exactly. 'Hot water' is what SDR-11 means; showing both splits the result set twice for one decision."
+    },
+    {
+      "filter": "PPR (PN 10–25)",
+      "reason": "A real system, but commercial and industrial rather than residential, and the collection sweep found no PPR supply in either target city. Left out rather than shipped as an empty branch — if PPR appears in a later run it earns a sixth System value and its own conditional PN filter."
+    },
+    {
+      "filter": "Seller rating",
+      "reason": "Held back until there is a real ratings corpus."
+    }
+  ],
+  "reconciled_at": "2026-08-01T11:39:34.195Z",
+  "reconciled_region": "hyderabad"
+}

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TMT steel — filter tree</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#FCFBF9;--tint:#F5F2EE;--ink:#171310;--ink60:#6A625B;--ink40:#9C948C;
+--hair:#E6E1DA;--hair2:#F0ECE6;--terra:#C4552D;--terra-t:#F7E9E2;--green:#2F6B4F;
+--amber:#9A6B14;--amber-t:#FBF2E0;
+--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;
+--mono:'SF Mono',Menlo,Consolas,monospace}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;
+line-height:1.6;-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;padding:44px 40px 120px}
+h1{font-family:Georgia,serif;font-size:38px;font-weight:400;letter-spacing:-.02em;
+line-height:1.15;margin-bottom:10px}
+h2{font-family:Georgia,serif;font-size:25px;font-weight:400;letter-spacing:-.015em;
+margin-bottom:8px}
+.eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.15em;color:var(--terra);
+font-weight:700;margin-bottom:10px}
+.sub{color:var(--ink60);max-width:74ch;margin-bottom:16px;font-size:14px}
+section{padding:38px 0;border-top:1px solid var(--hair)}
+header{padding-bottom:26px}
+.meta{display:flex;gap:30px;flex-wrap:wrap;margin-top:16px;padding:14px 18px;
+background:var(--tint);border:1px solid var(--hair);border-radius:7px}
+.meta div{font-size:12.5px;color:var(--ink60)}
+.meta b{display:block;font-size:17px;color:var(--ink);font-weight:600;
+letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.illus{margin-top:12px;padding:9px 14px;background:var(--amber-t);
+border-left:3px solid var(--amber);border-radius:0 4px 4px 0;font-size:12.5px;
+color:var(--amber)}
+.leadbox{margin-top:14px;padding:13px 17px;background:var(--terra-t);
+border-left:3px solid var(--terra);border-radius:0 5px 5px 0}
+.leadbox .t{font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+font-weight:700;color:var(--terra);margin-bottom:3px}
+.leadbox p{font-size:13.5px;color:var(--ink)}
+
+.split{display:grid;grid-template-columns:352px 1fr;gap:38px;align-items:start}
+@media(max-width:1000px){.split{grid-template-columns:1fr}}
+.rail{background:#fff;border:1px solid var(--hair);border-radius:9px;padding:24px 22px;
+box-shadow:0 1px 2px rgba(23,19,16,.04),0 8px 24px rgba(23,19,16,.05)}
+.railh{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--ink40);
+font-weight:700;padding-bottom:14px;border-bottom:1px solid var(--hair);margin-bottom:6px}
+.clus{font-size:9px;text-transform:uppercase;letter-spacing:.16em;color:var(--terra);
+font-weight:700;margin:20px 0 4px;padding-top:12px;border-top:1px dashed var(--hair)}
+.clus:first-of-type{border-top:none;padding-top:0;margin-top:14px}
+.f{margin-bottom:17px}
+.f.sub{margin-left:11px;padding-left:12px;border-left:2px solid var(--terra-t)}
+.fh{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink60);
+font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cond,.offb,.lead{font-size:8.5px;letter-spacing:.05em;padding:1.5px 6px;border-radius:3px;
+text-transform:none;font-weight:600}
+.cond{background:var(--terra-t);color:var(--terra)}
+.offb{background:var(--tint);color:var(--ink40);border:1px solid var(--hair)}
+.lead{background:var(--ink);color:var(--paper)}
+.fnote{font-size:11px;color:var(--ink40);margin-bottom:6px;line-height:1.45}
+.nv{font-size:10.5px;color:var(--amber);background:var(--amber-t);padding:5px 8px;
+border-radius:4px;margin-bottom:7px;line-height:1.45}
+.v{display:flex;align-items:baseline;gap:7px;padding:3.5px 0;font-size:13.5px;
+flex-wrap:wrap}
+.v.dis{opacity:.38;text-decoration:line-through}
+.bx{color:var(--ink40);font-size:12px}
+.sw{width:13px;height:13px;border-radius:50%;border:1px solid var(--hair);
+display:inline-block;flex:0 0 13px}
+.vl{color:var(--ink)}
+.vsub{font-size:11px;color:var(--ink40)}
+.vc{font-size:11.5px;color:var(--ink40);font-variant-numeric:tabular-nums}
+.rev{font-size:10px;color:var(--terra);width:100%;padding-left:19px}
+
+.fl{margin-bottom:22px;padding:17px 20px;background:#fff;border:1px solid var(--hair);
+border-radius:7px}
+.flp{font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:700;
+color:var(--ink);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--hair2)}
+.br{display:flex;align-items:baseline;gap:11px;padding:6px 0;font-size:13.5px}
+.brv{flex:0 0 128px;font-weight:600;color:var(--terra)}
+.bra{color:var(--ink40)}
+.brc b{display:block;font-size:13px}
+.brc span{font-size:12px;color:var(--ink60)}
+.always{padding:14px 20px;background:var(--tint);border:1px solid var(--hair);
+border-radius:7px;font-size:13px;color:var(--ink60)}
+.always b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink40);margin-bottom:4px}
+.empty{color:var(--ink60);font-style:italic}
+.morefold{margin-top:16px;padding-top:14px;border-top:1px dashed var(--hair)}
+.morefold summary{font-size:11px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink60);font-weight:700;cursor:pointer;list-style:none;display:flex;
+align-items:center;gap:7px}
+.morefold summary::-webkit-details-marker{display:none}
+.morefold summary::before{content:'+';font-size:14px;color:var(--terra)}
+.morefold[open] summary::before{content:'2'}
+.morefold .mc{background:var(--tint);border:1px solid var(--hair);border-radius:3px;
+font-size:9px;padding:1px 5px;color:var(--ink40)}
+.morebody{padding-top:14px}
+.budget{display:flex;gap:26px;flex-wrap:wrap;margin-top:12px;padding:11px 16px;
+border-radius:6px;font-size:12px}
+.budget.ok{background:#EDF3EF;border:1px solid #CFE0D6;color:var(--green)}
+.budget.over{background:var(--amber-t);border:1px solid #E8D6AC;color:var(--amber)}
+.budget b{font-variant-numeric:tabular-nums}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+color:var(--ink40);font-weight:700;padding:0 10px 8px 0;border-bottom:1px solid var(--ink)}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--hair2);vertical-align:top}
+tr:hover td{background:rgba(0,0,0,.014)}
+code{font-family:var(--mono);font-size:11px;background:var(--tint);padding:1px 5px;
+border-radius:3px}
+code.src{background:none;padding:0;color:var(--ink40)}
+.mut{color:var(--ink40)}
+.why{color:var(--ink60);max-width:34ch}
+ul.om,ul.warn{margin-left:19px;max-width:80ch}
+ul.om li,ul.warn li{margin-bottom:7px;color:var(--ink60);font-size:13.5px}
+ul.om li b{color:var(--ink)}
+ul.warn li{color:var(--amber)}
+footer{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair);
+font-size:11.5px;color:var(--ink40)}
+</style></head><body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">Filter &amp; sub-filter tree</div>
+  <h1>TMT steel</h1>
+  <div class="meta">
+    <div><b>13</b>filters</div>
+    <div><b>0</b>conditional</div>
+    <div><b>32</b>products</div>
+    <div><b>kg</b>canonical unit</div>
+    <div><b>commodity.steel.tmt</b>taxonomy path</div>
+  </div>
+  <div class="budget ok"><span><b>8</b> / 8 visible filters</span><span><b>34</b> / 34 value rows</span><span>rail ≈ <b>1326</b> / 1350 px</span><span><b>5</b> behind “More filters”</span><span><b>0</b> conditional</span><span>fits one screen</span></div>
+  
+  <div class="leadbox"><div class="t">Lead filter — Diameter</div><p>The number on the bar bending schedule. A buyer arrives holding a drawing that says 12 mm, and one click eliminates most of the catalogue.</p></div>
+</header>
+
+<section>
+  <h2>The panel</h2>
+  <p class="sub">As a customer sees it. Indented filters are sub-filters — they appear
+  only once their parent value is chosen.</p>
+  <div class="split">
+    <div class="rail">
+      <div class="railh">Narrow by</div>
+      <div class="clus">Specification</div>
+<div class="f"><div class="fh">Diameter<span class="lead">leads</span></div><div class="fnote">Top six by count shown; 6, 28, 32, 36, 40 mm behind &#x27;show all&#x27;.</div><div class="v"><span class="bx">☐</span><span class="vl">8 mm</span><span class="vsub">0.395 kg/m</span><span class="vc">(6)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">10 mm</span><span class="vsub">0.617 kg/m</span><span class="vc">(7)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">12 mm</span><span class="vsub">0.888 kg/m</span><span class="vc">(7)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">16 mm</span><span class="vsub">1.578 kg/m</span><span class="vc">(7)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">20 mm</span><span class="vsub">2.466 kg/m</span><span class="vc">(2)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">25 mm</span><span class="vsub">3.854 kg/m</span><span class="vc">(2)</span></div></div>
+<div class="f"><div class="fh">Grade</div><div class="fnote">Per IS 1786. Never sorted by popularity and never folded.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Fe 500</span><span class="vsub">general RCC</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Fe 500D</span><span class="vsub">high ductility, seismic zones</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Fe 550</span><span class="vsub">higher strength</span><span class="vc">(9)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Fe 550D</span><span class="vsub">high strength + ductility</span><span class="vc">(9)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Fe 415</span><span class="vsub">legacy, low-rise</span><span class="vc">(0)</span></div></div>
+<div class="clus">Price &amp; brand</div>
+<div class="f"><div class="fh">Brand</div><div class="fnote">Ordered by result count. Search-within-facet above 12 brands. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3.</div><div class="v"><span class="bx">☐</span><span class="vl">AF Star</span><span class="vc">(5)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Vizag</span><span class="vc">(5)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">MS Life Steel</span><span class="vc">(4)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Shree TMT</span><span class="vc">(4)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Sugna</span><span class="vc">(4)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Vinayak</span><span class="vc">(4)</span></div></div>
+<div class="f"><div class="fh">Price per kg, delivered</div><div class="fnote">Bands derived from the actual in-zone distribution at reconcile time. The observed national spread runs ₹56/kg (Raipur) to ₹74/kg (Mysore). Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.</div><div class="v"><span class="bx">○</span><span class="vl">Under ₹49</span><span class="vc">(9)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹49 – ₹51</span><span class="vc">(8)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹51 – ₹54</span><span class="vc">(8)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">Over ₹54</span><span class="vc">(7)</span></div></div>
+<div class="clus">Trust &amp; certification</div>
+<div class="f"><div class="fh">Producer</div><div class="v"><span class="bx">☐</span><span class="vl">Primary producer</span><span class="vsub">integrated steel plant</span><span class="vc">(5)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Secondary producer</span><span class="vsub">induction/re-rolling route</span><span class="vc">(27)</span></div></div>
+<div class="clus">Price &amp; brand</div>
+<div class="f"><div class="fh">Order quantity</div><div class="v dis"><span class="bx">○</span><span class="vl">Under 500 kg</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">0.5 – 2 tonne</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">2 – 10 tonne</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">10 tonne+</span><span class="vc">(0)</span></div></div>
+<div class="clus">Trust &amp; certification</div>
+<div class="f"><div class="fh">BIS licence<span class="offb">default off</span></div><div class="fnote">Default off. Same three honest states as cement.</div><div class="nv">⚑ needs verification — Spec §D8.1a records IS 1786 rebar as confirmed mandatory but could not identify the specific Quality Control Order number and date. Read the BIS QCO index before treating this as settled. The hard filter in this build fires only on positive evidence of an EXPIRED licence.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Licence number on file</span><span class="vsub">CM/L-… captured from source</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">BIS-licensed brand, licence not quoted</span><span class="vsub">mill holds a licence; this listing does not publish it</span><span class="vc">(32)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Not declared</span><span class="vsub">no evidence either way</span><span class="vc">(0)</span></div></div>
+<div class="clus">Delivery</div>
+<div class="f"><div class="fh">Arrives</div><div class="fnote">Steel is delivered by 6-tyre or 10-tyre truck above 2 t, which changes both the ETA and the freight band.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Tomorrow</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(32)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Scheduled delivery</span><span class="vsub">you pick the date</span><span class="vc">(0)</span></div></div>
+<details class="morefold"><summary>More filters <span class="mc">5</span></summary><div class="morebody"><div class="f"><div class="fh">Corrosion resistance</div><div class="v dis"><span class="bx">☐</span><span class="vl">Plain</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">CRS</span><span class="vsub">corrosion resistant</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Epoxy coated</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">Length</div><div class="v"><span class="bx">☐</span><span class="vl">12 m standard</span><span class="vc">(32)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Cut to length</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">Seller quotes price</div><div class="v"><span class="bx">☐</span><span class="vl">Inclusive of GST</span><span class="vc">(32)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Exclusive of GST</span><span class="vsub">18%, HSN 7213/7214</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">Price verified</div><div class="fnote">TMT is volatility class V0 — a 24 h SLA.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Verified today</span><span class="vc">(32)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">Country of origin</div><div class="v dis"><span class="bx">☐</span><span class="vl">India</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Not published by seller</span><span class="vc">(32)</span></div></div></div></details>
+    </div>
+    <div>
+      <h2 style="font-size:19px;margin-bottom:6px">The flow</h2>
+      <p class="sub">Which selections reveal which sub-filters.</p>
+      <p class="empty">No conditional filters — every filter in this panel is shown to every buyer, all the time.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Implementation</h2>
+  <p class="sub">One row per filter, in display order.</p>
+  <table>
+    <thead><tr><th>id</th><th>Label</th><th>Cluster</th><th>Control</th><th>Values</th>
+    <th>Appears when</th><th>Default</th><th>Source field</th><th>Why it exists</th></tr></thead>
+    <tbody><tr><td><code>diameter_mm</code></td><td><b>Diameter</b></td><td>Specification</td><td>checkbox</td><td>6</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.diameter_mm</code></td><td class="why">The single spec every rebar buyer arrives with. Nothing else is decidable until it is set.</td></tr>
+<tr><td><code>grade</code></td><td><b>Grade</b></td><td>Specification</td><td>checkbox</td><td>5</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.grade</code></td><td class="why">A safety property, not a preference. Fe 500D is not &#x27;a bit better than&#x27; Fe 500 — the D denotes controlled ductility for seismic performance, so the label spells it out rather than leaving the suffix cryptic.</td></tr>
+<tr><td><code>brand</code></td><td><b>Brand</b></td><td>Price &amp; brand</td><td>checkbox</td><td>6</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.brand</code></td><td class="why">Like cement, brand legitimately climbs above price in TMT — the primary/secondary producer distinction is real and buyers ask about it by name.</td></tr>
+<tr><td><code>price_per_kg</code></td><td><b>Price per kg, delivered</b></td><td>Price &amp; brand</td><td>radio</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.normalised_paise WHERE normalised_unit=&#x27;kg&#x27;</code></td><td class="why">₹/kg is the only basis on which a rod price and a tonne price are the same kind of number. Bands are on the delivered figure.</td></tr>
+<tr><td><code>producer_type</code></td><td><b>Producer</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.producer_type</code></td><td class="why">Surfaced honestly rather than hidden. Secondary steel is cheaper and legitimately used, but a buyer comparing a ₹52/kg bar against a ₹68/kg bar deserves to know why they differ.</td></tr>
+<tr><td><code>bulk_slab</code></td><td><b>Order quantity</b></td><td>Price &amp; brand</td><td>radio</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.bulk_slabs[].min_qty</code></td><td class="why">Steel slabs move the ₹/kg materially and every trade buyer knows their tier. JSW Neosteel publishes free delivery at ≥1 MT, which is a slab boundary with a real freight consequence.</td></tr>
+<tr><td><code>bis</code></td><td><b>BIS licence</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>off</td><td><code class="src">offer.cert_state</code></td><td class="why">Deformed bars to IS 1786 are under a mandatory certification regime, so this is a legal question rather than a preference — but a listing that omits the licence number is not evidence that the mill lacks one.</td></tr>
+<tr><td><code>arrives</code></td><td><b>Arrives</b></td><td>Delivery</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">serviceability.lead_time_days (computed per pincode)</code></td><td class="why">Computed per pincode from the freight model, not stored on the product.</td></tr>
+<tr><td><code>corrosion_resistance</code></td><td><b>Corrosion resistance</b></td><td>Specification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.corrosion_resistance</code></td><td class="why">A genuine decision on the AP coast and largely irrelevant inland. Folded rather than cut, because when it matters it matters a great deal.</td></tr>
+<tr><td><code>length</code></td><td><b>Length</b></td><td>Specification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.length_m</code></td><td class="why">Cut-to-length changes freight and site wastage. Folded because 12 m standard dominates the catalogue.</td></tr>
+<tr><td><code>gst_treatment</code></td><td><b>Seller quotes price</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.gst_treatment</code></td><td class="why">Steel is quoted ex-works ex-GST by convention — Tata Nexarc publishes &#x27;Ex-yard … GST, Packaging, Loading, Freight charges are not included&#x27;. Making that visible is the point of the engine.</td></tr>
+<tr><td><code>price_freshness</code></td><td><b>Price verified</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.priced_as_of</code></td><td class="why">TMT moved +34.5% trough-to-peak in six months. A 30-day-old steel price is wrong by up to 11%, which on a ₹28 L cart is ₹45–55k of error — so freshness is a substantive filter here, not a curiosity.</td></tr>
+<tr><td><code>country_of_origin</code></td><td><b>Country of origin</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.country_of_origin</code></td><td class="why">Indexed and sortable from day one — LMPC Rule 6(10A) makes this a schema decision, not a UI decision.</td></tr></tbody>
+  </table>
+</section>
+
+<section><h2>Deliberately left out</h2><p class="sub">A filter considered and rejected, with the reason, stops the same debate recurring in two weeks.</p><ul class="om"><li><b>In stock</b> — Moved to a toggle above the results. Single binary, and the rail slot is worth more to grade or diameter.</li><li><b>Standard (IS 1786)</b> — One value across the entire category — a filter that eliminates nothing. Folded into the page&#x27;s line of category truth instead.</li><li><b>Weight per metre</b> — Fully determined by diameter, so it would split the result set twice for one decision. Printed on the card instead, so a buyer can convert a rod count into a tonnage.</li><li><b>Seller rating</b> — Held back until there is a real ratings corpus.</li></ul></section>
+
+
+<footer>Generated by the <code>category-filters</code> skill.
+Counts and values should be confirmed against the live catalogue before build.</footer>
+</div></body></html>

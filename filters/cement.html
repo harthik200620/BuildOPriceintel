@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cement — filter tree</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#FCFBF9;--tint:#F5F2EE;--ink:#171310;--ink60:#6A625B;--ink40:#9C948C;
+--hair:#E6E1DA;--hair2:#F0ECE6;--terra:#C4552D;--terra-t:#F7E9E2;--green:#2F6B4F;
+--amber:#9A6B14;--amber-t:#FBF2E0;
+--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;
+--mono:'SF Mono',Menlo,Consolas,monospace}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;
+line-height:1.6;-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;padding:44px 40px 120px}
+h1{font-family:Georgia,serif;font-size:38px;font-weight:400;letter-spacing:-.02em;
+line-height:1.15;margin-bottom:10px}
+h2{font-family:Georgia,serif;font-size:25px;font-weight:400;letter-spacing:-.015em;
+margin-bottom:8px}
+.eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.15em;color:var(--terra);
+font-weight:700;margin-bottom:10px}
+.sub{color:var(--ink60);max-width:74ch;margin-bottom:16px;font-size:14px}
+section{padding:38px 0;border-top:1px solid var(--hair)}
+header{padding-bottom:26px}
+.meta{display:flex;gap:30px;flex-wrap:wrap;margin-top:16px;padding:14px 18px;
+background:var(--tint);border:1px solid var(--hair);border-radius:7px}
+.meta div{font-size:12.5px;color:var(--ink60)}
+.meta b{display:block;font-size:17px;color:var(--ink);font-weight:600;
+letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.illus{margin-top:12px;padding:9px 14px;background:var(--amber-t);
+border-left:3px solid var(--amber);border-radius:0 4px 4px 0;font-size:12.5px;
+color:var(--amber)}
+.leadbox{margin-top:14px;padding:13px 17px;background:var(--terra-t);
+border-left:3px solid var(--terra);border-radius:0 5px 5px 0}
+.leadbox .t{font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+font-weight:700;color:var(--terra);margin-bottom:3px}
+.leadbox p{font-size:13.5px;color:var(--ink)}
+
+.split{display:grid;grid-template-columns:352px 1fr;gap:38px;align-items:start}
+@media(max-width:1000px){.split{grid-template-columns:1fr}}
+.rail{background:#fff;border:1px solid var(--hair);border-radius:9px;padding:24px 22px;
+box-shadow:0 1px 2px rgba(23,19,16,.04),0 8px 24px rgba(23,19,16,.05)}
+.railh{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--ink40);
+font-weight:700;padding-bottom:14px;border-bottom:1px solid var(--hair);margin-bottom:6px}
+.clus{font-size:9px;text-transform:uppercase;letter-spacing:.16em;color:var(--terra);
+font-weight:700;margin:20px 0 4px;padding-top:12px;border-top:1px dashed var(--hair)}
+.clus:first-of-type{border-top:none;padding-top:0;margin-top:14px}
+.f{margin-bottom:17px}
+.f.sub{margin-left:11px;padding-left:12px;border-left:2px solid var(--terra-t)}
+.fh{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink60);
+font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cond,.offb,.lead{font-size:8.5px;letter-spacing:.05em;padding:1.5px 6px;border-radius:3px;
+text-transform:none;font-weight:600}
+.cond{background:var(--terra-t);color:var(--terra)}
+.offb{background:var(--tint);color:var(--ink40);border:1px solid var(--hair)}
+.lead{background:var(--ink);color:var(--paper)}
+.fnote{font-size:11px;color:var(--ink40);margin-bottom:6px;line-height:1.45}
+.nv{font-size:10.5px;color:var(--amber);background:var(--amber-t);padding:5px 8px;
+border-radius:4px;margin-bottom:7px;line-height:1.45}
+.v{display:flex;align-items:baseline;gap:7px;padding:3.5px 0;font-size:13.5px;
+flex-wrap:wrap}
+.v.dis{opacity:.38;text-decoration:line-through}
+.bx{color:var(--ink40);font-size:12px}
+.sw{width:13px;height:13px;border-radius:50%;border:1px solid var(--hair);
+display:inline-block;flex:0 0 13px}
+.vl{color:var(--ink)}
+.vsub{font-size:11px;color:var(--ink40)}
+.vc{font-size:11.5px;color:var(--ink40);font-variant-numeric:tabular-nums}
+.rev{font-size:10px;color:var(--terra);width:100%;padding-left:19px}
+
+.fl{margin-bottom:22px;padding:17px 20px;background:#fff;border:1px solid var(--hair);
+border-radius:7px}
+.flp{font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:700;
+color:var(--ink);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--hair2)}
+.br{display:flex;align-items:baseline;gap:11px;padding:6px 0;font-size:13.5px}
+.brv{flex:0 0 128px;font-weight:600;color:var(--terra)}
+.bra{color:var(--ink40)}
+.brc b{display:block;font-size:13px}
+.brc span{font-size:12px;color:var(--ink60)}
+.always{padding:14px 20px;background:var(--tint);border:1px solid var(--hair);
+border-radius:7px;font-size:13px;color:var(--ink60)}
+.always b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink40);margin-bottom:4px}
+.empty{color:var(--ink60);font-style:italic}
+.morefold{margin-top:16px;padding-top:14px;border-top:1px dashed var(--hair)}
+.morefold summary{font-size:11px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink60);font-weight:700;cursor:pointer;list-style:none;display:flex;
+align-items:center;gap:7px}
+.morefold summary::-webkit-details-marker{display:none}
+.morefold summary::before{content:'+';font-size:14px;color:var(--terra)}
+.morefold[open] summary::before{content:'2'}
+.morefold .mc{background:var(--tint);border:1px solid var(--hair);border-radius:3px;
+font-size:9px;padding:1px 5px;color:var(--ink40)}
+.morebody{padding-top:14px}
+.budget{display:flex;gap:26px;flex-wrap:wrap;margin-top:12px;padding:11px 16px;
+border-radius:6px;font-size:12px}
+.budget.ok{background:#EDF3EF;border:1px solid #CFE0D6;color:var(--green)}
+.budget.over{background:var(--amber-t);border:1px solid #E8D6AC;color:var(--amber)}
+.budget b{font-variant-numeric:tabular-nums}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+color:var(--ink40);font-weight:700;padding:0 10px 8px 0;border-bottom:1px solid var(--ink)}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--hair2);vertical-align:top}
+tr:hover td{background:rgba(0,0,0,.014)}
+code{font-family:var(--mono);font-size:11px;background:var(--tint);padding:1px 5px;
+border-radius:3px}
+code.src{background:none;padding:0;color:var(--ink40)}
+.mut{color:var(--ink40)}
+.why{color:var(--ink60);max-width:34ch}
+ul.om,ul.warn{margin-left:19px;max-width:80ch}
+ul.om li,ul.warn li{margin-bottom:7px;color:var(--ink60);font-size:13.5px}
+ul.om li b{color:var(--ink)}
+ul.warn li{color:var(--amber)}
+footer{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair);
+font-size:11.5px;color:var(--ink40)}
+</style></head><body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">Filter &amp; sub-filter tree</div>
+  <h1>Cement</h1>
+  <div class="meta">
+    <div><b>13</b>filters</div>
+    <div><b>1</b>conditional</div>
+    <div><b>637</b>products</div>
+    <div><b>bag</b>canonical unit</div>
+    <div><b>commodity.cement</b>taxonomy path</div>
+  </div>
+  <div class="budget ok"><span><b>7</b> / 8 visible filters</span><span><b>30</b> / 34 value rows</span><span>rail ≈ <b>1167</b> / 1350 px</span><span><b>5</b> behind “More filters”</span><span><b>1</b> conditional</span><span>fits one screen</span></div>
+  
+  <div class="leadbox"><div class="t">Lead filter — Type</div><p>OPC and PPC are not substitutes — the buyer&#x27;s job (slab vs plaster) decides the chemistry before anything else does, and it eliminates more of the catalogue than any other single choice.</p></div>
+</header>
+
+<section>
+  <h2>The panel</h2>
+  <p class="sub">As a customer sees it. Indented filters are sub-filters — they appear
+  only once their parent value is chosen.</p>
+  <div class="split">
+    <div class="rail">
+      <div class="railh">Narrow by</div>
+      <div class="clus">Specification</div>
+<div class="f"><div class="fh">Type<span class="lead">leads</span></div><div class="v"><span class="bx">☐</span><span class="vl">OPC</span><span class="vsub">ordinary portland</span><span class="vc">(277)</span><span class="rev">↳ opens opc_grade</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">PPC</span><span class="vsub">portland pozzolana, fly-ash blended</span><span class="vc">(326)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">PSC</span><span class="vsub">portland slag</span><span class="vc">(22)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">White cement</span><span class="vsub">decorative, IS 8042</span><span class="vc">(11)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Sulphate resisting</span><span class="vsub">SRC, aggressive soils</span><span class="vc">(1)</span></div></div>
+<div class="f sub"><div class="fh">Grade<span class="cond">appears when cement_type = OPC</span></div><div class="fnote">IS 269:2015 consolidated the older grade-specific standards IS 8112 (43) and IS 12269 (53) into one.</div><div class="v"><span class="bx">☐</span><span class="vl">53 grade</span><span class="vsub">RCC, slabs, columns</span><span class="vc">(183)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">43 grade</span><span class="vsub">general construction, masonry</span><span class="vc">(129)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">33 grade</span><span class="vsub">plastering, non-structural</span><span class="vc">(8)</span></div></div>
+<div class="clus">Price &amp; brand</div>
+<div class="f"><div class="fh">Brand</div><div class="fnote">Ordered by result count, not alphabetically. Search-within-facet above 12 brands. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43.</div><div class="v"><span class="bx">☐</span><span class="vl">UltraTech</span><span class="vc">(41)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Bangur</span><span class="vc">(33)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">JSW</span><span class="vc">(33)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">KCP</span><span class="vc">(33)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Ambuja</span><span class="vc">(31)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Bharathi</span><span class="vc">(29)</span></div></div>
+<div class="f"><div class="fh">Price per bag, delivered</div><div class="fnote">Bands are derived from the actual in-zone distribution at reconcile time, not from round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.</div><div class="v"><span class="bx">○</span><span class="vl">Under ₹350</span><span class="vc">(156)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹350 – ₹380</span><span class="vc">(146)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹380 – ₹420</span><span class="vc">(170)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">Over ₹420</span><span class="vc">(165)</span></div></div>
+<div class="clus">Specification</div>
+<div class="f"><div class="fh">Pack size</div><div class="v"><span class="bx">☐</span><span class="vl">50 kg bag</span><span class="vsub">standard</span><span class="vc">(616)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">25 kg bag</span><span class="vc">(19)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">1 MT jumbo</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Bulk tanker</span><span class="vsub">priced per tonne</span><span class="vc">(0)</span></div></div>
+<div class="clus">Price &amp; brand</div>
+<div class="f"><div class="fh">Order quantity</div><div class="v dis"><span class="bx">○</span><span class="vl">1 – 10 bags</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">11 – 50 bags</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">51 – 200 bags</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">○</span><span class="vl">200+ bags</span><span class="vc">(0)</span></div></div>
+<div class="clus">Trust &amp; certification</div>
+<div class="f"><div class="fh">BIS licence<span class="offb">default off</span></div><div class="fnote">Default off. Three honest states, never collapsed into a pass/fail.</div><div class="nv">⚑ needs verification — The Cement (Quality Control) Order 2003, S.O. 191(E) dated 17 Feb 2003 is named in a secondary source (spec §D8.1a) and has not been read against the gazette. The QCO hard filter in this build fires only on positive evidence of an EXPIRED licence, never on a listing that simply does not quote one — see the demo-simplification note in the production prompt.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Licence number on file</span><span class="vsub">CM/L-… captured from source</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">BIS-licensed brand, licence not quoted</span><span class="vsub">manufacturer holds a licence; this listing does not publish it</span><span class="vc">(598)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Not declared</span><span class="vsub">no evidence either way</span><span class="vc">(39)</span></div></div>
+<div class="clus">Delivery</div>
+<div class="f"><div class="fh">Arrives</div><div class="fnote">Scheduled delivery carries equal weight here. Construction buys are staged — cement at footing stage, months before finishing — so a chosen date is often the preferred option, not a lesser one.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Tomorrow</span><span class="vc">(146)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(433)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(58)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Scheduled delivery</span><span class="vsub">you pick the date</span><span class="vc">(0)</span></div></div>
+<details class="morefold"><summary>More filters <span class="mc">5</span></summary><div class="morebody"><div class="f"><div class="fh">Application</div><div class="v dis"><span class="bx">☐</span><span class="vl">RCC &amp; slab</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Plastering</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Masonry</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Flooring</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Waterproof works</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">IS standard</div><div class="v"><span class="bx">☐</span><span class="vl">IS 269</span><span class="vsub">OPC</span><span class="vc">(278)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">IS 1489</span><span class="vsub">PPC, fly-ash based</span><span class="vc">(326)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">IS 455</span><span class="vsub">PSC</span><span class="vc">(22)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">IS 8042</span><span class="vsub">white cement</span><span class="vc">(11)</span></div></div><div class="f"><div class="fh">Seller quotes price</div><div class="v"><span class="bx">☐</span><span class="vl">Inclusive of GST</span><span class="vc">(45)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Exclusive of GST</span><span class="vsub">18%, HSN 2523</span><span class="vc">(592)</span></div></div><div class="f"><div class="fh">Price verified</div><div class="fnote">Cement is volatility class V0 — a 24 h SLA, because the market moved ₹15–20/bag in one month.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Verified today</span><span class="vc">(637)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">Country of origin</div><div class="v dis"><span class="bx">☐</span><span class="vl">India</span><span class="vc">(0)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Not published by seller</span><span class="vc">(637)</span></div></div></div></details>
+    </div>
+    <div>
+      <h2 style="font-size:19px;margin-bottom:6px">The flow</h2>
+      <p class="sub">Which selections reveal which sub-filters.</p>
+      <div class="fl"><div class="flp">Type</div><div class="br"><div class="brv">OPC</div><div class="bra">→</div><div class="brc"><b>Grade</b><span>53 grade · 43 grade · 33 grade</span></div></div></div><div class="always"><b>Always shown</b>Type · Brand · Price per bag, delivered · Pack size · Order quantity · BIS licence · Arrives · Application · IS standard · Seller quotes price · Price verified · Country of origin</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Implementation</h2>
+  <p class="sub">One row per filter, in display order.</p>
+  <table>
+    <thead><tr><th>id</th><th>Label</th><th>Cluster</th><th>Control</th><th>Values</th>
+    <th>Appears when</th><th>Default</th><th>Source field</th><th>Why it exists</th></tr></thead>
+    <tbody><tr><td><code>cement_type</code></td><td><b>Type</b></td><td>Specification</td><td>checkbox</td><td>5</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.cement_type</code></td><td class="why">The genuine first decision. PPC is fly-ash blended and slower-setting; OPC 53 is the slab cement. Choosing wrong costs strength or money.</td></tr>
+<tr><td><code>opc_grade</code></td><td><b>Grade</b></td><td>Specification</td><td>checkbox</td><td>3</td><td>cement_type = OPC</td><td>on</td><td><code class="src">offer.spec.opc_grade</code></td><td class="why">Only OPC carries a grade in this sense. Showing an empty grade filter on a PPC listing is the classic flat-panel mistake.</td></tr>
+<tr><td><code>brand</code></td><td><b>Brand</b></td><td>Price &amp; brand</td><td>checkbox</td><td>6</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.brand</code></td><td class="why">Brand sits above price here, against the usual order. Cement is the most brand-loyal category in Indian construction and a large share of buyers start with the name, not the spec.</td></tr>
+<tr><td><code>price_per_bag</code></td><td><b>Price per bag, delivered</b></td><td>Price &amp; brand</td><td>radio</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.normalised_paise WHERE normalised_unit=&#x27;bag&#x27;</code></td><td class="why">Bands are on the delivered ₹/bag, not the seller&#x27;s ex-GST quote — a buyer who filters &#x27;under ₹350&#x27; and receives a ₹340 bag with ₹40 of freight never trusts the filter again.</td></tr>
+<tr><td><code>pack_size</code></td><td><b>Pack size</b></td><td>Specification</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.pack_size_kg</code></td><td class="why">Bulk changes the entire price basis. A 1 MT jumbo and a 50 kg bag in one price band is the basis error this engine exists to remove.</td></tr>
+<tr><td><code>bulk_slab</code></td><td><b>Order quantity</b></td><td>Price &amp; brand</td><td>radio</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.bulk_slabs[].min_qty</code></td><td class="why">A contractor and a homeowner are different buyers on the same page. Selecting the slab shows the price that actually applies instead of making them compute it per card.</td></tr>
+<tr><td><code>bis</code></td><td><b>BIS licence</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>off</td><td><code class="src">offer.cert_state</code></td><td class="why">Cement is covered by a quality-control order that makes a valid BIS licence a legal condition of sale — so this is not a preference. But almost no listing publishes the licence number, and &#x27;not published by this seller&#x27; is a different claim from &#x27;not licensed&#x27;.</td></tr>
+<tr><td><code>arrives</code></td><td><b>Arrives</b></td><td>Delivery</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">serviceability.lead_time_days (computed per pincode)</code></td><td class="why">Computed per pincode, not stored on the product — the same SKU is &#x27;tomorrow&#x27; in Kukatpally and &#x27;within a week&#x27; in a district town, so this facet cannot be cached without the pincode in the key.</td></tr>
+<tr><td><code>application</code></td><td><b>Application</b></td><td>Specification</td><td>checkbox</td><td>5</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.application</code></td><td class="why">Many buyers shop by job rather than by chemistry. Folded rather than primary because it substantially restates Type once Type is chosen.</td></tr>
+<tr><td><code>standard</code></td><td><b>IS standard</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.cert_standards[]</code></td><td class="why">Professional buyers specify by IS code. Folded because the standard is fully implied by Type for most of the catalogue.</td></tr>
+<tr><td><code>gst_treatment</code></td><td><b>Seller quotes price</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.gst_treatment</code></td><td class="why">Not a filter any competitor offers. A GSTIN holder claiming input credit needs to know which sellers quote ex-GST; ranking is always on the landed figure regardless of what the seller quoted.</td></tr>
+<tr><td><code>price_freshness</code></td><td><b>Price verified</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.priced_as_of</code></td><td class="why">Kept quiet and available rather than prominent. Most buyers will not touch it; the professional buyer who does will notice immediately that no competitor timestamps a price at all.</td></tr>
+<tr><td><code>country_of_origin</code></td><td><b>Country of origin</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.country_of_origin</code></td><td class="why">Built as a proper indexed, sortable facet rather than page text because LMPC Rule 6(10A) (G.S.R. 128(E), compliance date moved to 2027-07-01) requires origin to be searchable and sortable, and a text field cannot satisfy that.</td></tr></tbody>
+  </table>
+</section>
+
+<section><h2>Deliberately left out</h2><p class="sub">A filter considered and rejected, with the reason, stops the same debate recurring in two weeks.</p><ul class="om"><li><b>In stock</b> — Moved to a toggle above the results rather than a rail block — it is a single binary and the rail slot is worth more to a spec filter. Default on, one click to undo.</li><li><b>Colour</b> — Grey in every OPC/PPC/PSC listing; white cement is already its own Type value. One meaningful value is noise.</li><li><b>Seller rating</b> — Held back until there is a real ratings corpus. B2B directory listings carry sparse ratings, and a filter that returns nothing makes the marketplace look empty.</li><li><b>Discount / % off MRP</b> — Cement strike-through pricing in this market is computed against an inflated reference. A discount facet built on a manufactured number is worse than none.</li></ul></section>
+
+
+<footer>Generated by the <code>category-filters</code> skill.
+Counts and values should be confirmed against the live catalogue before build.</footer>
+</div></body></html>

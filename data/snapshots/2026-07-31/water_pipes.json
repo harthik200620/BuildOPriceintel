@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-07-31T23:31:35.526Z",
+  "collection_run_id": "run_ms9kp393",
+  "category": "water_pipes",
+  "category_label": "Water pipes",
+  "offer_count": 0,
+  "vendor_count": 0,
+  "brand_count": 0,
+  "platform_count": 0,
+  "by_region": {
+    "hyderabad": {
+      "offers": 0,
+      "vendors": 0,
+      "brands": 0,
+      "platforms": 0
+    },
+    "vijayawada": {
+      "offers": 0,
+      "vendors": 0,
+      "brands": 0,
+      "platforms": 0
+    }
+  },
+  "note": "Every price here is the figure the named source published, converted to the canonical unit by a recorded conversion. Nothing in this file was invented to fill a gap.",
+  "offers": []
+}

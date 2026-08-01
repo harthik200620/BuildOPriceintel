@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.vercel
+.env*.local
+.DS_Store
+
+# The working store and its journal. `data/buildo.prod.db` — the snapshot that
+# `npm run db:snapshot` folds the WAL into — is committed instead; it is the
+# file a deployment serves.
+data/buildo.db
+data/buildo.db-wal
+data/buildo.db-shm
+data/logs/
+
+# Build artefacts of the local demo, not inputs to it.
+screenshots/
+~$*

@@ -1,0 +1,696 @@
+{
+  "category": "Bricks & blocks",
+  "category_path": "commodity.masonry",
+  "canonical_unit": "piece",
+  "canonical_unit_note": "₹/piece. Also quoted per 1,000 and, for AAC, per cubic metre — a ₹/piece band and a ₹/cum band differ by roughly the number of blocks in a cubic metre, so the conversion needs piece volume from the size attribute.",
+  "result_count": 484,
+  "counts_are_illustrative": false,
+  "counts_note": "Counts measured from data/buildo.db on 2026-08-01 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "regions": [
+    "hyderabad",
+    "vijayawada"
+  ],
+  "lead_filter": "block_type",
+  "lead_reason": "These are entirely different products with different masonry practice, different mortar and different wall thickness — not variants of one thing. Nothing else on the panel is decidable until it is chosen.",
+  "panel_regime": "20-100 products — 7 primary + 4 conditional",
+  "filters": [
+    {
+      "id": "block_type",
+      "facet_key": "attrs.block_type",
+      "label": "Type",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 10,
+      "source": "offer.spec.block_type",
+      "why": "The defining decision and the parent of the size ladder — clay, AAC and concrete blocks have completely different size vocabularies, so one flat Size filter would be meaningless.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "AAC block",
+          "sublabel": "autoclaved aerated, lightweight",
+          "count": 33,
+          "reveals": [
+            "size_aac",
+            "fly_ash_pct"
+          ]
+        },
+        {
+          "label": "Red clay brick",
+          "sublabel": "traditional burnt clay",
+          "count": 211,
+          "reveals": [
+            "size_clay",
+            "finish_clay"
+          ]
+        },
+        {
+          "label": "Fly ash brick",
+          "sublabel": "IS 12894",
+          "count": 47,
+          "reveals": [
+            "size_clay",
+            "fly_ash_pct"
+          ]
+        },
+        {
+          "label": "Concrete solid block",
+          "sublabel": "IS 2185 Part 1",
+          "count": 65,
+          "reveals": [
+            "size_concrete"
+          ]
+        },
+        {
+          "label": "Concrete hollow block",
+          "sublabel": "lighter, cheaper per m²",
+          "count": 17,
+          "reveals": [
+            "size_concrete"
+          ],
+          "disabled": true
+        },
+        {
+          "label": "CLC block",
+          "sublabel": "cellular lightweight concrete",
+          "count": 23,
+          "reveals": [
+            "size_concrete"
+          ],
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "size_aac",
+      "facet_key": "attrs.size_mm",
+      "label": "Size",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 21,
+      "source": "offer.spec.size_mm",
+      "why": "AAC runs a 600×200 face with the thickness as the variable — the thickness is the wall decision (100 mm partition, 200 mm external).",
+      "depends_on": {
+        "filter": "block_type",
+        "value": "AAC block"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "600×200×100",
+          "sublabel": "internal partition",
+          "unit": "mm",
+          "count": 30
+        },
+        {
+          "label": "600×200×150",
+          "unit": "mm",
+          "count": 3,
+          "disabled": true
+        },
+        {
+          "label": "600×200×200",
+          "sublabel": "external wall",
+          "unit": "mm",
+          "count": 1,
+          "disabled": true
+        },
+        {
+          "label": "600×200×75",
+          "unit": "mm",
+          "count": 1,
+          "disabled": true
+        },
+        {
+          "label": "600×200×230",
+          "unit": "mm",
+          "count": 1,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "size_clay",
+      "facet_key": "attrs.size_mm",
+      "label": "Size",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 22,
+      "source": "offer.spec.size_mm",
+      "why": "The Indian standard modular brick is 230×110×75 mm; the traditional country brick varies by kiln and is sold as a separate value rather than pretending to a standard it does not meet.",
+      "depends_on": {
+        "filter": "block_type",
+        "value": "Red clay brick"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "230×110×75",
+          "sublabel": "IS 1077 modular",
+          "unit": "mm",
+          "count": 204
+        },
+        {
+          "label": "230×110×70",
+          "sublabel": "common local size",
+          "unit": "mm",
+          "count": 2,
+          "disabled": true
+        },
+        {
+          "label": "Non-standard / kiln size",
+          "sublabel": "dimension varies by lot",
+          "unit": "mm",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "size_concrete",
+      "facet_key": "attrs.size_mm",
+      "label": "Size",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 23,
+      "source": "offer.spec.size_mm",
+      "why": "Concrete blocks run a 400×200 face with thickness as the variable, the same shape of decision as AAC but a different ladder.",
+      "depends_on": {
+        "filter": "block_type",
+        "value": "Concrete solid block"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "400×200×100",
+          "unit": "mm",
+          "count": 2,
+          "disabled": true
+        },
+        {
+          "label": "400×200×150",
+          "unit": "mm",
+          "count": 4,
+          "disabled": true
+        },
+        {
+          "label": "400×200×200",
+          "unit": "mm",
+          "count": 6,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.size_mm`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "compressive_strength",
+      "facet_key": "attrs.compressive_strength_nmm2",
+      "label": "Compressive strength",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 30,
+      "source": "offer.spec.compressive_strength_nmm2",
+      "why": "The load-bearing decision. A 3.5 N/mm² block in a load-bearing wall is a structural failure, not a saving — so this is a safety filter and never folded.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "3 – 4 N/mm²",
+          "sublabel": "AAC, non-load-bearing",
+          "unit": "N/mm²",
+          "count": 1,
+          "disabled": true
+        },
+        {
+          "label": "5 – 7 N/mm²",
+          "sublabel": "general masonry",
+          "unit": "N/mm²",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "7.5 – 10 N/mm²",
+          "sublabel": "load-bearing",
+          "unit": "N/mm²",
+          "count": 1,
+          "disabled": true
+        },
+        {
+          "label": "Over 10 N/mm²",
+          "unit": "N/mm²",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Not declared",
+          "sublabel": "common on local kiln supply",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.compressive_strength_nmm2`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "brand",
+      "facet_key": "product.brand",
+      "label": "Brand",
+      "cluster": "commercial",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 40,
+      "source": "product.brand",
+      "why": "Branded supply is real in AAC and almost absent in clay brick, where the market is local kilns. 'Local / unbranded' is a first-class value here, not a fallback — it is most of the honest supply.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Wienerberger",
+          "count": 4
+        },
+        {
+          "label": "Greenstone",
+          "count": 3
+        },
+        {
+          "label": "Ecotherm",
+          "count": 2
+        },
+        {
+          "label": "Karimnagar PVC",
+          "count": 2
+        },
+        {
+          "label": "Porotherm",
+          "count": 2
+        },
+        {
+          "label": "Aerobild",
+          "count": 1
+        }
+      ],
+      "note": "Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12.",
+      "data_backed": true
+    },
+    {
+      "id": "price_per_piece",
+      "facet_key": "price_current.normalised_paise",
+      "label": "Price per piece, delivered",
+      "cluster": "commercial",
+      "control": "radio",
+      "type": "range",
+      "sort_order": 50,
+      "source": "price_current.normalised_paise WHERE normalised_unit='piece'",
+      "why": "₹/piece is the only band on which a ₹7 clay brick and a ₹58 AAC block are the same kind of number. Freight dominates here — a lorry of bricks is mostly transport — so the band is on the delivered figure.",
+      "note": "Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Under ₹14",
+          "unit": "₹/piece delivered",
+          "count": 138
+        },
+        {
+          "label": "₹14 – ₹33",
+          "unit": "₹/piece delivered",
+          "count": 106
+        },
+        {
+          "label": "₹33 – ₹49",
+          "unit": "₹/piece delivered",
+          "count": 128
+        },
+        {
+          "label": "Over ₹49",
+          "unit": "₹/piece delivered",
+          "count": 112
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "bulk_slab",
+      "facet_key": "offer.bulk_slabs",
+      "label": "Order quantity",
+      "cluster": "commercial",
+      "control": "radio",
+      "type": "single",
+      "sort_order": 60,
+      "source": "offer.bulk_slabs[].min_qty",
+      "why": "Masonry is bought by the lorry load, and the per-piece rate moves sharply with it. Most sellers here quote a minimum in thousands, so this facet also prevents a cart that cannot be fulfilled.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Under 1,000",
+          "unit": "piece",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "1,000 – 5,000",
+          "unit": "piece",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "5,000 – 20,000",
+          "unit": "piece",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "20,000+",
+          "unit": "piece",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `offer.bulk_slabs`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "bis",
+      "facet_key": "offer.cert_state",
+      "label": "BIS mark",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 70,
+      "source": "offer.cert_state",
+      "why": "Labels, never hides — and this is the category where that matters most. Local clay bricks from a Krishna-district kiln are legal, ordinary, widely used material carrying no BIS mark. A default-on certification filter would delete most of the real supply and substitute our judgement for the buyer's.",
+      "note": "Default off. 'Not applicable' is the honest state for most local kiln supply, and it is neutral — not a failure.",
+      "default_state": "off",
+      "default_open": false,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Certified",
+          "sublabel": "licence on file",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Not declared",
+          "sublabel": "seller has not provided one",
+          "count": 26
+        },
+        {
+          "label": "Not applicable",
+          "sublabel": "no standard applies to this product",
+          "count": 458
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "arrives",
+      "facet_key": "serviceability.lead_time_days",
+      "label": "Arrives",
+      "cluster": "logistics",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 80,
+      "source": "serviceability.lead_time_days (computed per pincode)",
+      "why": "Computed per pincode from the freight model. Masonry is the most freight-sensitive category in the set — a kiln 60 km out can be cheaper ex-yard and dearer delivered.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Tomorrow",
+          "unit": "days",
+          "count": 129,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "days",
+          "count": 312
+        },
+        {
+          "label": "Within a week",
+          "unit": "days",
+          "count": 43,
+          "disabled": true
+        },
+        {
+          "label": "Scheduled delivery",
+          "sublabel": "you pick the date",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "fly_ash_pct",
+      "facet_key": "attrs.fly_ash_pct",
+      "label": "Fly ash content",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 90,
+      "source": "offer.spec.fly_ash_pct",
+      "why": "This attribute decides the tax rate, not just the recipe: AAC with fly ash over 50% falls under HSN 6815 at 12%, below that under 6810 at 18%. A six-point GST difference on the same-looking block is exactly the kind of hidden basis error this engine exists to surface.",
+      "depends_on": {
+        "filter": "block_type",
+        "value": "AAC block"
+      },
+      "visibility": "conditional",
+      "default_open": false,
+      "needs_verification": "The >50% fly-ash threshold comes from the 55th GST Council clarification as recorded in the spec's Appendix C. Confirm against the notification text before this drives an invoice.",
+      "values": [
+        {
+          "label": "Over 50%",
+          "sublabel": "HSN 6815 · 12% GST",
+          "unit": "%",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "50% or under",
+          "sublabel": "HSN 6810 · 18% GST",
+          "unit": "%",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Not published by seller",
+          "sublabel": "rate shown at the higher slab",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.fly_ash_pct`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "finish_clay",
+      "facet_key": "attrs.finish",
+      "label": "Finish",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 95,
+      "source": "offer.spec.finish",
+      "why": "Wire-cut bricks have square arrises and take exposed brickwork; table-moulded do not. Only meaningful for clay.",
+      "depends_on": {
+        "filter": "block_type",
+        "value": "Red clay brick"
+      },
+      "visibility": "conditional",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Wire-cut",
+          "sublabel": "square edges, exposed work",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Table-moulded",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Machine-pressed",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "`attrs.finish` is populated on 1 of 484 listings in hyderabad, but as uncontrolled seller text (\"Manufacturer\") which matches none of this filter's values. The gap is normalisation, not collection: shipped disabled rather than deleted, and rather than mapped by guess.",
+      "no_data_kind": "unnormalised"
+    },
+    {
+      "id": "density_class",
+      "facet_key": "attrs.density_kg_m3",
+      "label": "Density",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 100,
+      "source": "offer.spec.density_kg_m3",
+      "why": "AAC's whole selling point is dead-load reduction — a 550 kg/m³ block against a 1,900 kg/m³ clay brick changes the structural design. Folded because it is largely implied by Type.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Under 700 kg/m³",
+          "sublabel": "AAC, CLC",
+          "unit": "kg/m³",
+          "count": 33
+        },
+        {
+          "label": "700 – 1,500 kg/m³",
+          "unit": "kg/m³",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Over 1,500 kg/m³",
+          "sublabel": "clay, solid concrete",
+          "unit": "kg/m³",
+          "count": 211
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "standard",
+      "facet_key": "product.cert_standards",
+      "label": "IS standard",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 110,
+      "source": "product.cert_standards[]",
+      "why": "Specifying engineers work from the IS code. Folded because it maps one-to-one onto Type.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "IS 1077",
+          "sublabel": "burnt clay",
+          "count": 211
+        },
+        {
+          "label": "IS 2185 Pt 3",
+          "sublabel": "AAC",
+          "count": 138
+        },
+        {
+          "label": "IS 2185 Pt 1",
+          "sublabel": "concrete",
+          "count": 138
+        },
+        {
+          "label": "IS 12894",
+          "sublabel": "fly ash",
+          "count": 47
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "gst_treatment",
+      "facet_key": "offer.gst_treatment",
+      "label": "Seller quotes price",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 120,
+      "source": "offer.gst_treatment",
+      "why": "Clay bricks are 12% with ITC or 6% without — the 5% figure repeated across the web died on 2022-04-01 and would systematically under-price every BOQ built on it.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Inclusive of GST",
+          "count": 15
+        },
+        {
+          "label": "Exclusive of GST",
+          "count": 469,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "price_freshness",
+      "facet_key": "price_current.freshness_state",
+      "label": "Price verified",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 130,
+      "source": "price_current.priced_as_of",
+      "why": "Bricks and blocks are volatility class V0 — a 24 h SLA, because they are freight-dominated and diesel-linked.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Verified today",
+          "unit": "hours",
+          "count": 484,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Within a week",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `price_current.freshness_state`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    }
+  ],
+  "omitted": [
+    {
+      "filter": "In stock",
+      "reason": "Moved to a toggle above the results. Single binary, and the rail slot is worth more to strength or size."
+    },
+    {
+      "filter": "Colour",
+      "reason": "Determined by material — clay is red, AAC is grey-white, concrete is grey. It restates Type and eliminates nothing."
+    },
+    {
+      "filter": "Interlocking paver",
+      "reason": "A real product but a paving item rather than masonry, with its own thickness/shape/traffic-class vocabulary. It belongs in an External Works tree, not here."
+    },
+    {
+      "filter": "Water absorption %",
+      "reason": "A genuine IS 1077 quality property, but no seller in either target city publishes it. A filter over a field that is empty on 90% of listings produces a broken experience — better to leave it out and say so than to ship a dead facet."
+    },
+    {
+      "filter": "Seller rating",
+      "reason": "Held back until there is a real ratings corpus."
+    }
+  ],
+  "reconciled_at": "2026-08-01T11:39:34.216Z",
+  "reconciled_region": "hyderabad"
+}

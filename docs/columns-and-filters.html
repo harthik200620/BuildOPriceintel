@@ -1,0 +1,369 @@
+<title>cOS columns and filters — what is real</title>
+
+<style>
+  :root {
+    --canvas: #ECE7DE; --panel: rgba(255,255,255,.74); --panel-solid: #FBF9F6;
+    --ink: #14161A; --ink-2: #4C5158; --ink-3: #5D636C;
+    --rule: rgba(22,20,18,.13); --rule-soft: rgba(22,20,18,.07);
+    --accent: #A8431B; --accent-bg: rgba(168,67,27,.075);
+    --live: #276843; --live-bg: rgba(39,104,67,.11);
+    --mine: #A8431B; --mine-bg: rgba(168,67,27,.11);
+    --time: #8A6410; --time-bg: rgba(138,100,16,.13);
+    --no:   #8C3A3A; --no-bg:   rgba(140,58,58,.11);
+    --shadow: 0 1px 2px rgba(28,25,22,.05), 0 12px 34px -18px rgba(28,25,22,.22);
+    --display: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas: #16140F; --panel: rgba(40,36,29,.72); --panel-solid: #221E18;
+      --ink: #EFE9DE; --ink-2: #B6AEA1; --ink-3: #8E8579;
+      --rule: rgba(239,233,222,.16); --rule-soft: rgba(239,233,222,.08);
+      --accent: #E07A44; --accent-bg: rgba(224,122,68,.13);
+      --live: #6DB88A; --live-bg: rgba(109,184,138,.15);
+      --mine: #E07A44; --mine-bg: rgba(224,122,68,.15);
+      --time: #D2A33C; --time-bg: rgba(210,163,60,.15);
+      --no:   #E08585; --no-bg:   rgba(224,133,133,.14);
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 34px -18px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --canvas: #16140F; --panel: rgba(40,36,29,.72); --panel-solid: #221E18;
+    --ink: #EFE9DE; --ink-2: #B6AEA1; --ink-3: #8E8579;
+    --rule: rgba(239,233,222,.16); --rule-soft: rgba(239,233,222,.08);
+    --accent: #E07A44; --accent-bg: rgba(224,122,68,.13);
+    --live: #6DB88A; --live-bg: rgba(109,184,138,.15);
+    --mine: #E07A44; --mine-bg: rgba(224,122,68,.15);
+    --time: #D2A33C; --time-bg: rgba(210,163,60,.15);
+    --no: #E08585; --no-bg: rgba(224,133,133,.14);
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 34px -18px rgba(0,0,0,.7);
+  }
+  :root[data-theme="light"] {
+    --canvas: #ECE7DE; --panel: rgba(255,255,255,.74); --panel-solid: #FBF9F6;
+    --ink: #14161A; --ink-2: #4C5158; --ink-3: #5D636C;
+    --rule: rgba(22,20,18,.13); --rule-soft: rgba(22,20,18,.07);
+    --accent: #A8431B; --accent-bg: rgba(168,67,27,.075);
+    --live: #276843; --live-bg: rgba(39,104,67,.11);
+    --mine: #A8431B; --mine-bg: rgba(168,67,27,.11);
+    --time: #8A6410; --time-bg: rgba(138,100,16,.13);
+    --no: #8C3A3A; --no-bg: rgba(140,58,58,.11);
+    --shadow: 0 1px 2px rgba(28,25,22,.05), 0 12px 34px -18px rgba(28,25,22,.22);
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 700px at 12% -8%, rgba(200,150,105,.16), transparent 60%),
+      radial-gradient(900px 620px at 92% 108%, rgba(122,140,190,.13), transparent 60%),
+      var(--canvas);
+    background-attachment: fixed;
+    color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(18px,4vw,40px) 100px; }
+
+  header.mast { padding: clamp(48px,8vw,88px) 0 28px; border-bottom: 1px solid var(--rule); }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin: 0 0 16px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px,5.6vw,62px); line-height: 1.04; letter-spacing: -.02em; margin: 0 0 20px; text-wrap: balance; }
+  h1 em { font-style: italic; color: var(--accent); }
+  .standfirst { font-size: clamp(16px,2vw,19px); color: var(--ink-2); max-width: 64ch; margin: 0; }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  .tally { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1px; margin: 36px 0 0; background: var(--rule-soft); border: 1px solid var(--rule-soft); border-radius: 12px; overflow: hidden; }
+  .tally div { background: var(--panel-solid); padding: 16px 18px; }
+  .tally dt { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 6px; }
+  .tally dd { margin: 0; font-family: var(--mono); font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .tally p { margin: 4px 0 0; font-size: 12px; color: var(--ink-3); line-height: 1.45; }
+
+  section { padding: clamp(38px,5vw,58px) 0 0; }
+  h2 { font-family: var(--display); font-weight: 400; font-size: clamp(25px,3.2vw,34px); line-height: 1.14; letter-spacing: -.015em; margin: 0 0 10px; text-wrap: balance; }
+  h3 { font-size: 14.5px; font-weight: 650; margin: 28px 0 8px; }
+  p { margin: 0 0 14px; max-width: 68ch; color: var(--ink-2); }
+  p strong { color: var(--ink); font-weight: 620; }
+  code { font-family: var(--mono); font-size: .87em; background: var(--accent-bg); color: var(--accent); padding: .1em .34em; border-radius: 3px; }
+
+  .tw { overflow-x: auto; margin: 0 0 22px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.4px; min-width: 620px; }
+  th, td { text-align: left; padding: 8px 13px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  th { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; white-space: nowrap; position: sticky; top: 0; background: var(--panel-solid); }
+  td { color: var(--ink-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.k { color: var(--ink); font-weight: 560; }
+  td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; padding: 2px 7px; border-radius: 999px; white-space: nowrap; text-transform: uppercase; }
+  .t-live { background: var(--live-bg); color: var(--live); }
+  .t-mine { background: var(--mine-bg); color: var(--mine); }
+  .t-time { background: var(--time-bg); color: var(--time); }
+  .t-no   { background: var(--no-bg);   color: var(--no); }
+
+  .panel { position: relative; background: var(--panel); border: 1px solid var(--rule); border-radius: 13px; box-shadow: var(--shadow); padding: 20px 22px; margin: 0 0 20px; }
+  .panel > :last-child { margin-bottom: 0; }
+  .panel.warn { background: var(--no-bg); border-color: rgba(140,58,58,.25); }
+  .kicker { font-family: var(--mono); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-3); display: block; margin: 0 0 6px; }
+
+  footer { border-top: 1px solid var(--rule); margin-top: 48px; padding-top: 24px; font-size: 13px; color: var(--ink-3); max-width: 68ch; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">cOS brief · 33 column headers + ~170 filters, audited against the database</p>
+  <h1>Of about 200 proposed columns, <em>45 are real</em>. This is which, and why the rest are not.</h1>
+  <p class="standfirst">
+    Every item in the brief was checked against the live catalogue — <strong>1,797 offers, 920 products,
+    633 vendors</strong> — and against the full raw archive of <strong>4,625 collected listings</strong>.
+    A column is only listed as available here if something in that data actually fills it. Where a field
+    would have to be produced rather than measured, it says so, with the specific reason.
+  </p>
+
+  <dl class="tally">
+    <div><dt style="color:var(--live)">Live</dt><dd>28</dd><p>Real data now, each with its measured fill rate</p></div>
+    <div><dt style="color:var(--mine)">Mined</dt><dd>17</dd><p>Was in the archive, discarded by the parser — now extracted</p></div>
+    <div><dt style="color:var(--time)">Needs time</dt><dd>12</dd><p>Schema is ready; the data accrues with daily runs</p></div>
+    <div><dt style="color:var(--no)">Cannot</dt><dd>~140</dd><p>No source publishes it. Building it would mean inventing it</p></div>
+  </dl>
+</header>
+
+<section>
+  <h2>The ceiling nobody can raise by trying harder</h2>
+  <p>
+    <strong>Only 824 of 1,797 offers (45.9%) carry a single published specification.</strong> That is the hard
+    limit on every spec-derived column in the brief. Broken down by source: ExportersIndia 198/198 (100%),
+    IndiaMART 626/1,415 (44%), and <strong>BigBMart 0/184 — every one of its listings ships an empty spec
+    object.</strong>
+  </p>
+  <p>
+    A second ceiling applies to steel specifically: all 64 TMT listings arrive with no specs at all, so every
+    TMT attribute — diameter, mass per metre, rod weight, mill type — is parsed out of the title or computed
+    from IS 1786 engineering constants. There is no steel spec data to mine. That is a gap in what the source
+    publishes, not in the parser.
+  </p>
+</section>
+
+<section>
+  <h2>Live — real data, with the fill rate measured today</h2>
+  <p>
+    These are in the table now. Where a column is patchy, its header states the percentage, so a column
+    populated on 9% of rows reads as an honest measurement rather than a broken feature.
+  </p>
+  <div class="tw"><table>
+    <thead><tr><th>Brief item</th><th>Column</th><th class="num">Fill</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Product Image</td><td>Photo</td><td class="num">89.7%</td><td>Downloaded locally; the card rotates up to five</td></tr>
+      <tr><td class="k">Product Name</td><td>Product</td><td class="num">100%</td><td>Synthesised from resolved attributes</td></tr>
+      <tr><td class="k">Brand</td><td>Brand</td><td class="num">46.0%</td><td>Roster-gated — a brand is only claimed when verified</td></tr>
+      <tr><td class="k">Category / Subcategory</td><td>(page context)</td><td class="num">100%</td><td>Four categories, shown as the intent chips</td></tr>
+      <tr><td class="k">SKU / Product Code</td><td><code>item_code</code></td><td class="num">100%</td><td>In the sheet; the substitutability key, not a seller SKU</td></tr>
+      <tr><td class="k">Grade</td><td>Grade</td><td class="num">37% cement</td><td>Only where the seller states it; 16% on TMT</td></tr>
+      <tr><td class="k">Size</td><td>Size / Bore / Dia</td><td class="num">17–100%</td><td>Per category — bore 53%, diameter 100%, brick size 17%</td></tr>
+      <tr><td class="k">Unit</td><td>Unit</td><td class="num">100%</td><td>Canonical per category, never nullable by schema</td></tr>
+      <tr><td class="k">Price</td><td>Unit price</td><td class="num">100%</td><td>Delivered, per canonical unit — the ranked number</td></tr>
+      <tr><td class="k">Final Price</td><td>Landed</td><td class="num">100%</td><td>base + GST + freight + handling + loading</td></tr>
+      <tr><td class="k">Location</td><td>Seller locality</td><td class="num">84.4%</td><td>Only where a real address is published</td></tr>
+      <tr><td class="k">Certifications</td><td>BIS</td><td class="num">100%</td><td>State, not a claim — see the warning below</td></tr>
+      <tr><td class="k">Rating</td><td>Rating</td><td class="num">50.6%</td><td>IndiaMART only; shrunk toward the mean by review count</td></tr>
+      <tr><td class="k">Reviews</td><td>Reviews</td><td class="num">50.6%</td><td>Same source constraint</td></tr>
+      <tr><td class="k">Last Updated</td><td>Verified</td><td class="num">100%</td><td>Per listing, shown relative — "14 h ago"</td></tr>
+      <tr><td class="k">Compare</td><td>Compare tray</td><td class="num">—</td><td>Already built; keyed per seller offer</td></tr>
+      <tr><td class="k">Wishlist</td><td>My list</td><td class="num">—</td><td>Already built</td></tr>
+      <tr><td class="k">Downloads</td><td>Datasheets</td><td class="num">88 assets</td><td>Now rendered in the sheet; was collected and unused</td></tr>
+      <tr><td class="k">Price Range filter</td><td>Price band facet</td><td class="num">100%</td><td>Quartiles of the real distribution, not round numbers</td></tr>
+      <tr><td class="k">Delivery / Arrives</td><td>ETA facet</td><td class="num">100%</td><td>Computed per pincode by the freight model</td></tr>
+      <tr><td class="k">Seller Rating filter</td><td>Facet</td><td class="num">50.6%</td><td>Excludes every ExportersIndia seller — stated in the rail</td></tr>
+      <tr><td class="k">Bulk / Wholesale price</td><td>MOQ</td><td class="num">9.2%</td><td>Quantity break itself: 0 of 1,797 — see "cannot"</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="panel warn">
+    <span class="kicker">One live column that must not be oversold</span>
+    <p>
+      <strong>Certification looks 100% filled and is not a certification claim.</strong> The breakdown is
+      BRAND_LICENSED 765, NOT_APPLICABLE 559, NOT_DECLARED 472 — and <strong>CERTIFIED: 1</strong>. Exactly
+      one offer in the whole catalogue publishes a licence number. BRAND_LICENSED means "this manufacturer
+      holds a BIS licence for this IS code, but this listing does not quote it", which is a weaker claim and
+      is rendered as <code>BIS*</code> rather than as a tick. A "BIS certified only" filter marketed on this
+      column would misrepresent 764 listings.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>Mined — published all along, discarded by the parser</h2>
+  <p>
+    These were in the raw archive and no extractor looked for them. They now load, applied to the existing
+    catalogue by replaying all 4,625 archived listings offline — <strong>no network calls</strong>. Every one
+    is recorded as <code>quoted</code>, not <code>derived</code> or <code>typical</code>: it is the seller's
+    own published text.
+  </p>
+  <div class="tw"><table>
+    <thead><tr><th>Brief item</th><th>Source key</th><th class="num">Products</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Country of Origin</td><td><code>Country of Origin</code></td><td class="num">96 · 10.4%</td><td>The column existed at <strong>0% fill</strong> since the schema was written. Five raw variants canonicalise to one value</td></tr>
+      <tr><td class="k">Manufacturer</td><td><code>Supply Type</code></td><td class="num">86</td><td>Manufacturer vs Supplier — who you are actually buying from</td></tr>
+      <tr><td class="k">(trade pricing)</td><td><code>Trade Type</code></td><td class="num">16</td><td>Trade / Non-Trade, a real cement pricing distinction</td></tr>
+      <tr><td class="k">Material Type</td><td><code>Material</code></td><td class="num">95</td><td>Clay, PVC, Concrete…</td></tr>
+      <tr><td class="k">Colour</td><td><code>Color</code></td><td class="num">50</td><td>19 distinct values</td></tr>
+      <tr><td class="k">Finish / Form</td><td><code>Form</code>, <code>Shape</code></td><td class="num">46 · 64</td><td>Powder/Solid; Rectangular/Round</td></tr>
+      <tr><td class="k">Warranty period</td><td><code>Shelf Life</code></td><td class="num">19</td><td>Not warranty — see the correction below</td></tr>
+      <tr><td class="k">IS Code</td><td><code>Standard Compliance</code></td><td class="num">5</td><td>IS 12269, IS 269:2015</td></tr>
+      <tr><td class="k">Water Resistance</td><td><code>Water Absorption</code></td><td class="num">7</td><td>Bricks only, and thin</td></tr>
+      <tr><td class="k">Model No.</td><td><code>Brand Name</code></td><td class="num">135</td><td>Kept as <em>declared brand</em>, beside the resolved one — see below</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="panel">
+    <span class="kicker">Why the seller's brand is not promoted into the brand column</span>
+    <p>
+      The audit suggested merging <code>Brand Name</code> into <code>product.brand</code> to lift it off 46%.
+      That would have been wrong. <code>brand</code> feeds <code>item_code</code>, which is product identity —
+      one mis-declared brand there splits a product in two or merges two into one, and sellers do contradict
+      themselves. One collected listing reads title "Maha PPC Cement", Brand "Birla Cement", Type "Maha PPC
+      Cement". So the seller's typed brand is kept as a separate quoted attribute, shown beside the resolved
+      brand, and identity stays roster-gated.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>Needs time — the schema is ready, the data is not</h2>
+  <p>
+    <code>price_history</code> holds 20,611 rows, which looks healthy until you count the distinct timestamps:
+    <strong>20, all inside a single 14-hour window.</strong> That is one observation sampled twenty times, not
+    twenty days of market data. Every trend column in the brief depends on it.
+  </p>
+  <div class="tw"><table>
+    <thead><tr><th>Brief item</th><th>Blocked on</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Price Change 24H</td><td>The entire history is shorter than 24 hours</td></tr>
+      <tr><td class="k">Price Change 7D / 30D</td><td>Off by two orders of magnitude</td></tr>
+      <tr><td class="k">Price Volatility</td><td>Needs a series; there is one point per product</td></tr>
+      <tr><td class="k">Lowest / Highest Ever Price</td><td>Same — "ever" is currently "today"</td></tr>
+      <tr><td class="k">Price Drop badge</td><td>Same</td></tr>
+      <tr><td class="k">Recently Added / New Launch</td><td><code>first_seen</code> exists; needs history to mean anything</td></tr>
+      <tr><td class="k">Demand / Supply / Scarcity Index</td><td>Needs supply counts over time, plus a defined method</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    Roughly <strong>30 consecutive daily runs</strong> makes the first four of these real. Nothing in the
+    schema blocks them — <code>price_history</code> is correctly shaped and already capturing.
+  </p>
+</section>
+
+<section>
+  <h2>Cannot, without inventing it</h2>
+  <p>
+    About 140 items. They are grouped by <em>why</em>, because the reasons differ and one of them is worth
+    arguing about while the others are not.
+  </p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Group</th><th>Items</th><th>Why not</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="k">Product Intelligence <span class="tag t-no">9</span></td>
+        <td>AI Quality / Value / Performance / Durability / Sustainability / Risk Score, AI Confidence, Product Health Index, Innovation Score, Lifecycle Score</td>
+        <td>Each would be a model output rendered as a measurement. There is no quality, failure or lifecycle data to fit against, so the number would carry the appearance of evidence and none of the substance.</td>
+      </tr>
+      <tr>
+        <td class="k">Quality Intelligence <span class="tag t-no">12</span></td>
+        <td>Factory Test Passed, Third-Party Tested, Test Date, Failure / Defect / Complaint / Return Rate, Quality Consistency, Counterfeit Risk, Batch Traceability, QR Verification</td>
+        <td>No source publishes test certificates, returns or defect data. There is no transaction history in this build at all, so a return rate has no denominator.</td>
+      </tr>
+      <tr>
+        <td class="k">Community Intelligence <span class="tag t-no">10</span></td>
+        <td>Contractor / Engineer / Architect / Builder / Homeowner Rating, Expert Recommendation, Government Approved Projects, Mega Projects Used, Trending Score, Social Popularity</td>
+        <td>No source segments reviewers by trade. The only rating collected is a single undifferentiated seller score, on 50.6% of offers, from one platform.</td>
+      </tr>
+      <tr>
+        <td class="k">Predictive <span class="tag t-no">6</span></td>
+        <td>Expected Price Drop / Rise, Expected Stock Shortage, Expected Demand Increase, Best Month to Buy, Best Quarter to Purchase</td>
+        <td>A forecast needs a series. See "needs time" — there is one day of prices.</td>
+      </tr>
+      <tr>
+        <td class="k">Logistics Intelligence <span class="tag t-no">8</span></td>
+        <td>Delivery Carbon, Truck Availability, Loading / Unloading Time, Damage Probability, Nearest Warehouse, Packaging Type per shipment</td>
+        <td>Freight is modelled deterministically from distance, weight and vehicle class. Nothing about carrier fleets, damage or emissions is collected. <em>Nearest warehouse</em> is doubly blocked: only 4.9% of vendors geocode.</td>
+      </tr>
+      <tr>
+        <td class="k">Popularity <span class="tag t-no">7</span></td>
+        <td>Popularity, Best Seller, Most Bought, Most Viewed, Most Compared, Trending, AI Recommended</td>
+        <td>No order history and no view tracking. This is already handled honestly in ranking: feature <code>f8</code> "most bought" is set to zero and its weight redistributed, rather than left as a dead term.</td>
+      </tr>
+      <tr>
+        <td class="k">Sustainability <span class="tag t-no">5</span></td>
+        <td>Sustainability Score, Eco-Friendly, Recyclable, Low Carbon, Green Certified</td>
+        <td>Not published by any collected source. Fly-ash content — the one genuine proxy — is null on all 316 brick products.</td>
+      </tr>
+      <tr>
+        <td class="k">Smart Engineering <span class="tag t-no">9</span></td>
+        <td>Suitable for High-Rise / Villas / Bridges / Roads / Hospitals / Schools / Warehouses / Coastal / Earthquake Zones</td>
+        <td>These are engineering judgements about fitness for purpose. Asserting them from a marketplace listing would be advice, not data, in a category where being wrong has structural consequences.</td>
+      </tr>
+      <tr>
+        <td class="k">Commercial <span class="tag t-no">6</span></td>
+        <td>Discount %, Stock Quantity, Availability state, Bulk Pricing slabs, Warranty Duration, Return Policy</td>
+        <td>See the three corrections below — each of these fails for a specific, checkable reason.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <div class="panel warn">
+    <span class="kicker">Three claims in the brief that the data contradicts</span>
+    <p>
+      <strong>Warranty does not exist.</strong> The word appears <strong>0 times across all 4,625 collected
+      listings</strong>. Warranty Duration, Return Policy and Replacement Available have nothing behind them.
+      <code>Shelf Life</code> is present on 19 products and is a different thing.
+    </p>
+    <p>
+      <strong>Availability is not a two-state signal.</strong> <code>stock_state</code> is <code>unknown</code>
+      on 100% of loaded offers. The archive does carry <code>on_request</code> — but only on listings with no
+      published price, which the loader deliberately skips, because a price with no basis cannot be shown.
+      So In Stock / Out of Stock / Pre-order cannot be filtered, and <strong>Stock Quantity is published by
+      nobody at all.</strong>
+    </p>
+    <p>
+      <strong>Discount % works for one tenth of the catalogue.</strong> An MRP is needed to compute one, and
+      <code>mrp_paise</code> is filled on 182 of 1,797 offers — 98.9% of BigBMart's listings and 0% of every
+      other source. It ships as an optional MRP column rather than a headline discount badge, because a
+      "20% off" badge that can only ever appear on one platform's stock is a ranking distortion, not a
+      feature.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>How the table itself stays honest</h2>
+  <p>
+    <strong>Sorting is server-side.</strong> A header click changes the query and refetches, so the order
+    applies to every matching result rather than to the 24 rows the browser happens to hold. Sorting client
+    side would have made page 2 disagree with page 1, and the header disagree with the sort dropdown.
+  </p>
+  <p>
+    <strong>The disclosed order is the applied order.</strong> When a column drives the sort, the line under
+    the controls names that column and its direction — "Unit price · lowest first", "Seller · A–Z" — instead
+    of continuing to say "Recommended". CP (E-Commerce) Rule 5(3)(f) requires the ranking parameters shown to
+    a customer to be the ones in force.
+  </p>
+  <p>
+    <strong>Nulls sort last in both directions.</strong> "Unknown" is not a value at either end of a range:
+    sorting rating descending should surface the best-rated sellers, not the 49% who publish no rating.
+  </p>
+  <p>
+    <strong>Every column carries its coverage.</strong> Patchy columns print their percentage in the header
+    and in the column picker, measured over the results on screen.
+  </p>
+</section>
+
+<footer>
+  <p>
+    Figures measured from <code>data/buildo.db</code> and <code>collector/raw/*.jsonl</code> on 2026-08-01 and
+    reproducible with <code>npx tsx scripts/field-coverage.ts</code>. They move with each collection run; the
+    script, not this page, is the source of record.
+  </p>
+</footer>
+
+</div>

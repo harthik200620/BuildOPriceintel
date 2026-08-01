@@ -1,0 +1,214 @@
+pincode,region_id,locality,district,state_code,lat,lon,source_url,confidence
+500001,hyderabad,Moazzampura,Hyderabad,TS,17.52439,78.61415,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500002,hyderabad,Charminar HO,Hyderabad,TS,17.36994,78.46853,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500003,hyderabad,Secunderabad,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500004,hyderabad,A.Gs Office,Hyderabad,TS,17.40656,78.46703,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500005,hyderabad,CRP Camp,Ranga Reddy,TS,17.32611,78.45617,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500006,hyderabad,Kulsumpura,Hyderabad,TS,17.50203,78.6869,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500007,hyderabad,IICT,Hyderabad,TS,17.41128,78.51828,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500008,hyderabad,Golconda,Hyderabad,TS,17.63906,78.6665,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500009,hyderabad,Manovikasnagar,Hyderabad,TS,17.46906,78.50003,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500010,hyderabad,Alwal,Hyderabad,TS,17.50533,78.5175,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500011,hyderabad,Bowenpally,Hyderabad,TS,17.46489,78.47244,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500012,hyderabad,Begum Bazar,Hyderabad,TS,17.37892,78.46969,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500013,hyderabad,Ramanthapur,Medchal Malkajgiri,TS,17.39522,78.52651,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500014,hyderabad,Hakimpet,Hyderabad,TS,17.539,78.51831,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500015,hyderabad,Aoc Records,Hyderabad,TS,17.48658,78.51189,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500016,hyderabad,Begumpet,Hyderabad,TS,17.44037,78.46346,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500017,hyderabad,Lallapet,Hyderabad,TS,17.43664,78.53574,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500018,hyderabad,Erragadda,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500019,hyderabad,Lingampalli,Ranga Reddy,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500020,hyderabad,Ashoknagar,Hyderabad,TS,17.41028,78.49689,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500022,hyderabad,Central Secretariat,Hyderabad,TS,17.4085,78.47067,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500023,hyderabad,Yakutpura,Hyderabad,TS,17.35203,78.48853,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500024,hyderabad,Sahifa,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500025,hyderabad,Himmatnagar,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500026,hyderabad,Nehrunagar,Hyderabad,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500027,hyderabad,Barkatpura,Hyderabad,TS,17.52781,78.66375,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500028,hyderabad,Humayunnagar,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500029,hyderabad,Gagan Mahal,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500030,hyderabad,Rajendranagar,Ranga Reddy,TS,17.47392,78.51189,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500031,hyderabad,Ibrahim Bagh Lines,Hyderabad,TS,17.5355,78.66083,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500032,hyderabad,Manuu,Ranga Reddy,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500033,hyderabad,Jubilee Hills,Hyderabad,TS,17.42997,78.41742,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500034,hyderabad,Banjara Hills,Hyderabad,TS,17.41722,78.43589,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500035,hyderabad,Saroornagar,Ranga Reddy,TS,17.35953,78.53725,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500036,hyderabad,Malakpet Colony,Hyderabad,TS,17.37211,78.51031,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500037,hyderabad,Rangareddynagar,Medchal Malkajgiri,TS,17.48861,78.44121,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500038,hyderabad,Vengal Rao Nagar,Hyderabad,TS,17.58729,78.58949,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500039,hyderabad,Uppal,Medchal Malkajgiri,TS,17.47392,78.51189,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500040,hyderabad,Ie Moulali,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500041,hyderabad,Raj Bhawan,Hyderabad,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500042,hyderabad,Hal,Medchal Malkajgiri,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500043,hyderabad,Airforce Academy,Medchal Malkajgiri,TS,17.65297,78.39714,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500044,hyderabad,Nallakunta,Hyderabad,TS,17.40236,78.50983,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500045,hyderabad,Yousufguda,Hyderabad,TS,17.44297,78.42817,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500046,hyderabad,CUC,Ranga Reddy,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500047,hyderabad,Anandbagh,Medchal Malkajgiri,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500048,hyderabad,Hyderguda,Ranga Reddy,TS,17.39653,78.48228,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500049,hyderabad,Miyapur,Medchal Malkajgiri,TS,17.6526,78.55421,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500050,hyderabad,Chandanagar,Ranga Reddy,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500051,hyderabad,Hindustan Cables,Medchal Malkajgiri,TS,17.47392,78.53697,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500052,hyderabad,S.V.P.N.P.A,Ranga Reddy,TS,17.32789,78.43581,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500053,hyderabad,Uppuguda,Hyderabad,TS,17.34107,78.47413,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500054,hyderabad,HMT Township,Medchal Malkajgiri,TS,17.50258,78.44139,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500055,hyderabad,IDA Jeedimetla,Medchal Malkajgiri,TS,17.52069,78.44467,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500056,hyderabad,Neredmet,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500057,hyderabad,Vijay Nagar Colony,Hyderabad,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500058,hyderabad,Kanchanbagh,Hyderabad,TS,17.33511,78.502,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500059,hyderabad,Saidabad,Hyderabad,TS,17.35628,78.50506,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500060,hyderabad,Dilsukhnagar Colony,Ranga Reddy,TS,17.37344,78.52933,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500061,hyderabad,Sitaphalmandi,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500062,hyderabad,Ecil,Medchal Malkajgiri,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500063,hyderabad,LIC Division,Hyderabad,TS,17.40649,78.47209,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500064,hyderabad,Bahadurpura,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500065,hyderabad,Fatehdarwaza,Hyderabad,TS,17.35261,78.47869,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500066,hyderabad,High Court,Hyderabad,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500067,hyderabad,Suchitra Junction,Medchal Malkajgiri,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500068,hyderabad,G.S.I (S.R) Bandlaguda,Medchal Malkajgiri,TS,17.36297,78.58433,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500069,hyderabad,Research Centre Imarat,Ranga Reddy,TS,17.30494,78.52347,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500070,hyderabad,Vaidehinagar,Ranga Reddy,TS,17.32643,78.57138,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500072,hyderabad,Kukatpally,Medchal Malkajgiri,TS,17.5659,78.53887,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500073,hyderabad,Srinagar Colony,Hyderabad,TS,17.42972,78.43783,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500074,hyderabad,Lal Bahadurnagar,Ranga Reddy,TS,17.35206,78.54721,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500075,hyderabad,C.B.I.T,Ranga Reddy,TS,17.66122,78.51939,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500076,hyderabad,I.E.Nacharam,Medchal Malkajgiri,TS,17.42788,78.54981,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500077,hyderabad,Kattedan I.E,Ranga Reddy,TS,17.31592,78.43456,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500078,hyderabad,Nisa Hakimpet,Medchal Malkajgiri,TS,17.56344,78.53783,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500079,hyderabad,Hasthinapuram,Ranga Reddy,TS,17.3354,78.5373,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500080,hyderabad,Gandhinagar,Hyderabad,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500081,hyderabad,Cyberabad,Hyderabad,TS,17.44739,78.39625,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500082,hyderabad,I.M.Colony,Hyderabad,TS,17.42179,78.45497,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500083,hyderabad,Nagaram,Medchal Malkajgiri,TS,17.47392,78.51189,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500084,hyderabad,Kothaguda,Hyderabad,TS,17.47392,78.51189,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500085,hyderabad,Jntu Kukat Pally,Medchal Malkajgiri,TS,17.49322,78.39253,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500086,hyderabad,Don Bosco Nagar,Ranga Reddy,TS,17.34881,78.37689,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500087,hyderabad,JJ Nagar Colony,Medchal Malkajgiri,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500088,hyderabad,Samskruthi,Medchal Malkajgiri,TS,17.44003,78.65244,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500089,hyderabad,Manikonda,Ranga Reddy,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500090,hyderabad,Mallampet,Medchal Malkajgiri,TS,17.51764,78.33586,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500091,hyderabad,Himayat Sagar,Ranga Reddy,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500092,hyderabad,Boduppal,Medchal Malkajgiri,TS,17.42014,78.58447,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500093,hyderabad,Vikasnagar,Medchal Malkajgiri,TS,17.39314,78.47628,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500094,hyderabad,Sainikpuri,Hyderabad,TS,17.48786,78.64192,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500095,hyderabad,Putlibowli,Hyderabad,TS,17.39688,78.47725,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500096,hyderabad,Film Nagar,Hyderabad,TS,17.385,78.4867,https://github.com/harshvardhaniimi/IndiaPIN,typical
+500097,hyderabad,Meerpet,Ranga Reddy,TS,17.32753,78.53636,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500098,hyderabad,Medipalli,Medchal Malkajgiri,TS,17.40825,78.60156,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+500100,hyderabad,Kompally,Medchal Malkajgiri,TS,17.47392,78.51189,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520001,vijayawada,Wnchipet,Krishna,AP,16.52097,80.62017,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520002,vijayawada,Suryaraopet,Krishna,AP,16.51136,80.63038,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520003,vijayawada,Durgapuram,Krishna,AP,16.52044,80.62683,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520004,vijayawada,Gunadala,Krishna,AP,16.65256,80.75796,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520007,vijayawada,Kanuru,Krishna,AP,16.49504,80.67485,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520008,vijayawada,APUHS,Krishna,AP,16.51828,80.67025,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520010,vijayawada,Punnamathota,Krishna,AP,16.50494,80.63686,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520011,vijayawada,Lakshminagar,Krishna,AP,16.51017,80.63156,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520012,vijayawada,Ambapuram,Krishna,AP,16.53568,80.61226,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520013,vijayawada,Krishnalanka,Krishna,AP,16.50561,80.62325,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+520015,vijayawada,Azitnagar,Krishna,AP,16.53926,80.65065,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521001,vijayawada,Rajupet,Krishna,AP,16.19968,81.14489,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521002,vijayawada,K.P.Pur,Krishna,AP,16.19804,81.14153,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521003,vijayawada,Rudravaram,Krishna,AP,16.5062,80.648,https://github.com/harshvardhaniimi/IndiaPIN,typical
+521004,vijayawada,Krishna University,Krishna,AP,16.1369,81.09984,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521101,vijayawada,Roynagar,Krishna,AP,16.55255,80.79372,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521102,vijayawada,Kesarapalli,Krishna,AP,16.52362,80.77543,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521104,vijayawada,Velpuru,Krishna,AP,16.50825,80.74755,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521105,vijayawada,Koyyuru,Krishna,AP,16.65,80.97,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521106,vijayawada,Kanumolu,Krishna,AP,16.57,80.96271,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521107,vijayawada,Savaragudem,Krishna,AP,16.66045,80.78872,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521108,vijayawada,Enikepadu,Krishna,AP,16.51744,80.69329,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521109,vijayawada,Ampapuram,Krishna,AP,16.59053,80.89229,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521110,vijayawada,Veleru,Krishna,AP,16.63386,80.91484,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521111,vijayawada,Morsapudi,Krishna,AP,16.73885,80.89762,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521120,vijayawada,Nagayalanka,Krishna,AP,15.94775,80.91642,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521121,vijayawada,Avanigadda,Krishna,AP,16.02008,80.91556,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521122,vijayawada,Gandhikshetram,Krishna,AP,16.03069,80.929,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521126,vijayawada,Challapalli,Krishna,AP,16.11583,80.93156,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521130,vijayawada,Pedakallepalli,Krishna,AP,16.08228,80.98856,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521131,vijayawada,Lakshmipuram S.O (Krishna),Krishna,AP,16.78469,80.84986,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521132,vijayawada,Kodali,Krishna,AP,16.18367,80.90136,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521133,vijayawada,Ghantasala,Krishna,AP,16.16975,80.94636,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521134,vijayawada,Tadigadapa,Krishna,AP,16.42077,80.64651,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521135,vijayawada,Movva,Krishna,AP,16.22456,80.91503,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521136,vijayawada,K.P.Centre,Krishna,AP,16.36161,80.85231,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521137,vijayawada,Poranki,Krishna,AP,16.47919,80.70792,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521138,vijayawada,Pedasanagallu,Krishna,AP,16.30464,80.89817,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521139,vijayawada,Ganguru,Krishna,AP,16.46217,80.71697,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521148,vijayawada,Elamarru,Krishna,AP,16.39,80.92569,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521149,vijayawada,Guduru,Krishna,AP,16.21492,81.07783,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521150,vijayawada,Kaja,Krishna,AP,16.19894,81.00417,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521151,vijayawada,Gosala,Krishna,AP,16.4302,80.7592,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521153,vijayawada,Kolavennu,Krishna,AP,16.43214,80.79456,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521156,vijayawada,Nidumolu,Krishna,AP,16.25867,81.023,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521157,vijayawada,Pamarru Bazar,Krishna,AP,16.55253,80.90508,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521158,vijayawada,Nimmakuru,Krishna,AP,16.27031,80.99669,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521162,vijayawada,Polavaram(K),Krishna,AP,16.22825,80.96386,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521163,vijayawada,Devarapalli,Krishna,AP,16.33155,80.78855,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521164,vijayawada,Katuru,Krishna,AP,16.42175,80.85897,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521165,vijayawada,Vuyyuru,Krishna,AP,16.35824,80.83012,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521170,vijayawada,Damulur,Krishna,AP,16.82301,80.40391,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521175,vijayawada,Gandrai,Krishna,AP,16.90907,80.13521,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521178,vijayawada,Mangollu,Krishna,AP,16.85755,80.18712,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521180,vijayawada,Damuluru,Krishna,AP,16.64865,80.4002,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521181,vijayawada,Alluru,Krishna,AP,16.76951,80.45295,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521182,vijayawada,Popuru,Krishna,AP,16.66,80.22512,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521183,vijayawada,Eturu,Krishna,AP,16.65746,80.28773,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521184,vijayawada,Konduru,Krishna,AP,16.77676,80.33257,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521185,vijayawada,Keesara,Krishna,AP,16.73255,80.30776,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521190,vijayawada,Kannevidu,Krishna,AP,16.90301,80.25711,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521201,vijayawada,Nuzvid,Krishna,AP,16.78735,80.84993,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521202,vijayawada,APIIIT,Krishna,AP,16.78473,80.84,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521207,vijayawada,Balive,Krishna,AP,16.82,80.94194,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521211,vijayawada,Edara,Krishna,AP,16.68089,80.78367,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521212,vijayawada,Nunna,Krishna,AP,16.59378,80.72262,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521213,vijayawada,Lopudi,Krishna,AP,16.89,80.91,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521214,vijayawada,Chatrai,Krishna,AP,17.03,80.86,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521215,vijayawada,Kudapa,Krishna,AP,16.93422,80.74,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521225,vijayawada,Gollapudi,Krishna,AP,16.53986,80.57669,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521226,vijayawada,Repudi,Krishna,AP,16.88424,80.66943,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521227,vijayawada,Koduru,Krishna,AP,16.98511,80.65536,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521228,vijayawada,Ilaprolu,Krishna,AP,16.62724,80.56077,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521229,vijayawada,Atkuru,Krishna,AP,16.69385,80.5854,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521230,vijayawada,Koduru,Krishna,AP,16.77882,80.64601,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521231,vijayawada,JNNURM Colony,Krishna,AP,16.31,80.39,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521235,vijayawada,Rolupadu,Krishna,AP,17.06192,80.57276,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521241,vijayawada,Guntupalli,Krishna,AP,16.5831,80.55831,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521245,vijayawada,Akunuru,Krishna,AP,16.39711,80.81744,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521246,vijayawada,Hanumanthapuram,Krishna,AP,16.54401,80.86662,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521247,vijayawada,Iluru,Krishna,AP,16.26042,80.83906,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521250,vijayawada,Agniparru,Krishna,AP,16.27028,80.86838,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521256,vijayawada,Mantada,Krishna,AP,16.3562,80.89325,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521260,vijayawada,Tenneru,Krishna,AP,16.48619,80.83934,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521261,vijayawada,Mudunuru,Krishna,AP,16.41,80.90361,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521263,vijayawada,Vanapumala,Krishna,AP,16.44,80.95,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521286,vijayawada,Atkur,Krishna,AP,16.57746,80.84008,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521301,vijayawada,Gudivada,Krishna,AP,16.43,81.0,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521311,vijayawada,Vemanda,Krishna,AP,16.46019,80.89,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521312,vijayawada,Garapadu,Krishna,AP,16.52,80.89,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521320,vijayawada,Kruthivennu,Krishna,AP,16.3787,81.36062,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521321,vijayawada,Moparru,Krishna,AP,16.52,81.01,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521322,vijayawada,Tativarru,Krishna,AP,16.38,80.98,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521323,vijayawada,Moturu,Krishna,AP,16.45385,81.04824,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521324,vijayawada,Matlam,Krishna,AP,16.38,81.29,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521325,vijayawada,Guraza,Krishna,AP,16.43,81.11019,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521326,vijayawada,Unikili,Krishna,AP,16.5195,81.11,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521327,vijayawada,Tamirisa,Krishna,AP,16.51,81.04,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521328,vijayawada,Koduru,Krishna,AP,16.00861,81.03406,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521329,vijayawada,Urivi,Krishna,AP,16.41,81.18467,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521330,vijayawada,Nuzella,Krishna,AP,16.37384,81.03271,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521331,vijayawada,Kavutaram,Krishna,AP,16.33361,81.07625,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521332,vijayawada,Dokiparru,Krishna,AP,16.30044,81.05111,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521333,vijayawada,Atapaka,Krishna,AP,16.54887,81.21007,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521340,vijayawada,Kottada,Krishna,AP,16.58,81.29,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521343,vijayawada,Alluru,Krishna,AP,16.47689,81.22,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521344,vijayawada,Kondangi,Krishna,AP,16.47,81.335,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521345,vijayawada,Korlapadu,Krishna,AP,16.5075,81.15342,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521356,vijayawada,Gudlavalleru,Krishna,AP,16.3455,81.05192,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521366,vijayawada,Pedana,Krishna,AP,16.25386,81.1401,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521369,vijayawada,Munjuluru,Krishna,AP,16.31103,81.215,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521390,vijayawada,Addada,Krishna,AP,16.35336,80.96662,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521401,vijayawada,Nemali,Krishna,AP,16.99703,80.43508,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521402,vijayawada,Lingala,Krishna,AP,16.95891,80.26364,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521403,vijayawada,Arlapadu,Krishna,AP,16.99875,80.51991,https://github.com/harshvardhaniimi/IndiaPIN,quoted
+521456,vijayawada,VTPS,Krishna,AP,16.609,80.43514,https://github.com/harshvardhaniimi/IndiaPIN,quoted

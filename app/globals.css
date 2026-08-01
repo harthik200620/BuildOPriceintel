@@ -1,0 +1,332 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Alabaster
+   ─────────────────────────────────────────────────────────────────────────────
+   "Identity set down the way a site engineer sets down a boundary: with a thin,
+   certain line, measured twice, drawn once." — the bones of Drafted Ground,
+   rebuilt in glass.
+
+   Warm ivory is the ground. Light is the second material: every surface is a
+   pane held slightly above the page, lit along its top edge. Colour is still a
+   covenant — ONE copper accent, the colour of brick leaving the kiln, spent
+   once per view on the unit price and nowhere else. Its scarcity is its
+   authority.
+
+   Two rules that are engineering, not taste:
+
+   1. BLUR IS RATIONED, AND THE RULE IS "DOES ANYTHING MOVE BEHIND IT?".
+      `backdrop-filter` costs GPU on every repaint, and this page holds a
+      measured 200 ms keystroke-to-paint budget. Blurring every panel put it at
+      225 ms. Blur now belongs only to surfaces that content actually travels
+      under — the top bar, the search dropdown, the detail sheet and its scrim,
+      the compare tray. The filter rail and the vendor table sit over a static
+      canvas, so a blur there was invisible and cost real milliseconds: they
+      use .glass-card, which is the same look with no filter. Anything repeated
+      per result is .glass-card by definition.
+
+   2. LEGIBILITY OUTRANKS THE EFFECT. This is a page of prices. Dense data sits
+      on .glass-strong, and every foreground/background pair here was measured
+      against WCAG AA rather than eyeballed.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  --color-canvas:     #ece7de;
+  --color-ink:        #14161a;
+  --color-ink-2:      #474c54;
+  --color-ink-3:      #5d636c;
+  --color-accent:     #a8431b;
+  --color-accent-ink: #8a3413;
+
+  --color-fresh:  #276843;
+  --color-ageing: #8a5f10;
+  --color-stale:  #5d636c;
+
+  --font-display: var(--font-instrument-serif), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-ui: var(--font-inter-tight), "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-figure: var(--font-jetbrains-mono), "SF Mono", "Cascadia Mono", ui-monospace, Menlo, monospace;
+
+  --radius-glass: 14px;
+}
+
+:root {
+  /* Deeper than the panes on purpose. At #F7F5F1 the white glass was the same
+     value as the ground and every card read as flat paper — glass is only
+     legible as a *difference* in light. */
+  --canvas: #ece7de;
+  --canvas-warm: rgba(198, 142, 92, .30);
+  --canvas-cool: rgba(108, 130, 186, .24);
+
+  --glass:        rgba(255, 255, 255, .72);
+  --glass-strong: rgba(255, 255, 255, .86);
+  --glass-quiet:  rgba(255, 255, 255, .50);
+  --glass-border: rgba(255, 255, 255, .92);
+  --glass-hair:   rgba(22, 20, 18, .075);
+  --glass-shadow: 0 1px 2px rgba(28, 25, 22, .045), 0 12px 32px -16px rgba(28, 25, 22, .20);
+  --glass-shadow-lift: 0 2px 4px rgba(28, 25, 22, .06), 0 18px 44px -18px rgba(28, 25, 22, .22);
+
+  /* Measured against the worst case — the low-alpha tail of each pane, and
+     bare canvas where a label sits outside one. AA (4.5:1) on all three:
+       ink   #14161A  17.4 card · 16.8 glass · 12.6 canvas
+       ink-2 #474C54   8.3 card ·  8.0 glass ·  6.0 canvas
+       ink-3 #5D636C   5.6 card ·  5.6 glass ·  4.9 canvas
+     ink-3 started at #6C727B and failed at 4.49 on glass and 3.94 on canvas —
+     the classic light-glass failure, and exactly why the pairs get measured
+     rather than eyeballed. It carries the 10–11 px labels, so it is darker
+     than this palette would otherwise want. AA is in the brief. */
+  --ink:   #14161a;
+  --ink-2: #474c54;
+  --ink-3: #5d636c;
+
+  --rule:      rgba(22, 20, 18, .11);
+  --rule-soft: rgba(22, 20, 18, .06);
+
+  /* Copper. 5.8:1 on a pane, 4.9:1 on bare canvas — clears AA at badge sizes. */
+  --accent:      #a8431b;
+  --accent-lift: #c9561f;
+  --accent-ink:  #8a3413;
+  --accent-bg:   rgba(168, 67, 27, .075);
+
+  --fresh:  #276843;
+  --ageing: #8a5f10;
+  --stale:  #5d636c;
+
+  --radius: 14px;
+  --radius-pill: 999px;
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  /* The wash lives HERE, not on a ::before. A body background at z-index 0
+     paints straight over a ::before at z-index -1, which is why the blooms
+     were invisible and the ground read as flat card stock.
+     background-attachment: fixed anchors it to the viewport, so scrolling
+     never re-rasterises the gradient. */
+  background:
+    radial-gradient(1250px 820px at 6% -12%,  var(--canvas-warm), transparent 55%),
+    radial-gradient(1100px 760px at 98% 104%, var(--canvas-cool), transparent 54%),
+    radial-gradient(820px 560px at 58% 34%,   rgba(255,255,255,.72), transparent 64%),
+    var(--canvas);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv05" 1, "ss01" 1;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── the panes ────────────────────────────────────────────────────────────────
+   .glass        blurred. Persistent chrome ONLY — see rule 1 above.
+   .glass-card   identical look, no filter. Anything repeated per result.
+   .glass-strong dense data; higher opacity so figures stay crisp.
+   ─────────────────────────────────────────────────────────────────────────── */
+.glass,
+.glass-card,
+.glass-strong {
+  border: 1px solid var(--glass-hair);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-border);
+}
+.glass        { background: linear-gradient(168deg, rgba(255,255,255,.86), rgba(255,255,255,.62) 62%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.glass-strong { background: linear-gradient(168deg, rgba(255,255,255,.94), rgba(255,255,255,.80) 62%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+/* Same fall of light, no filter. Anything repeated per result uses this. */
+.glass-card   { background: linear-gradient(168deg, rgba(255,255,255,.95), rgba(255,255,255,.78) 68%); }
+
+.glass-quiet {
+  background: var(--glass-quiet);
+  border: 1px solid var(--glass-hair);
+  border-radius: var(--radius);
+}
+
+/* Cards lift toward the light rather than growing a heavier shadow. */
+@media (prefers-reduced-motion: no-preference) {
+  .lift { transition: box-shadow .18s cubic-bezier(.2,.7,.3,1), transform .18s cubic-bezier(.2,.7,.3,1); }
+  .lift:hover { transform: translateY(-2px); box-shadow: var(--glass-shadow-lift), inset 0 1px 0 var(--glass-border); }
+}
+
+/* ── figures ──────────────────────────────────────────────────────────────────
+   Every figure is tabular. Columns of prices must align to the decimal.
+   ─────────────────────────────────────────────────────────────────────────── */
+.fig  { font-family: var(--font-figure); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+.display { font-family: var(--font-display); font-weight: 400; letter-spacing: -.01em; }
+
+/* ── the hairline ─────────────────────────────────────────────────────────── */
+.rule        { border-color: var(--rule); }
+.rule-t      { border-top: 1px solid var(--rule); }
+.rule-b      { border-bottom: 1px solid var(--rule); }
+.rule-l      { border-left: 1px solid var(--rule); }
+.rule-r      { border-right: 1px solid var(--rule); }
+.rule-soft-b { border-bottom: 1px solid var(--rule-soft); }
+
+/* ── blueprint line-art, used sparingly ───────────────────────────────────── */
+.blueprint {
+  background-image:
+    linear-gradient(to right, var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule-soft) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+}
+/* The corner tick — a survey mark, not decoration. Kept from Drafted Ground. */
+.corner-tick { position: relative; }
+.corner-tick::before,
+.corner-tick::after {
+  content: ""; position: absolute; width: 8px; height: 8px; pointer-events: none;
+  border-color: var(--accent); opacity: .34;
+}
+.corner-tick::before { top: 6px;    left: 6px;  border-top: 1px solid; border-left: 1px solid; }
+.corner-tick::after  { bottom: 6px; right: 6px; border-bottom: 1px solid; border-right: 1px solid; }
+
+/* ── focus: visible, always ───────────────────────────────────────────────── */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ── motion: purposeful, 150–200 ms ───────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .anim      { transition: background-color .16s ease, border-color .16s ease, color .16s ease, opacity .16s ease, box-shadow .16s ease, transform .18s cubic-bezier(.2,.7,.3,1); }
+  .anim-fast { transition: opacity .12s ease, transform .12s ease; }
+  @keyframes sheet-in { from { transform: translateX(18px); opacity: 0 } to { transform: none; opacity: 1 } }
+  @keyframes fade-up  { from { transform: translateY(5px);  opacity: 0 } to { transform: none; opacity: 1 } }
+  @keyframes tray-in  { from { transform: translateY(100%) } to { transform: none } }
+  .sheet-in { animation: sheet-in .2s cubic-bezier(.2,.7,.3,1) both; }
+  .fade-up  { animation: fade-up .16s ease both; }
+  .tray-in  { animation: tray-in .2s cubic-bezier(.2,.7,.3,1) both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ── skeletons: match the final layout exactly, and shimmer as glass ──────── */
+@keyframes shimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+.skel {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.42) 25%,
+    rgba(255,255,255,.86) 37%,
+    rgba(255,255,255,.42) 63%);
+  background-color: rgba(22,20,18,.045);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+  border-radius: 8px;
+}
+
+/* ── controls ─────────────────────────────────────────────────────────────── */
+.field {
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-hair);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 var(--glass-border);
+  color: var(--ink);
+  font: inherit;
+}
+.field::placeholder { color: var(--ink-3); }
+.field:focus { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+
+.seg {
+  border: 1px solid var(--glass-hair);
+  border-radius: 10px;
+  background: var(--glass-quiet);
+  box-shadow: inset 0 1px 0 var(--glass-border);
+  overflow: hidden;
+}
+.seg button { color: var(--ink-2); background: transparent; }
+.seg button[aria-pressed="true"] {
+  background: var(--ink);
+  color: #fbfaf8;
+}
+
+.chip {
+  border: 1px solid var(--glass-hair);
+  border-radius: var(--radius-pill);
+  background: var(--glass-strong);
+  box-shadow: inset 0 1px 0 var(--glass-border);
+  color: var(--ink-2);
+}
+.chip:hover { border-color: color-mix(in srgb, var(--accent) 34%, transparent); color: var(--ink); }
+.chip[aria-pressed="true"] {
+  background: var(--ink);
+  color: #fbfaf8;
+  border-color: var(--ink);
+}
+
+/* Facets disable rather than vanish — a struck value tells the buyer the
+   catalogue does not go there; a vanished one teaches them nothing. */
+.facet-val[data-disabled="true"] {
+  color: var(--ink-3);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  cursor: not-allowed;
+  opacity: .72;
+}
+
+/* ── freshness dot ────────────────────────────────────────────────────────── */
+.dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.dot-green { background: var(--fresh); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fresh) 16%, transparent); }
+.dot-amber { background: var(--ageing); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ageing) 16%, transparent); }
+.dot-grey  { background: var(--stale); }
+
+/* ── the accent, spent once ───────────────────────────────────────────────────
+   The hero price is the one place colour is allowed to carry meaning, so it
+   gets the display face and a slight vertical gradient — ink that caught the
+   light, not a flat fill.
+   ─────────────────────────────────────────────────────────────────────────── */
+.hero-figure {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.022em;
+  background: linear-gradient(175deg, var(--accent-lift) 4%, var(--accent) 58%, var(--accent-ink) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Forced-colours and print need a real colour, not a clipped gradient. */
+@media (forced-colors: active), print {
+  .hero-figure { background: none; color: var(--accent); -webkit-text-fill-color: currentColor; }
+}
+
+/* A stale price is struck to secondary weight — never presented as current. */
+.price-stale {
+  color: var(--ink-3);
+  background: none;
+  -webkit-text-fill-color: var(--ink-3);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+/* ── provenance badges ────────────────────────────────────────────────────── */
+.prov {
+  font-size: 9.5px; letter-spacing: .085em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: var(--radius-pill);
+  border: 1px solid var(--rule);
+  background: var(--glass-quiet);
+  color: var(--ink-3); white-space: nowrap;
+}
+.prov-derived { border-color: color-mix(in srgb, var(--ink-3) 42%, transparent); }
+.prov-typical { border-color: color-mix(in srgb, var(--ageing) 55%, transparent); color: var(--ageing); background: color-mix(in srgb, var(--ageing) 8%, transparent); }
+.prov-unknown { border-style: dashed; }
+
+/* ── scroll ───────────────────────────────────────────────────────────────── */
+.scroll-thin { scrollbar-width: thin; scrollbar-color: rgba(22,20,18,.22) transparent; }
+.scroll-thin::-webkit-scrollbar { width: 10px; height: 10px; }
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(22,20,18,.20); border-radius: 99px;
+  border: 3px solid transparent; background-clip: content-box;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover { background: rgba(22,20,18,.32); background-clip: content-box; }
+.scroll-thin::-webkit-scrollbar-track { background: transparent; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Wide content scrolls inside its own container; the page body never does. */
+.x-scroll { overflow-x: auto; }
+
+::selection { background: var(--accent-bg); color: var(--accent-ink); }

@@ -1,0 +1,532 @@
+{
+  "category": "Cement",
+  "category_path": "commodity.cement",
+  "canonical_unit": "bag",
+  "canonical_unit_note": "50 kg bag. Also priced per tonne at 20 bags/tonne — the price filter bands on ₹/bag delivered, never on ₹/tonne, or a jumbo bag and a 50 kg bag land in the same band.",
+  "result_count": 637,
+  "counts_are_illustrative": false,
+  "counts_note": "Counts measured from data/buildo.db on 2026-08-01 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "regions": [
+    "hyderabad",
+    "vijayawada"
+  ],
+  "lead_filter": "cement_type",
+  "lead_reason": "OPC and PPC are not substitutes — the buyer's job (slab vs plaster) decides the chemistry before anything else does, and it eliminates more of the catalogue than any other single choice.",
+  "panel_regime": "20-100 products — 7 primary filters",
+  "filters": [
+    {
+      "id": "cement_type",
+      "facet_key": "attrs.cement_type",
+      "label": "Type",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 10,
+      "source": "offer.spec.cement_type",
+      "why": "The genuine first decision. PPC is fly-ash blended and slower-setting; OPC 53 is the slab cement. Choosing wrong costs strength or money.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "OPC",
+          "sublabel": "ordinary portland",
+          "unit": null,
+          "count": 277,
+          "reveals": [
+            "opc_grade"
+          ]
+        },
+        {
+          "label": "PPC",
+          "sublabel": "portland pozzolana, fly-ash blended",
+          "unit": null,
+          "count": 326
+        },
+        {
+          "label": "PSC",
+          "sublabel": "portland slag",
+          "unit": null,
+          "count": 22
+        },
+        {
+          "label": "White cement",
+          "sublabel": "decorative, IS 8042",
+          "unit": null,
+          "count": 11,
+          "disabled": true
+        },
+        {
+          "label": "Sulphate resisting",
+          "sublabel": "SRC, aggressive soils",
+          "unit": null,
+          "count": 1,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "opc_grade",
+      "facet_key": "attrs.opc_grade",
+      "label": "Grade",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 20,
+      "source": "offer.spec.opc_grade",
+      "why": "Only OPC carries a grade in this sense. Showing an empty grade filter on a PPC listing is the classic flat-panel mistake.",
+      "note": "IS 269:2015 consolidated the older grade-specific standards IS 8112 (43) and IS 12269 (53) into one.",
+      "depends_on": {
+        "filter": "cement_type",
+        "value": "OPC"
+      },
+      "visibility": "conditional",
+      "default_open": true,
+      "values": [
+        {
+          "label": "53 grade",
+          "sublabel": "RCC, slabs, columns",
+          "unit": "N/mm²",
+          "count": 183
+        },
+        {
+          "label": "43 grade",
+          "sublabel": "general construction, masonry",
+          "unit": "N/mm²",
+          "count": 129
+        },
+        {
+          "label": "33 grade",
+          "sublabel": "plastering, non-structural",
+          "unit": "N/mm²",
+          "count": 8,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "brand",
+      "facet_key": "product.brand",
+      "label": "Brand",
+      "cluster": "commercial",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 30,
+      "source": "product.brand",
+      "why": "Brand sits above price here, against the usual order. Cement is the most brand-loyal category in Indian construction and a large share of buyers start with the name, not the spec.",
+      "note": "Ordered by result count, not alphabetically. Search-within-facet above 12 brands. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "UltraTech",
+          "count": 41
+        },
+        {
+          "label": "Bangur",
+          "count": 33
+        },
+        {
+          "label": "JSW",
+          "count": 33
+        },
+        {
+          "label": "KCP",
+          "count": 33
+        },
+        {
+          "label": "Ambuja",
+          "count": 31
+        },
+        {
+          "label": "Bharathi",
+          "count": 29
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "price_per_bag",
+      "facet_key": "price_current.normalised_paise",
+      "label": "Price per bag, delivered",
+      "cluster": "commercial",
+      "control": "radio",
+      "type": "range",
+      "sort_order": 40,
+      "source": "price_current.normalised_paise WHERE normalised_unit='bag'",
+      "why": "Bands are on the delivered ₹/bag, not the seller's ex-GST quote — a buyer who filters 'under ₹350' and receives a ₹340 bag with ₹40 of freight never trusts the filter again.",
+      "note": "Bands are derived from the actual in-zone distribution at reconcile time, not from round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Under ₹350",
+          "unit": "₹/bag delivered",
+          "count": 156
+        },
+        {
+          "label": "₹350 – ₹380",
+          "unit": "₹/bag delivered",
+          "count": 146
+        },
+        {
+          "label": "₹380 – ₹420",
+          "unit": "₹/bag delivered",
+          "count": 170
+        },
+        {
+          "label": "Over ₹420",
+          "unit": "₹/bag delivered",
+          "count": 165
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "pack_size",
+      "facet_key": "product.pack_size",
+      "label": "Pack size",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 50,
+      "source": "product.pack_size_kg",
+      "why": "Bulk changes the entire price basis. A 1 MT jumbo and a 50 kg bag in one price band is the basis error this engine exists to remove.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "50 kg bag",
+          "sublabel": "standard",
+          "unit": "kg",
+          "count": 616
+        },
+        {
+          "label": "25 kg bag",
+          "unit": "kg",
+          "count": 19,
+          "disabled": true
+        },
+        {
+          "label": "1 MT jumbo",
+          "unit": "tonne",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Bulk tanker",
+          "sublabel": "priced per tonne",
+          "unit": "tonne",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "bulk_slab",
+      "facet_key": "offer.bulk_slabs",
+      "label": "Order quantity",
+      "cluster": "commercial",
+      "control": "radio",
+      "type": "single",
+      "sort_order": 60,
+      "source": "offer.bulk_slabs[].min_qty",
+      "why": "A contractor and a homeowner are different buyers on the same page. Selecting the slab shows the price that actually applies instead of making them compute it per card.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "1 – 10 bags",
+          "unit": "bag",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "11 – 50 bags",
+          "unit": "bag",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "51 – 200 bags",
+          "unit": "bag",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "200+ bags",
+          "unit": "bag",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `offer.bulk_slabs`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "bis",
+      "facet_key": "offer.cert_state",
+      "label": "BIS licence",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 70,
+      "source": "offer.cert_state",
+      "why": "Cement is covered by a quality-control order that makes a valid BIS licence a legal condition of sale — so this is not a preference. But almost no listing publishes the licence number, and 'not published by this seller' is a different claim from 'not licensed'.",
+      "note": "Default off. Three honest states, never collapsed into a pass/fail.",
+      "default_state": "off",
+      "default_open": false,
+      "visibility": "primary",
+      "needs_verification": "The Cement (Quality Control) Order 2003, S.O. 191(E) dated 17 Feb 2003 is named in a secondary source (spec §D8.1a) and has not been read against the gazette. The QCO hard filter in this build fires only on positive evidence of an EXPIRED licence, never on a listing that simply does not quote one — see the demo-simplification note in the production prompt.",
+      "values": [
+        {
+          "label": "Licence number on file",
+          "sublabel": "CM/L-… captured from source",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "BIS-licensed brand, licence not quoted",
+          "sublabel": "manufacturer holds a licence; this listing does not publish it",
+          "count": 598
+        },
+        {
+          "label": "Not declared",
+          "sublabel": "no evidence either way",
+          "count": 39
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "arrives",
+      "facet_key": "serviceability.lead_time_days",
+      "label": "Arrives",
+      "cluster": "logistics",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 80,
+      "source": "serviceability.lead_time_days (computed per pincode)",
+      "why": "Computed per pincode, not stored on the product — the same SKU is 'tomorrow' in Kukatpally and 'within a week' in a district town, so this facet cannot be cached without the pincode in the key.",
+      "note": "Scheduled delivery carries equal weight here. Construction buys are staged — cement at footing stage, months before finishing — so a chosen date is often the preferred option, not a lesser one.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Tomorrow",
+          "unit": "days",
+          "count": 146,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "days",
+          "count": 433
+        },
+        {
+          "label": "Within a week",
+          "unit": "days",
+          "count": 58,
+          "disabled": true
+        },
+        {
+          "label": "Scheduled delivery",
+          "sublabel": "you pick the date",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "application",
+      "facet_key": "attrs.application",
+      "label": "Application",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 90,
+      "source": "offer.spec.application",
+      "why": "Many buyers shop by job rather than by chemistry. Folded rather than primary because it substantially restates Type once Type is chosen.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "RCC & slab",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Plastering",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Masonry",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Flooring",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Waterproof works",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "`attrs.application` is populated on 130 of 637 listings in hyderabad, but as uncontrolled seller text (\"Construction\", \"For Asbestos Pipes, RCC Beams And  RCC S\", \"For Construction\") which matches none of this filter's values. The gap is normalisation, not collection: shipped disabled rather than deleted, and rather than mapped by guess.",
+      "no_data_kind": "unnormalised"
+    },
+    {
+      "id": "standard",
+      "facet_key": "product.cert_standards",
+      "label": "IS standard",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 100,
+      "source": "product.cert_standards[]",
+      "why": "Professional buyers specify by IS code. Folded because the standard is fully implied by Type for most of the catalogue.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "IS 269",
+          "sublabel": "OPC",
+          "count": 278
+        },
+        {
+          "label": "IS 1489",
+          "sublabel": "PPC, fly-ash based",
+          "count": 326
+        },
+        {
+          "label": "IS 455",
+          "sublabel": "PSC",
+          "count": 22
+        },
+        {
+          "label": "IS 8042",
+          "sublabel": "white cement",
+          "count": 11,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "gst_treatment",
+      "facet_key": "offer.gst_treatment",
+      "label": "Seller quotes price",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 110,
+      "source": "offer.gst_treatment",
+      "why": "Not a filter any competitor offers. A GSTIN holder claiming input credit needs to know which sellers quote ex-GST; ranking is always on the landed figure regardless of what the seller quoted.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Inclusive of GST",
+          "count": 45
+        },
+        {
+          "label": "Exclusive of GST",
+          "sublabel": "18%, HSN 2523",
+          "count": 592,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "price_freshness",
+      "facet_key": "price_current.freshness_state",
+      "label": "Price verified",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 120,
+      "source": "price_current.priced_as_of",
+      "why": "Kept quiet and available rather than prominent. Most buyers will not touch it; the professional buyer who does will notice immediately that no competitor timestamps a price at all.",
+      "note": "Cement is volatility class V0 — a 24 h SLA, because the market moved ₹15–20/bag in one month.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Verified today",
+          "unit": "hours",
+          "count": 637,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Within a week",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `price_current.freshness_state`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "country_of_origin",
+      "facet_key": "product.country_of_origin",
+      "label": "Country of origin",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 130,
+      "source": "product.country_of_origin",
+      "why": "Built as a proper indexed, sortable facet rather than page text because LMPC Rule 6(10A) (G.S.R. 128(E), compliance date moved to 2027-07-01) requires origin to be searchable and sortable, and a text field cannot satisfy that.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "India",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Not published by seller",
+          "count": 637
+        }
+      ],
+      "data_backed": true
+    }
+  ],
+  "omitted": [
+    {
+      "filter": "In stock",
+      "reason": "Moved to a toggle above the results rather than a rail block — it is a single binary and the rail slot is worth more to a spec filter. Default on, one click to undo."
+    },
+    {
+      "filter": "Colour",
+      "reason": "Grey in every OPC/PPC/PSC listing; white cement is already its own Type value. One meaningful value is noise."
+    },
+    {
+      "filter": "Seller rating",
+      "reason": "Held back until there is a real ratings corpus. B2B directory listings carry sparse ratings, and a filter that returns nothing makes the marketplace look empty."
+    },
+    {
+      "filter": "Discount / % off MRP",
+      "reason": "Cement strike-through pricing in this market is computed against an inflated reference. A discount facet built on a manufactured number is worse than none."
+    }
+  ],
+  "reconciled_at": "2026-08-01T11:39:34.128Z",
+  "reconciled_region": "hyderabad"
+}

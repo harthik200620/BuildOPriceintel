@@ -1,0 +1,511 @@
+{
+  "category": "TMT steel",
+  "category_path": "commodity.steel.tmt",
+  "canonical_unit": "kg",
+  "canonical_unit_note": "₹/kg. Also quoted per tonne and per 12 m rod — the rod↔kg conversion needs unit_weight_kg per diameter (8 mm ≈ 4.74 kg, 10 mm ≈ 7.40, 12 mm ≈ 10.66 per 12 m rod), which is a table, never arithmetic.",
+  "result_count": 32,
+  "counts_are_illustrative": false,
+  "counts_note": "Counts measured from data/buildo.db on 2026-08-01 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "regions": [
+    "hyderabad",
+    "vijayawada"
+  ],
+  "lead_filter": "diameter_mm",
+  "lead_reason": "The number on the bar bending schedule. A buyer arrives holding a drawing that says 12 mm, and one click eliminates most of the catalogue.",
+  "panel_regime": "20-100 products — 8 primary filters",
+  "filters": [
+    {
+      "id": "diameter_mm",
+      "facet_key": "attrs.diameter_mm",
+      "label": "Diameter",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 10,
+      "source": "offer.spec.diameter_mm",
+      "why": "The single spec every rebar buyer arrives with. Nothing else is decidable until it is set.",
+      "note": "Top six by count shown; 6, 28, 32, 36, 40 mm behind 'show all'.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "8 mm",
+          "sublabel": "0.395 kg/m",
+          "unit": "mm",
+          "count": 6
+        },
+        {
+          "label": "10 mm",
+          "sublabel": "0.617 kg/m",
+          "unit": "mm",
+          "count": 7
+        },
+        {
+          "label": "12 mm",
+          "sublabel": "0.888 kg/m",
+          "unit": "mm",
+          "count": 7
+        },
+        {
+          "label": "16 mm",
+          "sublabel": "1.578 kg/m",
+          "unit": "mm",
+          "count": 7
+        },
+        {
+          "label": "20 mm",
+          "sublabel": "2.466 kg/m",
+          "unit": "mm",
+          "count": 2
+        },
+        {
+          "label": "25 mm",
+          "sublabel": "3.854 kg/m",
+          "unit": "mm",
+          "count": 2
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "grade",
+      "facet_key": "attrs.grade",
+      "label": "Grade",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 20,
+      "source": "offer.spec.grade",
+      "why": "A safety property, not a preference. Fe 500D is not 'a bit better than' Fe 500 — the D denotes controlled ductility for seismic performance, so the label spells it out rather than leaving the suffix cryptic.",
+      "note": "Per IS 1786. Never sorted by popularity and never folded.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Fe 500",
+          "sublabel": "general RCC",
+          "unit": null,
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Fe 500D",
+          "sublabel": "high ductility, seismic zones",
+          "unit": null,
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Fe 550",
+          "sublabel": "higher strength",
+          "unit": null,
+          "count": 9
+        },
+        {
+          "label": "Fe 550D",
+          "sublabel": "high strength + ductility",
+          "unit": null,
+          "count": 9
+        },
+        {
+          "label": "Fe 415",
+          "sublabel": "legacy, low-rise",
+          "unit": null,
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "brand",
+      "facet_key": "product.brand",
+      "label": "Brand",
+      "cluster": "commercial",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 30,
+      "source": "product.brand",
+      "why": "Like cement, brand legitimately climbs above price in TMT — the primary/secondary producer distinction is real and buyers ask about it by name.",
+      "note": "Ordered by result count. Search-within-facet above 12 brands. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "AF Star",
+          "count": 5
+        },
+        {
+          "label": "Vizag",
+          "count": 5
+        },
+        {
+          "label": "MS Life Steel",
+          "count": 4
+        },
+        {
+          "label": "Shree TMT",
+          "count": 4
+        },
+        {
+          "label": "Sugna",
+          "count": 4
+        },
+        {
+          "label": "Vinayak",
+          "count": 4
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "price_per_kg",
+      "facet_key": "price_current.normalised_paise",
+      "label": "Price per kg, delivered",
+      "cluster": "commercial",
+      "control": "radio",
+      "type": "range",
+      "sort_order": 40,
+      "source": "price_current.normalised_paise WHERE normalised_unit='kg'",
+      "why": "₹/kg is the only basis on which a rod price and a tonne price are the same kind of number. Bands are on the delivered figure.",
+      "note": "Bands derived from the actual in-zone distribution at reconcile time. The observed national spread runs ₹56/kg (Raipur) to ₹74/kg (Mysore). Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Under ₹49",
+          "unit": "₹/kg delivered",
+          "count": 9
+        },
+        {
+          "label": "₹49 – ₹51",
+          "unit": "₹/kg delivered",
+          "count": 8
+        },
+        {
+          "label": "₹51 – ₹54",
+          "unit": "₹/kg delivered",
+          "count": 8
+        },
+        {
+          "label": "Over ₹54",
+          "unit": "₹/kg delivered",
+          "count": 7
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "producer_type",
+      "facet_key": "product.producer_type",
+      "label": "Producer",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 50,
+      "source": "product.producer_type",
+      "why": "Surfaced honestly rather than hidden. Secondary steel is cheaper and legitimately used, but a buyer comparing a ₹52/kg bar against a ₹68/kg bar deserves to know why they differ.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Primary producer",
+          "sublabel": "integrated steel plant",
+          "count": 5
+        },
+        {
+          "label": "Secondary producer",
+          "sublabel": "induction/re-rolling route",
+          "count": 27
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "bulk_slab",
+      "facet_key": "offer.bulk_slabs",
+      "label": "Order quantity",
+      "cluster": "commercial",
+      "control": "radio",
+      "type": "single",
+      "sort_order": 60,
+      "source": "offer.bulk_slabs[].min_qty",
+      "why": "Steel slabs move the ₹/kg materially and every trade buyer knows their tier. JSW Neosteel publishes free delivery at ≥1 MT, which is a slab boundary with a real freight consequence.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Under 500 kg",
+          "unit": "kg",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "0.5 – 2 tonne",
+          "unit": "tonne",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "2 – 10 tonne",
+          "unit": "tonne",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "10 tonne+",
+          "unit": "tonne",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `offer.bulk_slabs`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "bis",
+      "facet_key": "offer.cert_state",
+      "label": "BIS licence",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 70,
+      "source": "offer.cert_state",
+      "why": "Deformed bars to IS 1786 are under a mandatory certification regime, so this is a legal question rather than a preference — but a listing that omits the licence number is not evidence that the mill lacks one.",
+      "note": "Default off. Same three honest states as cement.",
+      "default_state": "off",
+      "default_open": false,
+      "visibility": "primary",
+      "needs_verification": "Spec §D8.1a records IS 1786 rebar as confirmed mandatory but could not identify the specific Quality Control Order number and date. Read the BIS QCO index before treating this as settled. The hard filter in this build fires only on positive evidence of an EXPIRED licence.",
+      "values": [
+        {
+          "label": "Licence number on file",
+          "sublabel": "CM/L-… captured from source",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "BIS-licensed brand, licence not quoted",
+          "sublabel": "mill holds a licence; this listing does not publish it",
+          "count": 32
+        },
+        {
+          "label": "Not declared",
+          "sublabel": "no evidence either way",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "arrives",
+      "facet_key": "serviceability.lead_time_days",
+      "label": "Arrives",
+      "cluster": "logistics",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 80,
+      "source": "serviceability.lead_time_days (computed per pincode)",
+      "why": "Computed per pincode from the freight model, not stored on the product.",
+      "note": "Steel is delivered by 6-tyre or 10-tyre truck above 2 t, which changes both the ETA and the freight band.",
+      "default_open": true,
+      "visibility": "primary",
+      "values": [
+        {
+          "label": "Tomorrow",
+          "unit": "days",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "days",
+          "count": 32
+        },
+        {
+          "label": "Within a week",
+          "unit": "days",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Scheduled delivery",
+          "sublabel": "you pick the date",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "corrosion_resistance",
+      "facet_key": "attrs.corrosion_resistance",
+      "label": "Corrosion resistance",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 90,
+      "source": "offer.spec.corrosion_resistance",
+      "why": "A genuine decision on the AP coast and largely irrelevant inland. Folded rather than cut, because when it matters it matters a great deal.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Plain",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "CRS",
+          "sublabel": "corrosion resistant",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Epoxy coated",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": false,
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.corrosion_resistance`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
+    },
+    {
+      "id": "length",
+      "facet_key": "attrs.length_m",
+      "label": "Length",
+      "cluster": "spec",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 100,
+      "source": "offer.spec.length_m",
+      "why": "Cut-to-length changes freight and site wastage. Folded because 12 m standard dominates the catalogue.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "12 m standard",
+          "unit": "m",
+          "count": 32
+        },
+        {
+          "label": "Cut to length",
+          "unit": "m",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "gst_treatment",
+      "facet_key": "offer.gst_treatment",
+      "label": "Seller quotes price",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 110,
+      "source": "offer.gst_treatment",
+      "why": "Steel is quoted ex-works ex-GST by convention — Tata Nexarc publishes 'Ex-yard … GST, Packaging, Loading, Freight charges are not included'. Making that visible is the point of the engine.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Inclusive of GST",
+          "count": 32
+        },
+        {
+          "label": "Exclusive of GST",
+          "sublabel": "18%, HSN 7213/7214",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true
+    },
+    {
+      "id": "price_freshness",
+      "facet_key": "price_current.freshness_state",
+      "label": "Price verified",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 120,
+      "source": "price_current.priced_as_of",
+      "why": "TMT moved +34.5% trough-to-peak in six months. A 30-day-old steel price is wrong by up to 11%, which on a ₹28 L cart is ₹45–55k of error — so freshness is a substantive filter here, not a curiosity.",
+      "note": "TMT is volatility class V0 — a 24 h SLA.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "Verified today",
+          "unit": "hours",
+          "count": 32,
+          "disabled": true
+        },
+        {
+          "label": "Within 3 days",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Within a week",
+          "unit": "hours",
+          "count": 0,
+          "disabled": true
+        }
+      ],
+      "data_backed": true,
+      "no_data_reason": "No collected listing in hyderabad populates `price_current.freshness_state`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent."
+    },
+    {
+      "id": "country_of_origin",
+      "facet_key": "product.country_of_origin",
+      "label": "Country of origin",
+      "cluster": "trust",
+      "control": "checkbox",
+      "type": "multi",
+      "sort_order": 130,
+      "source": "product.country_of_origin",
+      "why": "Indexed and sortable from day one — LMPC Rule 6(10A) makes this a schema decision, not a UI decision.",
+      "visibility": "more",
+      "default_open": false,
+      "values": [
+        {
+          "label": "India",
+          "count": 0,
+          "disabled": true
+        },
+        {
+          "label": "Not published by seller",
+          "count": 32
+        }
+      ],
+      "data_backed": true
+    }
+  ],
+  "omitted": [
+    {
+      "filter": "In stock",
+      "reason": "Moved to a toggle above the results. Single binary, and the rail slot is worth more to grade or diameter."
+    },
+    {
+      "filter": "Standard (IS 1786)",
+      "reason": "One value across the entire category — a filter that eliminates nothing. Folded into the page's line of category truth instead."
+    },
+    {
+      "filter": "Weight per metre",
+      "reason": "Fully determined by diameter, so it would split the result set twice for one decision. Printed on the card instead, so a buyer can convert a rod count into a tonnage."
+    },
+    {
+      "filter": "Seller rating",
+      "reason": "Held back until there is a real ratings corpus."
+    }
+  ],
+  "reconciled_at": "2026-08-01T11:39:34.183Z",
+  "reconciled_region": "hyderabad"
+}

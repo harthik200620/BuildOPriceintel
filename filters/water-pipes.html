@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Water pipes — filter tree</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#FCFBF9;--tint:#F5F2EE;--ink:#171310;--ink60:#6A625B;--ink40:#9C948C;
+--hair:#E6E1DA;--hair2:#F0ECE6;--terra:#C4552D;--terra-t:#F7E9E2;--green:#2F6B4F;
+--amber:#9A6B14;--amber-t:#FBF2E0;
+--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;
+--mono:'SF Mono',Menlo,Consolas,monospace}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;
+line-height:1.6;-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;padding:44px 40px 120px}
+h1{font-family:Georgia,serif;font-size:38px;font-weight:400;letter-spacing:-.02em;
+line-height:1.15;margin-bottom:10px}
+h2{font-family:Georgia,serif;font-size:25px;font-weight:400;letter-spacing:-.015em;
+margin-bottom:8px}
+.eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.15em;color:var(--terra);
+font-weight:700;margin-bottom:10px}
+.sub{color:var(--ink60);max-width:74ch;margin-bottom:16px;font-size:14px}
+section{padding:38px 0;border-top:1px solid var(--hair)}
+header{padding-bottom:26px}
+.meta{display:flex;gap:30px;flex-wrap:wrap;margin-top:16px;padding:14px 18px;
+background:var(--tint);border:1px solid var(--hair);border-radius:7px}
+.meta div{font-size:12.5px;color:var(--ink60)}
+.meta b{display:block;font-size:17px;color:var(--ink);font-weight:600;
+letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.illus{margin-top:12px;padding:9px 14px;background:var(--amber-t);
+border-left:3px solid var(--amber);border-radius:0 4px 4px 0;font-size:12.5px;
+color:var(--amber)}
+.leadbox{margin-top:14px;padding:13px 17px;background:var(--terra-t);
+border-left:3px solid var(--terra);border-radius:0 5px 5px 0}
+.leadbox .t{font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+font-weight:700;color:var(--terra);margin-bottom:3px}
+.leadbox p{font-size:13.5px;color:var(--ink)}
+
+.split{display:grid;grid-template-columns:352px 1fr;gap:38px;align-items:start}
+@media(max-width:1000px){.split{grid-template-columns:1fr}}
+.rail{background:#fff;border:1px solid var(--hair);border-radius:9px;padding:24px 22px;
+box-shadow:0 1px 2px rgba(23,19,16,.04),0 8px 24px rgba(23,19,16,.05)}
+.railh{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--ink40);
+font-weight:700;padding-bottom:14px;border-bottom:1px solid var(--hair);margin-bottom:6px}
+.clus{font-size:9px;text-transform:uppercase;letter-spacing:.16em;color:var(--terra);
+font-weight:700;margin:20px 0 4px;padding-top:12px;border-top:1px dashed var(--hair)}
+.clus:first-of-type{border-top:none;padding-top:0;margin-top:14px}
+.f{margin-bottom:17px}
+.f.sub{margin-left:11px;padding-left:12px;border-left:2px solid var(--terra-t)}
+.fh{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink60);
+font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cond,.offb,.lead{font-size:8.5px;letter-spacing:.05em;padding:1.5px 6px;border-radius:3px;
+text-transform:none;font-weight:600}
+.cond{background:var(--terra-t);color:var(--terra)}
+.offb{background:var(--tint);color:var(--ink40);border:1px solid var(--hair)}
+.lead{background:var(--ink);color:var(--paper)}
+.fnote{font-size:11px;color:var(--ink40);margin-bottom:6px;line-height:1.45}
+.nv{font-size:10.5px;color:var(--amber);background:var(--amber-t);padding:5px 8px;
+border-radius:4px;margin-bottom:7px;line-height:1.45}
+.v{display:flex;align-items:baseline;gap:7px;padding:3.5px 0;font-size:13.5px;
+flex-wrap:wrap}
+.v.dis{opacity:.38;text-decoration:line-through}
+.bx{color:var(--ink40);font-size:12px}
+.sw{width:13px;height:13px;border-radius:50%;border:1px solid var(--hair);
+display:inline-block;flex:0 0 13px}
+.vl{color:var(--ink)}
+.vsub{font-size:11px;color:var(--ink40)}
+.vc{font-size:11.5px;color:var(--ink40);font-variant-numeric:tabular-nums}
+.rev{font-size:10px;color:var(--terra);width:100%;padding-left:19px}
+
+.fl{margin-bottom:22px;padding:17px 20px;background:#fff;border:1px solid var(--hair);
+border-radius:7px}
+.flp{font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:700;
+color:var(--ink);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--hair2)}
+.br{display:flex;align-items:baseline;gap:11px;padding:6px 0;font-size:13.5px}
+.brv{flex:0 0 128px;font-weight:600;color:var(--terra)}
+.bra{color:var(--ink40)}
+.brc b{display:block;font-size:13px}
+.brc span{font-size:12px;color:var(--ink60)}
+.always{padding:14px 20px;background:var(--tint);border:1px solid var(--hair);
+border-radius:7px;font-size:13px;color:var(--ink60)}
+.always b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink40);margin-bottom:4px}
+.empty{color:var(--ink60);font-style:italic}
+.morefold{margin-top:16px;padding-top:14px;border-top:1px dashed var(--hair)}
+.morefold summary{font-size:11px;text-transform:uppercase;letter-spacing:.13em;
+color:var(--ink60);font-weight:700;cursor:pointer;list-style:none;display:flex;
+align-items:center;gap:7px}
+.morefold summary::-webkit-details-marker{display:none}
+.morefold summary::before{content:'+';font-size:14px;color:var(--terra)}
+.morefold[open] summary::before{content:'2'}
+.morefold .mc{background:var(--tint);border:1px solid var(--hair);border-radius:3px;
+font-size:9px;padding:1px 5px;color:var(--ink40)}
+.morebody{padding-top:14px}
+.budget{display:flex;gap:26px;flex-wrap:wrap;margin-top:12px;padding:11px 16px;
+border-radius:6px;font-size:12px}
+.budget.ok{background:#EDF3EF;border:1px solid #CFE0D6;color:var(--green)}
+.budget.over{background:var(--amber-t);border:1px solid #E8D6AC;color:var(--amber)}
+.budget b{font-variant-numeric:tabular-nums}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+color:var(--ink40);font-weight:700;padding:0 10px 8px 0;border-bottom:1px solid var(--ink)}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--hair2);vertical-align:top}
+tr:hover td{background:rgba(0,0,0,.014)}
+code{font-family:var(--mono);font-size:11px;background:var(--tint);padding:1px 5px;
+border-radius:3px}
+code.src{background:none;padding:0;color:var(--ink40)}
+.mut{color:var(--ink40)}
+.why{color:var(--ink60);max-width:34ch}
+ul.om,ul.warn{margin-left:19px;max-width:80ch}
+ul.om li,ul.warn li{margin-bottom:7px;color:var(--ink60);font-size:13.5px}
+ul.om li b{color:var(--ink)}
+ul.warn li{color:var(--amber)}
+footer{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair);
+font-size:11.5px;color:var(--ink40)}
+</style></head><body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">Filter &amp; sub-filter tree</div>
+  <h1>Water pipes</h1>
+  <div class="meta">
+    <div><b>17</b>filters</div>
+    <div><b>5</b>conditional</div>
+    <div><b>248</b>products</div>
+    <div><b>running_metre</b>canonical unit</div>
+    <div><b>plumbing.pipes</b>taxonomy path</div>
+  </div>
+  <div class="budget ok"><span><b>7</b> / 8 visible filters</span><span><b>32</b> / 34 value rows</span><span>rail ≈ <b>1221</b> / 1350 px</span><span><b>5</b> behind “More filters”</span><span><b>5</b> conditional</span><span>fits one screen</span></div>
+  
+  <div class="leadbox"><div class="t">Lead filter — System</div><p>The material decides which pressure-rating vocabulary even applies. SDR, Class, Type and PN are four unrelated systems, and a panel that flattens them into one &#x27;Class&#x27; list lets a buyer express an impossible requirement.</p></div>
+</header>
+
+<section>
+  <h2>The panel</h2>
+  <p class="sub">As a customer sees it. Indented filters are sub-filters — they appear
+  only once their parent value is chosen.</p>
+  <div class="split">
+    <div class="rail">
+      <div class="railh">Narrow by</div>
+      <div class="clus">Specification</div>
+<div class="f"><div class="fh">System<span class="lead">leads</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">CPVC</span><span class="vsub">hot &amp; cold potable — IS 15778</span><span class="vc">(59)</span><span class="rev">↳ opens cpvc_sdr</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">UPVC / PVC</span><span class="vsub">cold water, low pressure — IS 4985</span><span class="vc">(67)</span><span class="rev">↳ opens upvc_class</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">SWR</span><span class="vsub">soil, waste &amp; drainage — IS 13592</span><span class="vc">(49)</span><span class="rev">↳ opens swr_type</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">GI</span><span class="vsub">threaded, legacy &amp; fire lines — IS 1239</span><span class="vc">(0)</span><span class="rev">↳ opens gi_class</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">HDPE</span><span class="vsub">underground mains, borewell — IS 4984</span><span class="vc">(56)</span><span class="rev">↳ opens hdpe_grade</span></div></div>
+<div class="f sub"><div class="fh">Pressure class — SDR<span class="cond">appears when system = CPVC</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">SDR-11</span><span class="vsub">hot &amp; cold</span><span class="vc">(8)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">SDR-13.5</span><span class="vsub">cold only</span><span class="vc">(4)</span></div></div>
+<div class="f sub"><div class="fh">Pressure class<span class="cond">appears when system = UPVC / PVC</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">Class 1</span><span class="vsub">2.5 kg/cm²</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Class 2</span><span class="vsub">4 kg/cm²</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Class 3</span><span class="vsub">6 kg/cm²</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Class 4</span><span class="vsub">10 kg/cm²</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Class 5</span><span class="vsub">12.5 kg/cm²</span><span class="vc">(0)</span></div></div>
+<div class="f sub"><div class="fh">SWR type<span class="cond">appears when system = SWR</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">Type A</span><span class="vsub">ventilation, rainwater</span><span class="vc">(2)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Type B</span><span class="vsub">soil &amp; waste</span><span class="vc">(1)</span></div></div>
+<div class="f sub"><div class="fh">GI class<span class="cond">appears when system = GI</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">Light</span><span class="vsub">yellow band</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Medium</span><span class="vsub">blue band</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Heavy</span><span class="vsub">red band</span><span class="vc">(0)</span></div></div>
+<div class="f sub"><div class="fh">PE grade<span class="cond">appears when system = HDPE</span></div><div class="v dis"><span class="bx">☐</span><span class="vl">PE 100</span><span class="vsub">current standard</span><span class="vc">(9)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">PE 80</span><span class="vc">(4)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">PE 63</span><span class="vsub">legacy</span><span class="vc">(0)</span></div></div>
+<div class="f"><div class="fh">Size (nominal bore)</div><div class="fnote">The mm↔inch mapping is nominal trade sizing, not arithmetic: 25 mm is called 1&quot; though 1&quot; is 25.4 mm, and 4&quot; SWR is 110 mm OD. It is a table with tests, never ×25.4. Top six by count shown; 50, 75, 160, 200 mm behind &#x27;show all&#x27;.</div><div class="v dis"><span class="bx">☐</span><span class="vl">15 mm</span><span class="vsub">½&quot;</span><span class="vc">(17)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">20 mm</span><span class="vsub">¾&quot;</span><span class="vc">(19)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">25 mm</span><span class="vsub">1&quot;</span><span class="vc">(22)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">32 mm</span><span class="vsub">1¼&quot;</span><span class="vc">(5)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">63 mm</span><span class="vsub">2&quot;</span><span class="vc">(9)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">110 mm</span><span class="vsub">4&quot;</span><span class="vc">(25)</span></div></div>
+<div class="clus">Price &amp; brand</div>
+<div class="f"><div class="fh">Brand</div><div class="fnote">Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21.</div><div class="v"><span class="bx">☐</span><span class="vl">Ashirvad</span><span class="vc">(8)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Astral</span><span class="vc">(5)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Austro</span><span class="vc">(5)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Truflo</span><span class="vc">(5)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">BRP</span><span class="vc">(4)</span></div>
+<div class="v"><span class="bx">☐</span><span class="vl">Prince</span><span class="vc">(4)</span></div></div>
+<div class="f"><div class="fh">Price per metre, delivered</div><div class="fnote">Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.</div><div class="v"><span class="bx">○</span><span class="vl">Under ₹54</span><span class="vc">(63)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹54 – ₹98</span><span class="vc">(61)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">₹98 – ₹180</span><span class="vc">(65)</span></div>
+<div class="v"><span class="bx">○</span><span class="vl">Over ₹180</span><span class="vc">(59)</span></div></div>
+<div class="clus">Specification</div>
+<div class="f"><div class="fh">Length</div><div class="v dis"><span class="bx">☐</span><span class="vl">3 m</span><span class="vsub">standard</span><span class="vc">(247)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">5 m</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">6 m</span><span class="vsub">GI standard</span><span class="vc">(1)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Coil</span><span class="vsub">HDPE</span><span class="vc">(0)</span></div></div>
+<div class="clus">Trust &amp; certification</div>
+<div class="f"><div class="fh">BIS mark<span class="offb">default off</span></div><div class="fnote">Default off. Pre-applying it would be a decision we are not entitled to make on the buyer&#x27;s behalf.</div><div class="v dis"><span class="bx">☐</span><span class="vl">Certified</span><span class="vsub">licence on file</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Not declared</span><span class="vsub">seller has not provided one</span><span class="vc">(248)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Not applicable</span><span class="vsub">no standard for this product</span><span class="vc">(0)</span></div></div>
+<div class="clus">Delivery</div>
+<div class="f"><div class="fh">Arrives</div><div class="v dis"><span class="bx">☐</span><span class="vl">Tomorrow</span><span class="vc">(56)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(183)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(9)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Scheduled delivery</span><span class="vsub">you pick the date</span><span class="vc">(0)</span></div></div>
+<details class="morefold"><summary>More filters <span class="mc">5</span></summary><div class="morebody"><div class="f"><div class="fh">Joint</div><div class="v dis"><span class="bx">☐</span><span class="vl">Solvent weld</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Threaded</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Push-fit / ring</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Fusion</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">IS standard</div><div class="v dis"><span class="bx">☐</span><span class="vl">IS 15778</span><span class="vsub">CPVC</span><span class="vc">(59)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">IS 4985</span><span class="vsub">uPVC</span><span class="vc">(67)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">IS 13592</span><span class="vsub">SWR</span><span class="vc">(49)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">IS 1239</span><span class="vsub">GI</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">IS 4984</span><span class="vsub">HDPE</span><span class="vc">(56)</span></div></div><div class="f"><div class="fh">Seller quotes price</div><div class="v dis"><span class="bx">☐</span><span class="vl">Inclusive of GST</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Exclusive of GST</span><span class="vsub">18%, HSN 3917</span><span class="vc">(248)</span></div></div><div class="f"><div class="fh">Price verified</div><div class="v dis"><span class="bx">☐</span><span class="vl">Verified today</span><span class="vc">(248)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within 3 days</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Within a week</span><span class="vc">(0)</span></div></div><div class="f"><div class="fh">Country of origin</div><div class="v dis"><span class="bx">☐</span><span class="vl">India</span><span class="vc">(0)</span></div>
+<div class="v dis"><span class="bx">☐</span><span class="vl">Not published by seller</span><span class="vc">(248)</span></div></div></div></details>
+    </div>
+    <div>
+      <h2 style="font-size:19px;margin-bottom:6px">The flow</h2>
+      <p class="sub">Which selections reveal which sub-filters.</p>
+      <div class="fl"><div class="flp">System</div><div class="br"><div class="brv">CPVC</div><div class="bra">→</div><div class="brc"><b>Pressure class — SDR</b><span>SDR-11 · SDR-13.5</span></div></div><div class="br"><div class="brv">UPVC / PVC</div><div class="bra">→</div><div class="brc"><b>Pressure class</b><span>Class 1 · Class 2 · Class 3 · Class 4 · Class 5</span></div></div><div class="br"><div class="brv">SWR</div><div class="bra">→</div><div class="brc"><b>SWR type</b><span>Type A · Type B</span></div></div><div class="br"><div class="brv">GI</div><div class="bra">→</div><div class="brc"><b>GI class</b><span>Light · Medium · Heavy</span></div></div><div class="br"><div class="brv">HDPE</div><div class="bra">→</div><div class="brc"><b>PE grade</b><span>PE 100 · PE 80 · PE 63</span></div></div></div><div class="always"><b>Always shown</b>System · Size (nominal bore) · Brand · Price per metre, delivered · Length · BIS mark · Arrives · Joint · IS standard · Seller quotes price · Price verified · Country of origin</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Implementation</h2>
+  <p class="sub">One row per filter, in display order.</p>
+  <table>
+    <thead><tr><th>id</th><th>Label</th><th>Cluster</th><th>Control</th><th>Values</th>
+    <th>Appears when</th><th>Default</th><th>Source field</th><th>Why it exists</th></tr></thead>
+    <tbody><tr><td><code>system</code></td><td><b>System</b></td><td>Specification</td><td>checkbox</td><td>5</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.pipe_system</code></td><td class="why">The defining decision, and the parent of every pressure-class filter below. Choosing CPVC reveals SDR; choosing GI reveals Light/Medium/Heavy. They never appear together.</td></tr>
+<tr><td><code>nominal_bore</code></td><td><b>Size (nominal bore)</b></td><td>Specification</td><td>checkbox</td><td>6</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.nominal_bore_mm</code></td><td class="why">The spec the plumber arrives with. Both vocabularies are shown because Indian sites use mm and inches interchangeably — a buyer told &#x27;one inch&#x27; on site must find 1&quot; on the page.</td></tr>
+<tr><td><code>cpvc_sdr</code></td><td><b>Pressure class — SDR</b></td><td>Specification</td><td>checkbox</td><td>2</td><td>system = CPVC</td><td>on</td><td><code class="src">offer.spec.sdr</code></td><td class="why">Determines hot-water suitability — the second question after bore, and meaningless on any material other than CPVC.</td></tr>
+<tr><td><code>upvc_class</code></td><td><b>Pressure class</b></td><td>Specification</td><td>checkbox</td><td>5</td><td>system = UPVC / PVC</td><td>on</td><td><code class="src">offer.spec.pressure_class</code></td><td class="why">IS 4985 rates uPVC in working pressure classes. Showing these beside SDR-11 would be incoherent — they are different rating systems for different materials.</td></tr>
+<tr><td><code>swr_type</code></td><td><b>SWR type</b></td><td>Specification</td><td>checkbox</td><td>2</td><td>system = SWR</td><td>on</td><td><code class="src">offer.spec.swr_type</code></td><td class="why">IS 13592 splits SWR by duty. Type B is the wall thickness for soil and waste; using Type A there is a failure in a few years.</td></tr>
+<tr><td><code>gi_class</code></td><td><b>GI class</b></td><td>Specification</td><td>checkbox</td><td>3</td><td>system = GI</td><td>on</td><td><code class="src">offer.spec.gi_class</code></td><td class="why">IS 1239 classes are identified on site by their painted colour band. Printing the colour beside the class is the detail that makes a plumber trust the page.</td></tr>
+<tr><td><code>hdpe_grade</code></td><td><b>PE grade</b></td><td>Specification</td><td>checkbox</td><td>3</td><td>system = HDPE</td><td>on</td><td><code class="src">offer.spec.pe_grade</code></td><td class="why">IS 4984 rates HDPE by resin grade, which sets the pressure rating at a given wall thickness.</td></tr>
+<tr><td><code>brand</code></td><td><b>Brand</b></td><td>Price &amp; brand</td><td>checkbox</td><td>6</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.brand</code></td><td class="why">Below spec here, unlike cement — a plumber arrives with a bore and a class, not a brand. Ordered by result count.</td></tr>
+<tr><td><code>price_per_metre</code></td><td><b>Price per metre, delivered</b></td><td>Price &amp; brand</td><td>radio</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.normalised_paise WHERE normalised_unit=&#x27;running_metre&#x27;</code></td><td class="why">₹/metre, never ₹/length. A 3 m pipe and a 6 m pipe in one price band is the single most common failure in this market.</td></tr>
+<tr><td><code>length</code></td><td><b>Length</b></td><td>Specification</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.length_m</code></td><td class="why">Kept primary rather than folded because it drives both freight and the ₹/length ↔ ₹/m conversion, and a site with a 3 m ceiling buys differently from one ordering coil.</td></tr>
+<tr><td><code>bis</code></td><td><b>BIS mark</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>off</td><td><code class="src">offer.cert_state</code></td><td class="why">Labels, never hides. Pipes are not under a quality-control order the way cement and rebar are, so an unmarked pipe is listed and ranked like any other — with the fact stated.</td></tr>
+<tr><td><code>arrives</code></td><td><b>Arrives</b></td><td>Delivery</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">serviceability.lead_time_days (computed per pincode)</code></td><td class="why">Computed per pincode from the freight model, not stored on the product.</td></tr>
+<tr><td><code>joint_type</code></td><td><b>Joint</b></td><td>Specification</td><td>checkbox</td><td>4</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.spec.joint_type</code></td><td class="why">Decides which fittings and which consumable (solvent cement vs thread seal) the buyer also needs. Folded because it is largely implied by System.</td></tr>
+<tr><td><code>standard</code></td><td><b>IS standard</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>5</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.cert_standards[]</code></td><td class="why">Professional buyers specify by IS code. Folded because it is one-to-one with System for most of the catalogue.</td></tr>
+<tr><td><code>gst_treatment</code></td><td><b>Seller quotes price</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">offer.gst_treatment</code></td><td class="why">The worked example in the spec: an ex-GST ₹402 quoted against a delivered ₹502.36 understates by 25.0%. Making the basis filterable is how that comparison stops being possible.</td></tr>
+<tr><td><code>price_freshness</code></td><td><b>Price verified</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>3</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">price_current.priced_as_of</code></td><td class="why">Pipes are volatility class V1 — a 7 day SLA, because PVC resin is commodity-linked and brands revise list prices several times a year.</td></tr>
+<tr><td><code>country_of_origin</code></td><td><b>Country of origin</b></td><td>Trust &amp; certification</td><td>checkbox</td><td>2</td><td><span class="mut">always</span></td><td>on</td><td><code class="src">product.country_of_origin</code></td><td class="why">Indexed and sortable from day one — LMPC Rule 6(10A).</td></tr></tbody>
+  </table>
+</section>
+
+<section><h2>Deliberately left out</h2><p class="sub">A filter considered and rejected, with the reason, stops the same debate recurring in two weeks.</p><ul class="om"><li><b>In stock</b> — Moved to a toggle above the results. Single binary, and the rail slot is worth more to a class filter.</li><li><b>Colour</b> — Fixed per material — CPVC is cream, uPVC white or grey, SWR usually white. One value per branch, so it eliminates nothing.</li><li><b>Application</b> — Restates pressure class exactly. &#x27;Hot water&#x27; is what SDR-11 means; showing both splits the result set twice for one decision.</li><li><b>PPR (PN 10–25)</b> — A real system, but commercial and industrial rather than residential, and the collection sweep found no PPR supply in either target city. Left out rather than shipped as an empty branch — if PPR appears in a later run it earns a sixth System value and its own conditional PN filter.</li><li><b>Seller rating</b> — Held back until there is a real ratings corpus.</li></ul></section>
+
+
+<footer>Generated by the <code>category-filters</code> skill.
+Counts and values should be confirmed against the live catalogue before build.</footer>
+</div></body></html>

@@ -1,0 +1,43 @@
+{
+  "name": "buildo-priceintel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BuildO Price Intelligence — local demo. Dynamic pricing search for construction materials in Hyderabad and Vijayawada. Zero cloud: SQLite in-process, no network on the query path.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:init": "tsx scripts/init-db.ts",
+    "db:snapshot": "node scripts/db-snapshot.mjs",
+    "collect": "tsx collector/run.ts",
+    "reconcile": "tsx scripts/reconcile-filters.ts",
+    "snapshot": "tsx scripts/snapshot.ts",
+    "bench": "tsx scripts/benchmark.ts",
+    "shots": "tsx scripts/screenshots.ts",
+    "test": "tsx tests/run.ts",
+    "images": "tsx scripts/collect-images.ts",
+    "db:checkpoint": "tsx scripts/checkpoint.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.2",
+    "cheerio": "^1.1.2",
+    "next": "^16.2.12",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.7.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "playwright": "^1.56.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}
