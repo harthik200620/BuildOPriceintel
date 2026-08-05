@@ -20,6 +20,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ProductCard } from '@/lib/types';
 import { Money, rupees, FreshnessDot, CertBadge, UNIT_LABEL } from './primitives';
+import { DAMPED } from './CardGallery';
 
 const ROW_H = 44;
 
@@ -49,7 +50,7 @@ export const COLUMNS: ColumnDef[] = [
     has: (c) => !!c.images?.length,
     render: (c) => (c.images?.[0]
       ? <img src={c.images[0]} alt="" width={30} height={30} loading="lazy"
-          style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 4, background: 'var(--glass-quiet)' }} />
+          style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 4, background: 'var(--glass-quiet)', filter: DAMPED }} />
       : <span style={{ width: 30, height: 30, borderRadius: 4, background: 'var(--glass-quiet)', display: 'block' }} />),
   },
   {
@@ -92,7 +93,21 @@ export const COLUMNS: ColumnDef[] = [
   {
     key: 'unit_price', id: 'unit_price', label: 'Unit price', w: 126, align: 'right', core: true,
     has: () => true,
-    render: (c) => <Money paise={c.normalised_paise} unit={c.unit_canonical} size="sm" accent={c.freshness_state !== 'STALE' && c.freshness_state !== 'EXPIRED'} />,
+    // One face down the whole column. `accent` used to be passed here on
+    // freshness, which switched between .hero-figure (the display serif) and
+    // .fig (the figure face) at 13px inside one 126px right-aligned column —
+    // roughly a 37% difference in advance width between adjacent rows, in the
+    // one column that exists to be read down its decimal. tabular-nums aligns
+    // digits *within* a face; it cannot align two.
+    //
+    // It also never passed `stale`, so a dead price rendered unstruck here
+    // while ProductCard struck it. Both are fixed by the same swap.
+    render: (c) => (
+      <Money
+        paise={c.normalised_paise} unit={c.unit_canonical} size="sm"
+        stale={c.freshness_state === 'STALE' || c.freshness_state === 'EXPIRED'}
+      />
+    ),
   },
   { key: 'landed', id: 'landed', label: 'Landed', w: 100, align: 'right', core: true, has: () => true, render: (c) => <span className="fig">{rupees(c.landed_paise, false)}</span> },
   { key: null, id: 'unit', label: 'Unit', w: 92, core: true, has: () => true, render: (c) => <span style={{ color: 'var(--ink-3)' }}>{UNIT_LABEL[c.unit_canonical] ?? c.unit_canonical}</span> },
@@ -230,7 +245,7 @@ export default function ResultsTable({
 
       <div className="x-scroll glass-card" style={{ overflow: 'hidden' }}>
         <div style={{ minWidth }}>
-          <div className="flex sticky top-0 z-10 rule-b" style={{ background: 'rgba(22,20,18,.045)' }}>
+          <div className="flex sticky top-0 z-10 rule-b" style={{ background: 'var(--wash)' }}>
             {cols.map((c) => {
               const active = c.key && sortKey === c.key;
               const cov = coverage.get(c.id) ?? 0;
@@ -284,7 +299,7 @@ export default function ResultsTable({
                     onClick={() => onOpen(c)}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(c); } }}
                     role="button" tabIndex={0}
-                    className="flex rule-soft-b anim hover:bg-[rgba(168,67,27,.045)] cursor-pointer"
+                    className="flex rule-soft-b anim hover:bg-[var(--accent-bg)] cursor-pointer"
                     style={{ height: ROW_H }}
                   >
                     {cols.map((col) => (

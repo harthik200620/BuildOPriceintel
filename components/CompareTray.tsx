@@ -30,11 +30,11 @@ export default function CompareTray({
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 tray-in"
       style={{
-        background: 'var(--glass)',
-        WebkitBackdropFilter: 'blur(20px) saturate(1.7)',
-        backdropFilter: 'blur(20px) saturate(1.7)',
+        background: 'var(--chrome)',
+        WebkitBackdropFilter: 'blur(20px) saturate(1.15)',
+        backdropFilter: 'blur(20px) saturate(1.15)',
         borderTop: '1px solid var(--glass-hair)',
-        boxShadow: '0 -10px 34px -18px rgba(28,25,22,.24), inset 0 1px 0 var(--glass-border)',
+        boxShadow: '0 -12px 40px -18px rgba(0,8,11,.66), inset 0 1px 0 var(--glass-border)',
       }}>
       <div className="mx-auto max-w-[1680px] px-6 lg:px-10 py-3">
         <div className="flex items-center justify-between gap-4 mb-2.5">
@@ -73,8 +73,11 @@ export default function CompareTray({
                 <div className="text-[12px] leading-snug mb-1.5" style={{
                   color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                 }}>{c.title}</div>
-                <Money paise={c.normalised_paise} unit={c.unit_canonical} size="md"
-                  accent={comparable && c.offer_id === cheapest.offer_id} />
+                {/* No `accent` here. The cheapest card is already marked twice
+                    — the accent border above, and the "+₹N vs cheapest" line
+                    below on every other card — and this third encoding was the
+                    only one that changed typeface mid-row. */}
+                <Money paise={c.normalised_paise} unit={c.unit_canonical} size="md" />
                 {comparable && c.offer_id !== cheapest.offer_id && (
                   <div className="fig text-[11px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
                     +{rupees(c.normalised_paise - cheapest.normalised_paise)} vs cheapest

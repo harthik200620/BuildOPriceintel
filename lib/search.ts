@@ -688,6 +688,14 @@ export function search(input: SearchInput): SearchResponse {
   let ranked: Scored[] = input.vendor_id ? score(candidates) : groupByVendor(score(candidates));
 
   if (input.sort && input.sort !== 'recommended') {
+    // An unrecognised key used to fall through this chain and leave the list in
+    // `recommended` order, silently. `price_estimate` shipped for weeks calling
+    // itself "cheapest live offer per line" while passing `price_asc`, which is
+    // not a key here — so it was returning the top recommendation and labelling
+    // it the cheapest. Failing loudly is the whole fix; the typo is incidental.
+    if (!(input.sort in SORTS)) {
+      throw new Error(`Unknown sort key "${input.sort}". Known: ${Object.keys(SORTS).join(', ')}.`);
+    }
     const byId = new Map(afterFacets.map(({ r }) => [r.offer_id, r]));
     const g = (id: string) => byId.get(id)!;
     if (input.sort === 'price_low') ranked = [...ranked].sort((a, b) => a.normalised_paise - b.normalised_paise);

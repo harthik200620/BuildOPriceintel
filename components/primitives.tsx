@@ -44,12 +44,18 @@ export function Money({
   }[size];
   return (
     <span
-      className={`${accent ? 'hero-figure' : 'fig'} ${cls} ${stale ? 'price-stale' : ''} ${className}`}
+      // nowrap because the unit label offers a break opportunity after its
+      // SOLIDUS, and the table cells this lands in have a hard `height: ROW_H`
+      // with no overflow clip — a wrapped price paints over the row below
+      // rather than being caught.
+      className={`${accent ? 'hero-figure' : 'fig'} ${cls} ${stale ? 'price-stale' : ''} whitespace-nowrap ${className}`}
       // Every number is labelled with its unit for screen readers.
       aria-label={`${rupees(paise, decimals)} ${UNIT_SPOKEN[unit] ?? unit}`}
     >
       {rupees(paise, decimals)}
-      <span className="opacity-55 ml-[1px]" style={{ fontSize: '0.62em' }} aria-hidden>
+      {/* Pinned to 400 rather than inheriting the numerals' weight, so "/bag"
+          sits under ₹286.20 instead of beside it. The number is the thing. */}
+      <span className="opacity-55 ml-[1px]" style={{ fontSize: '0.62em', fontWeight: 400, letterSpacing: 0 }} aria-hidden>
         {UNIT_LABEL[unit] ?? `/${unit}`}
       </span>
     </span>
@@ -140,8 +146,10 @@ export function CertBadge({ state, qco, compact = false }: { state: string; qco?
       className="inline-flex items-center gap-1 text-[10px] tracking-[.06em] uppercase px-2 py-[3px]"
       style={{
         color,
-        background: `color-mix(in srgb, ${color} 8%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${color} 26%, transparent)`,
+        // Higher than the light theme's 8/26. A mix toward `transparent` lands
+        // on whatever is behind it, and on this ground an 8% wash is not there.
+        background: `color-mix(in srgb, ${color} 16%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} 40%, transparent)`,
         borderRadius: 'var(--radius-pill)',
       }}
       title={m.tip}

@@ -110,45 +110,125 @@ Canonical units: cement **one standard 50 kg bag**, TMT `kg`, pipes `running_met
 
 "50 kg" in that sentence is load-bearing, and it was wrong until this run. `bag` was treated as dimensionless, so a per-bag quote passed through unscaled — and a ₹150 quote for a **1 kg** pack of Birla White became ₹150 *per bag*, the cheapest cement in Hyderabad, top of the results for `cement`. Every route to a cement price now goes through `cementCanonicalPaise()` and lands on the 50 kg basis (LMPC Rule 3(a)): 25 kg packs are rescaled ×2, 1 kg packs ×50, which pushes the novelty packs past 10× the category median where the absurdity gate quarantines them unpublished. `scripts/renormalise-cement.ts` re-derived the 23 affected offers already in the database from their stored quotes rather than re-fetching them; run it without `--apply` to see the arithmetic first.
 
-### The interface — "Alabaster"
+### The interface — "Patina"
 
 One appearance. There is no theme toggle, no `data-theme` attribute and no `prefers-color-scheme` branch
-anywhere in the codebase: warm ivory ground, white glass panes lit along their top edge, deep charcoal text,
-and one copper accent spent once per view on the unit price. The bones of the original drafting language
-survive — hairline rules, the corner survey ticks, tabular figures — rebuilt in glass.
+anywhere in the codebase: a deep teal ground lit from within, silver ink, translucent panes carrying more
+light than the water around them, and one luminous aqua accent spent once per view on the unit price. The
+bones of the original drafting language survive — hairline rules, the corner survey ticks, tabular figures.
 
-Type is **Instrument Serif** for display and the hero price, **Inter Tight** for UI, **JetBrains Mono** for
-every figure. `next/font` downloads them at build time and serves them from this origin, so there is no
-runtime request to a font CDN and "nothing here touches the cloud" still holds.
+It replaces *Alabaster* — warm ivory, charcoal text, a copper accent — and the light model inverts with it.
+On paper a pane is lifted by a shadow; here there is no paper, only depth, so elevation is alpha and a
+specular top edge first and shadow second. The ground is a slow **aurora**: two bloom fields drifting against
+each other on 72 s and 96 s periods, transform-only on their own compositor layer so the table underneath is
+never repainted, with a fine grain over the top. The grain is not decoration — a gradient this deep and this
+saturated bands into visible rings at 8 bits, and the grain is what dissolves them. Both stop under
+`prefers-reduced-motion`, the blooms holding a fixed composed position rather than looping at 0.01 ms.
+
+Product photographs are all white-background studio shots, which on this ground would be 1,796 lit rectangles
+punched through a dark page. They are damped at rest and released to true colour the moment attention lands
+on a card; the detail sheet's gallery renders its own `<img>` and is never damped at all, because that is
+where the purchase decision is made.
+
+Type is **Geist** for UI text and the hero price, **Geist Mono** for every figure that sits in a column, and
+**Fraunces** for the display voice — headings and section titles. `next/font` downloads them at build time
+and serves them from this origin, so there is no runtime request to a font CDN and "nothing here touches the
+cloud" still holds.
+
+**The hero price is the one number not set in the mono, and the reason is function.** A monospace earns its
+constant advance in a *column*, where every row has to align on the decimal. The hero sits alone in a card
+and nothing aligns to it — so it paid the cost of that advance and got none of the benefit: the period took a
+full digit width and `₹286 . 20` read as three groups rather than one number. It is Geist at weight 560,
+still `tabular-nums` so the figure does not jump as you type. Geist and Geist Mono are one superfamily and
+share their skeletons, so the price on the card and the same price in the table read as one number written
+twice. In the detail sheet the two sit side by side — the hero proportional and tight, the floor/ceiling/
+median row monospaced and aligned — and the difference reads as what it is: a statement next to a
+measurement.
+
+Weight is doing real work here and it is nearly free. `.hero-figure` is 560 and `.fig` is 450, both up from
+400, because a figure on a dark ground carries less apparent weight than the same figure on paper, and
+because the hero's clipped gradient needs stroke area to show in at all. **On a monospace the advance is
+constant across the weight axis**, so bumping `.fig` moved no column budget — confirmed by the probe
+reporting 0 wrapped, 0 spilled, 0 grown and an unchanged clip count across the change.
+
+**The faces were measured before they were chosen**, against next's own bundled capsize metrics — 1,753
+families, offline, no build required. The number that decided it: Geist Mono's average advance is **0.6000 em,
+identical to the JetBrains Mono it replaces**, so every fixed-width money column kept its budget exactly and
+the riskiest part of a font swap in this codebase was a no-op. Measured before and after on the live app: **0
+prices wrapped, 0 spilled past a cell, 0 fixed-width boxes grew, and no column header lost a character.** The
+honest cost is that Geist is 8.7% wider than Inter Tight, so long vendor names and product titles ellipse
+sooner — 24 already-truncating strings became 29. That cannot be tracked away; recovering 8.7% would need
+about −0.046 em, well past the point where letterforms collide at the 10–12 px where 72% of this app's type
+lives.
+
+Fraunces carries an **optical-size axis (9–144)**, which is why it and not a static serif: `.display` spans
+15→24 px, and an `opsz` axis draws each size properly instead of scaling one cut and correcting it by hand
+with negative tracking — so `.display` dropped its hand-tuned letter-spacing entirely. `SOFT` and `WONK` stay
+at 0, the restrained end.
+
+Three corrections went with the swap, each of which was a live defect rather than a migration cost:
+
+- **The unit-price column rendered in two typefaces.** `accent` was passed on freshness, switching between the
+  display serif and the figure face at 13 px inside one 126 px right-aligned column — roughly a 37% difference
+  in advance width between adjacent rows, in the column that exists to be read down its decimal. It also never
+  passed `stale`, so a dead price rendered unstruck there while the card struck it. `<Money>` now never picks
+  its face from data, and a test asserts it.
+- **`font-feature-settings: "cv05" 1, "ss01" 1` sat on `body`.** Those are Inter-specific character variants,
+  and the property inherits — so they were also landing on the figure and display faces, selecting whatever
+  those foundries happened to put at those tags.
+- **`.fig` asked for `tabular-nums` but not `lining-nums`.** Tabular fixes the advance; it does not force
+  lining figures, and a face defaulting to old-style would set `₹1,035.50` with descending 3/5/7/9 inside a
+  44 px `items-center` row.
+
+`₹` is **U+20B9, which Google serves from `latin-ext`, not `latin`**. The subset is now named explicitly on
+all three faces, so a face lacking it fails at build time rather than silently rendering the leading glyph of
+every price from a system fallback at an unrelated advance width.
 
 Two rules in `app/globals.css` are engineering rather than taste, and both are load-bearing:
 
 **Blur is rationed, and the test is "does anything move behind it?"** `backdrop-filter` costs GPU on every
 repaint. Blurring every panel put keystroke→paint at 225 ms against a 200 ms budget. Blur now belongs only to
 surfaces content actually travels under — the top bar, the search dropdown, the detail sheet and its scrim,
-the compare tray. The filter rail and the vendor table sit over a static canvas, where a blur was invisible
-and cost real milliseconds; they use `.glass-card`, the same look with no filter. Anything repeated per
-result is `.glass-card` by definition, because there are 24 of them and they re-render on every keystroke.
+the compare tray. The filter rail and the vendor table have nothing passing beneath them, where a blur was
+invisible and cost real milliseconds; they use `.glass-card`, the same look with no filter. Anything repeated
+per result is `.glass-card` by definition, because there are 24 of them and they re-render on every keystroke.
+The aurora does not reopen this: it drifts on a 72–96 s period, slow enough that blurring it is
+indistinguishable from blurring a still gradient — the rule is about content passing underneath, not about
+the ground breathing.
 
 Measured after the fact, the effects turned out not to be the cost at all: forcing a full repaint of the
 results grid takes ~28 ms whether card shadows, corner ticks, the ambient wash, the lift transition and every
 `backdrop-filter` are on or off. The rationing stands anyway — it is the right default, and it is why the
 page has headroom rather than needing it.
 
-**Every colour pair was measured, not eyeballed.** Light glass with small grey labels is the classic way this
-style fails WCAG AA, and it failed here first time: `--ink-3` at `#6C727B` came in at 4.49:1 on glass and
-3.94:1 on bare canvas. It is now `#5D636C`, and `--fresh` moved from `#2F7A4F` to `#276843` for the same
-reason. Against the worst case — each pane's low-alpha tail, and bare canvas where a label sits outside one:
+**Every colour pair is measured, not eyeballed — and now it is a test rather than a comment.** This used to
+be a block of prose in `globals.css` listing ratios that nothing enforced. When the theme was repainted the
+first candidate palette failed **16 of 120 pairings**, and a comment would have shipped saying otherwise.
 
-| | on card | on glass | on canvas |
-|---|---:|---:|---:|
-| `--ink` #14161A | 17.4:1 | 16.8:1 | 14.7:1 |
-| `--ink-2` #474C54 | 8.3:1 | 8.0:1 | 7.0:1 |
-| `--ink-3` #5D636C | 5.8:1 | 5.6:1 | 4.9:1 |
-| `--accent` #A8431B | 5.8:1 | 5.6:1 | 4.9:1 |
+`lib/contrast.ts` implements WCAG 2.1 luminance plus sRGB alpha compositing for stacked translucent layers,
+quantising 8-bit **per layer** as a browser does — compositing in float and rounding once at the end reads
+about 0.5 % high, which on a value sitting at 4.50 decides pass or fail. `tests/run.ts` **parses the `:root`
+block out of the live stylesheet** rather than keeping its own copy of the hexes, so a future colour edit that
+breaks contrast fails the suite instead of shipping.
 
-All clear AA for body text. The audit is a few lines of `node -e` against the composited backgrounds — worth
-re-running whenever an alpha changes, because these ratios are a property of the stack, not of the hex.
+Every ink is measured against four grounds — the flat floor, bare canvas, and each bloom at its peak — times
+five pane alphas. Worst case throughout is `.glass-strong` over the silver bloom, surface `#2A424A`:
+
+| | worst of 20 surfaces | |
+|---|---:|---|
+| `--ink` #E8F0F2 | 9.20:1 | |
+| `--ink-2` #B0C4CA | 5.87:1 | |
+| `--ink-3` #9BAEB3 | 4.60:1 | started at `#8EA3A9`, **failed at 4.03** |
+| `--stale` #ABADAD | 4.71:1 | started at `#7B8F96`, **failed at 3.14** |
+| `--fresh` #5AD888 | 5.87:1 | moved to ~142° so it reads as green, not dim accent |
+| `--ageing` #E0B155 | 5.36:1 | |
+| `--accent` #5CE1E6 | 6.76:1 | |
+| `--accent-ink` #3FD0D8 | 5.68:1 | the hero gradient's dimmest stop, and it is text |
+
+`--ink-3` carries the 10–11 px labels, so 4.5:1 genuinely applies to it — the 3:1 large-text allowance starts
+at 18.66 px bold. The old copper `#A8431B` measures **1.76:1** here: it fails not only AA text but the 3:1
+non-text bar on every surface, which is why the accent could not simply be carried over. These ratios are a
+property of the stack, not of the hex, which is exactly why the test composites rather than compares.
 
 ### Pictures
 
@@ -445,6 +525,79 @@ at ~28 ms regardless of which effects are enabled. It is stated here rather than
 The reason this lands is architectural rather than clever: `better-sqlite3` runs in-process, so there is no network hop between the query and the data at all. The AWS design in the spec budgets 55 ms for the OpenSearch retrieval hop alone; here the equivalent work is a function call at 6.62 ms p95.
 
 `sqlite-vec` was **not** added. The measurement came first: lexical FTS5 plus a trigram index already answers the golden query set — `ultratec` reaches UltraTech, `ఇటుక` and `itaka` and `eeta` all reach brick — at 6.62 ms p95 for retrieval. A vector index would have added a dependency and a build step to a stage that is not the bottleneck. If semantic matching is needed later the hook is `lib/search.ts:retrieve()`, which already score-normalises and fuses two retrievers.
+
+---
+
+## The assistant
+
+A grounded buying assistant on **Gemini 2.5 Flash**, in `lib/chat/`. The full design is in
+[`docs/ASSISTANT.md`](docs/ASSISTANT.md); the short version is that **the model is structurally
+incapable of producing a fact**.
+
+```
+message → scope gate (pre-model) → tool loop → fact ledger
+        → grounding check → one silent repair → answer, or an honest refusal
+```
+
+Eight tools are the only route to a fact, and each deposits every number, entity and source it
+returns into a per-turn **fact ledger**. The validator then holds the model's draft against that
+ledger: a price, a brand or a count that no tool returned this turn gets the draft rejected, the
+model is handed its own violation list, and a draft that fails twice degrades to an honest refusal
+that still shows the cards. The scope gate runs *before* any token is spent, so an off-topic or
+injection prompt costs nothing.
+
+`lib/no-network.ts` still throws on outbound calls from the query path. The model host is one named
+allowlist entry with its justification written next to it.
+
+### "Which is the best brick?" — and why it is not ranked
+
+`rank_by_quality` scores on declared grade (40%), certification (25%), brand (15%) and how many
+sellers carry it (20%). That works for cement and TMT steel. For **bricks it silently did not**:
+there is no brick grade field anywhere in the schema, and 94% of them sit at `NOT_APPLICABLE`
+because an unbranded kiln brick is not something BIS licenses. Three of the four terms were
+constant, the score reduced to seller breadth, and the tool returned **the cheapest unbranded brick
+in the catalogue as "#1 best quality"**.
+
+Every figure in that answer was real, which is why the fact ledger passed it. **A ledger proves a
+number came from the data; it cannot prove that arithmetic over the data means what its label
+says.** `rankableOn()` is that second check — measured, not hardcoded, so a future collection run
+that brings brick grades in turns ranking back on by itself. It also caught the same collapse in
+water pipes, which are 100% `NOT_DECLARED`.
+
+What replaces the ranking is `lib/chat/masonry.ts`, built on the same contract as
+`coefficients.ts`: every entry carries a confidence rung and a citation, and an entry with neither
+cannot be used. `CODE` is what IS 1077, IS 2185 and IS 12894 establish. `TRADE` is site practice —
+including the hot-dry climate note, because **no Indian standard selects masonry by city**, and
+dressing that up as a code requirement to make the answer land better would be the same failure in
+a nicer suit.
+
+So the answer is by *duty* — what the wall has to do — with the governing standard beside each type
+and the live delivered price under it, and the plain statement that no seller declared a grade and
+none carries a BIS licence.
+
+### Cost
+
+| | |
+|---|---|
+| **Repeat questions** | An answer cache keyed on the normalised question, the pincode, and SQLite's `PRAGMA data_version`. The collector is a separate process, so its writes bump that counter and the whole cache turns over the instant a price changes — no TTL, and no window where a stale price can be served. |
+| **Follow-ups** | Never cached and never read from cache. *"And in Vijayawada?"* means nothing without the turn before it, and keyed on the message alone it would confidently return someone else's answer. |
+| **The repair pass** | Was sending the full tool declarations alongside `toolMode: 'NONE'` — ~1,400 tokens the model was forbidden from calling. Dropped. |
+| **The stable prefix** | System prompt plus tool schemas is ~1,800–2,200 tokens, byte-identical every call, which clears the 1,024-token floor for implicit context caching on 2.5 Flash. `cachedContentTokenCount` is now read and surfaced in the trace — it was the one usage counter being dropped, which left the saving a hope rather than a measurement. |
+
+Anyone editing `prompt.ts` should know the corollary: implicit caching keys on an **exact** prefix
+match, so interpolating anything per-turn into `SYSTEM_PROMPT` switches it off silently, and that
+counter is the only thing that would say so.
+
+`/api/chat` is rate limited with a per-client token bucket (8 burst, refilling at 0.5/s) — a turn
+can cost four model round-trips and the route has no auth in front of it.
+
+```bash
+npm test          # 175 core + 186 chat + 19 engine, all offline, no key needed
+npm run test:live # 14 real conversations. Spends tokens. A report, not a gate.
+```
+
+Set `GEMINI_API_KEY` in `.env.local`. Without it the gates, the estimators and every refusal still
+work — only turns that genuinely need the model fail, and they say so.
 
 ---
 

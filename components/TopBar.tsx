@@ -22,9 +22,9 @@ export default function TopBar({
     <header
       className="sticky top-0 z-40"
       style={{
-        background: 'rgba(255,255,255,.58)',
-        WebkitBackdropFilter: 'blur(20px) saturate(1.7)',
-        backdropFilter: 'blur(20px) saturate(1.7)',
+        background: 'var(--chrome)',
+        WebkitBackdropFilter: 'blur(20px) saturate(1.15)',
+        backdropFilter: 'blur(20px) saturate(1.15)',
         borderBottom: '1px solid var(--glass-hair)',
         boxShadow: 'inset 0 1px 0 var(--glass-border)',
       }}

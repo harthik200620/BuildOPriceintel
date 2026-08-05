@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prep, lastSuccessfulRun } from '@/lib/db';
-import { armNetworkGuard, guardState } from '@/lib/no-network';
+import { armNetworkGuard, guardState, allowedHosts } from '@/lib/no-network';
+import { hasKey, GEMINI_MODEL } from '@/lib/chat/gemini';
 import { SORTS, COLUMN_SORTS } from '@/lib/rank';
 import { CATEGORY_LABEL } from '@/lib/types';
 
@@ -52,6 +53,9 @@ export async function GET() {
     // the app says so rather than presenting stale data as current.
     degraded: !runDetail || runDetail.status === 'failed',
     blocked_sources: blocked,
-    network_guard: guardState(),
+    // The guard's exceptions are published rather than buried, because an
+    // allowlist nobody can see is indistinguishable from no guard at all.
+    network_guard: { ...guardState(), allowed: allowedHosts() },
+    assistant: { ready: hasKey(), model: GEMINI_MODEL },
   }, { headers: { 'cache-control': 'no-store' } });
 }

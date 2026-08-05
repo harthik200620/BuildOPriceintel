@@ -97,7 +97,7 @@ export function NoDataYet() {
         The price surface is empty because the collector has not finished a run on this machine.
       </p>
       <p className="mt-2">
-        Run <code className="fig px-1.5 py-0.5" style={{ background: 'rgba(22,20,18,.045)' }}>npm run collect</code> to
+        Run <code className="fig px-1.5 py-0.5" style={{ background: 'var(--wash)' }}>npm run collect</code> to
         populate it, then reload.
       </p>
     </Frame>
@@ -144,7 +144,7 @@ export function OfflineBanner() {
 export function DegradedBanner({ lastRun }: { lastRun: string | null }) {
   return (
     <div className="px-3 py-2 text-[12px] flex items-center gap-2"
-      style={{ background: 'color-mix(in srgb, var(--ageing) 12%, transparent)', borderBottom: '1px solid var(--rule)', color: 'var(--ink-2)' }}
+      style={{ background: 'color-mix(in srgb, var(--ageing) 20%, transparent)', borderBottom: '1px solid var(--rule)', color: 'var(--ink-2)' }}
       role="status">
       <span className="dot dot-amber" aria-hidden />
       The last refresh did not complete{lastRun ? ` (last good run ${new Date(lastRun).toLocaleString('en-IN')})` : ''}.

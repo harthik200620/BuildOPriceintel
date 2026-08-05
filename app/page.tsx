@@ -8,7 +8,7 @@ import ProductCardView from '@/components/ProductCard';
 import ResultsTable from '@/components/ResultsTable';
 import DetailSheet from '@/components/DetailSheet';
 import CompareTray from '@/components/CompareTray';
-import LatencyHUD, { type Stage } from '@/components/LatencyHUD';
+import ChatPanel from '@/components/ChatPanel';
 import {
   ResultsSkeleton, ZeroResult, NoDataYet, EmptyCategory, ErrorState, OfflineBanner, DegradedBanner,
 } from '@/components/States';
@@ -53,12 +53,9 @@ export default function Page() {
   const [compare, setCompare] = React.useState<Card[]>([]);
   const [saved, setSaved] = React.useState<Card[]>([]);
   const [railCollapsed, setRailCollapsed] = React.useState(false);
-  const [stages, setStages] = React.useState<Stage[]>([]);
-  const [e2e, setE2e] = React.useState(0);
 
   const searchRef = React.useRef<HTMLInputElement>(null);
   const seq = React.useRef(0);
-  const keystrokeAt = React.useRef<number>(0);
 
   React.useEffect(() => {
     fetch('/api/meta').then((r) => r.json()).then(setMeta).catch(() => setError('Could not load app metadata.'));
@@ -88,9 +85,8 @@ export default function Page() {
     };
   }, []);
 
-  /* Instant as-you-type, 80 ms debounce, measured keystroke → painted. */
+  /* Instant as-you-type, 80 ms debounce. */
   React.useEffect(() => {
-    keystrokeAt.current = performance.now();
     const id = ++seq.current;
     setLoading(true);
     const spin = setTimeout(() => { if (id === seq.current) setShowSpinner(true); }, SPINNER_AFTER_MS);
@@ -104,9 +100,7 @@ export default function Page() {
       if (colSort) { params.set('col', colSort.key); params.set('dir', colSort.dir); }
       for (const [fid, vals] of Object.entries(selections)) for (const v of vals) params.append(`f.${fid}`, v);
       try {
-        const t0 = performance.now();
         const r = await fetch(`/api/search?${params}`);
-        const net = performance.now() - t0;
         if (id !== seq.current) return;
         if (!r.ok) {
           const j = await r.json().catch(() => ({}));
@@ -118,24 +112,6 @@ export default function Page() {
         setPincodeError(null);
         const j: SearchResponse = await r.json();
         setData(j); setError(null);
-        requestAnimationFrame(() => {
-          if (id !== seq.current) return;
-          const total = performance.now() - keystrokeAt.current;
-          setE2e(total);
-          setStages([
-            { label: 'debounce', ms: DEBOUNCE_MS, note: 'Counted inside the budget, not excluded from it.' },
-            { label: 'query parse', ms: j.timings.parse ?? 0, note: 'Typed-constraint grammar. No model call.' },
-            { label: 'store read', ms: j.timings.fetch ?? 0, note: 'In-process SQLite. No network hop.' },
-            { label: 'retrieve (FTS5 + trigram)', ms: j.timings.retrieve ?? 0 },
-            { label: 'filter + facet counts', ms: (j.timings.filter ?? 0) + (j.timings.facets ?? 0) },
-            // No "diversity damping" here any more — one card per vendor made it
-            // unreachable and it was removed. The disclosed parameters have to be
-            // the applied ones.
-            { label: 'rank + group by vendor', ms: j.timings.rank ?? 0, note: 'Nine features, four penalties, then one card per seller.' },
-            { label: 'transport + serialise', ms: Math.max(0, net - (j.timings.total ?? 0)) },
-            { label: 'react render + paint', ms: Math.max(0, total - DEBOUNCE_MS - net) },
-          ]);
-        });
       } catch (e) {
         if (id === seq.current) { setError(String((e as Error).message ?? e)); setData(null); }
       } finally {
@@ -261,9 +237,9 @@ export default function Page() {
                     <option key={k} value={k}>{v.label}</option>
                   ))}
                 </select>
-                <div className="seg" role="group" aria-label="Result layout">
-                  <button aria-pressed={view === 'cards'} onClick={() => setView('cards')}>Cards</button>
-                  <button aria-pressed={view === 'table'} onClick={() => setView('table')}>Table</button>
+                <div className="seg flex h-9 text-[12.5px]" role="group" aria-label="Result layout">
+                  <button className="anim px-3.5 h-full" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>Cards</button>
+                  <button className="anim px-3.5 h-full" aria-pressed={view === 'table'} onClick={() => setView('table')}>Table</button>
                 </div>
               </div>
             </div>
@@ -292,7 +268,7 @@ export default function Page() {
             {/* The government reference line — no competitor shows this. */}
             {data?.sor_anchor && (
               <div className="mb-4 px-3 py-2 text-[11.5px] flex items-start gap-2"
-                style={{ border: '1px solid var(--rule)', borderRadius: '10px', background: 'rgba(22,20,18,.045)' }}>
+                style={{ border: '1px solid var(--rule)', borderRadius: '10px', background: 'var(--wash)' }}>
                 <span className="shrink-0 mt-[2px]" style={{ color: 'var(--ink-3)' }}>⌖</span>
                 <span style={{ color: 'var(--ink-2)' }}>
                   <strong>Government reference</strong> — {data.sor_anchor.item}, {data.sor_anchor.state_code}{' '}
@@ -398,7 +374,7 @@ export default function Page() {
 
             {saved.length > 0 && (
               <div className="mt-6 px-3.5 py-3 flex items-center justify-between gap-4"
-                style={{ border: '1px solid var(--rule)', borderRadius: '10px', background: 'rgba(22,20,18,.045)' }}>
+                style={{ border: '1px solid var(--rule)', borderRadius: '10px', background: 'var(--wash)' }}>
                 <span className="text-[12.5px]" style={{ color: 'var(--ink-2)' }}>
                   <strong style={{ color: 'var(--ink)' }}>My list</strong> — {saved.length}{' '}
                   {saved.length === 1 ? 'item' : 'items'}, one unit of each
@@ -429,9 +405,18 @@ export default function Page() {
       {openSku && <DetailSheet productId={openSku} pincode={pincode} highlightVendorId={openVendor} highlightOfferId={openOffer}
         onClose={() => { setOpenSku(null); setOpenVendor(null); setOpenOffer(null); }} />}
 
-      {process.env.NODE_ENV !== 'production' && stages.length > 0 && (
-        <LatencyHUD stages={stages} total={e2e} />
-      )}
+      {/*
+        The assistant, docked. It shares the page's pincode so a price it
+        quotes and a price the grid shows are landed at the same place —
+        two surfaces disagreeing about a rupee figure is the failure this
+        whole application is built to avoid, and a chat bubble with its own
+        idea of "here" would reintroduce it.
+      */}
+      <ChatPanel
+        pincode={pincode}
+        regionName={meta?.regions?.find((r: Region) => r.region_id === regionId)?.name ?? 'Hyderabad'}
+        onApplySearch={(q) => { setQuery(q); setSubmitted(q); setVendorFilter(null); }}
+      />
     </div>
   );
 }

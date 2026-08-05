@@ -14,9 +14,14 @@
     "snapshot": "tsx scripts/snapshot.ts",
     "bench": "tsx scripts/benchmark.ts",
     "shots": "tsx scripts/screenshots.ts",
-    "test": "tsx tests/run.ts",
+    "test": "tsx tests/run.ts && tsx tests/chat.ts && tsx tests/chat-engine.ts",
     "images": "tsx scripts/collect-images.ts",
-    "db:checkpoint": "tsx scripts/checkpoint.ts"
+    "db:checkpoint": "tsx scripts/checkpoint.ts",
+    "test:chat": "tsx tests/chat.ts",
+    "test:engine": "tsx tests/chat-engine.ts",
+    "test:live": "tsx tests/chat-live.ts",
+    "probe:type": "tsx scripts/typography-probe.ts",
+    "test:core": "tsx tests/run.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.2",

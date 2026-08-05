@@ -110,7 +110,7 @@ export default function DetailSheet({
 
   return (
     <>
-      <div className="fixed inset-0 z-50" style={{ background: 'rgba(28,25,22,.22)', WebkitBackdropFilter: 'blur(2px)', backdropFilter: 'blur(2px)' }} onClick={onClose} aria-hidden />
+      <div className="fixed inset-0 z-50" style={{ background: 'var(--scrim)', WebkitBackdropFilter: 'blur(2px)', backdropFilter: 'blur(2px)' }} onClick={onClose} aria-hidden />
       <div
         ref={ref}
         tabIndex={-1}
@@ -119,10 +119,13 @@ export default function DetailSheet({
         aria-label={p?.title ?? 'Product detail'}
         className="fixed z-50 sheet-in scroll-thin outline-none
                    inset-0 md:inset-y-0 md:right-0 md:left-auto md:w-[min(1080px,88vw)]"
-        style={{ background: 'var(--glass-strong)', WebkitBackdropFilter: 'blur(24px) saturate(1.5)', backdropFilter: 'blur(24px) saturate(1.5)', borderLeft: '1px solid var(--glass-hair)', boxShadow: 'var(--glass-shadow-lift)', overflowY: 'auto' }}
+        // The sheet floats over a scrimmed page and its own content scrolls
+        // inside it, so it takes --chrome rather than a pane alpha: at
+        // .glass-strong the rows underneath showed through the header.
+        style={{ background: 'var(--chrome)', WebkitBackdropFilter: 'blur(24px) saturate(1.12)', backdropFilter: 'blur(24px) saturate(1.12)', borderLeft: '1px solid var(--glass-hair)', boxShadow: 'var(--glass-shadow-lift)', overflowY: 'auto' }}
       >
         <header className="sticky top-0 z-20 px-6 md:px-8 py-3.5 rule-b flex items-center justify-between gap-4"
-          style={{ background: 'rgba(255,255,255,.72)', WebkitBackdropFilter: 'blur(16px) saturate(1.4)', backdropFilter: 'blur(16px) saturate(1.4)', borderBottom: '1px solid var(--glass-hair)' }}>
+          style={{ background: 'var(--chrome)', WebkitBackdropFilter: 'blur(16px) saturate(1.1)', backdropFilter: 'blur(16px) saturate(1.1)', borderBottom: '1px solid var(--glass-hair)' }}>
           <span className="text-[10px] uppercase tracking-[0.14em]" style={{ color: 'var(--ink-3)' }}>
             {p?.category_label ?? 'Loading'} · full record
           </span>
@@ -144,7 +147,7 @@ export default function DetailSheet({
             {/* ── the offer that was actually clicked ────────────────────── */}
             {clicked && (
               <section className="mt-6 p-5 corner-tick"
-                style={{ background: 'var(--accent-bg)', border: '1px solid rgba(168,67,27,.22)', borderRadius: 'var(--radius)' }}>
+                style={{ background: 'var(--accent-bg)', border: '1px solid color-mix(in srgb, var(--accent) 34%, transparent)', borderRadius: 'var(--radius)' }}>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase tracking-[0.14em] mb-1" style={{ color: 'var(--accent-ink)' }}>
@@ -330,17 +333,28 @@ export default function DetailSheet({
             {/* Also fetched and never rendered. Scanned spec sheets are kept out
                 of the photo gallery on purpose — a buyer looking at pictures
                 expects the goods — but they belong somewhere, and this is it. */}
-            {(data.datasheet_images?.length ?? 0) > 0 && (
-              <Section title="Datasheets and spec sheets" n={data.datasheet_images.length}>
-                <div className="flex flex-wrap gap-2">
-                  {data.datasheet_images.map((d: any) => (
-                    <a key={d.local_path} href={d.page_url ?? d.local_path} target="_blank" rel="noopener noreferrer"
-                      className="anim hover:opacity-80" title={d.page_url ?? 'datasheet'}>
-                      <img src={d.local_path} alt="Datasheet" width={72} height={72} loading="lazy"
-                        style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--rule)' }} />
-                    </a>
-                  ))}
-                </div>
+            {((data.datasheet_images?.length ?? 0) > 0 || p.datasheet_url) && (
+              <Section title="Datasheets and spec sheets" n={data.datasheet_images?.length || undefined}>
+                {(data.datasheet_images?.length ?? 0) > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {data.datasheet_images.map((d: any) => (
+                      <a key={d.local_path} href={d.page_url ?? d.local_path} target="_blank" rel="noopener noreferrer"
+                        className="anim hover:opacity-80" title={d.page_url ?? 'datasheet'}>
+                        <img src={d.local_path} alt="Datasheet" width={72} height={72} loading="lazy"
+                          style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--rule)' }} />
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {/* Moved here when the Sources block went. It is a manufacturer
+                    document, not a listing we scraped, so it never belonged in
+                    a list of source URLs to begin with. */}
+                {p.datasheet_url && (
+                  <a href={p.datasheet_url} target="_blank" rel="noreferrer noopener"
+                    className="chip anim inline-flex items-center gap-1.5 px-3 h-8 text-[12px] mt-3">
+                    Manufacturer datasheet
+                  </a>
+                )}
               </Section>
             )}
 
@@ -399,7 +413,7 @@ export default function DetailSheet({
                     return (
                       <button key={s.product_id}
                         onClick={() => window.dispatchEvent(new CustomEvent('buildo:open-sku', { detail: s.product_id }))}
-                        className="text-left p-3 anim hover:bg-[rgba(22,20,18,.045)]"
+                        className="text-left p-3 anim hover:bg-[var(--wash)]"
                         style={{ border: '1px solid var(--rule)', borderRadius: '10px' }}>
                         <div className="text-[12.5px] truncate" style={{ color: 'var(--ink)' }}>{s.title}</div>
                         <div className="mt-1.5 flex items-baseline justify-between gap-2">
@@ -417,24 +431,16 @@ export default function DetailSheet({
               </Section>
             )}
 
-            {/* ── sources ───────────────────────────────────────────────── */}
-            <Section title="Sources" n={new Set(offers.map((o) => o.source_url)).size}>
-              <ul className="space-y-1">
-                {[...new Set(offers.map((o) => o.source_url))].map((u) => (
-                  <li key={u}>
-                    <a href={u} target="_blank" rel="noreferrer noopener"
-                      className="text-[11.5px] anim hover:opacity-70 underline decoration-dotted underline-offset-2 break-all"
-                      style={{ color: 'var(--ink-2)' }}>{u}</a>
-                  </li>
-                ))}
-              </ul>
-              {p.datasheet_url && (
-                <a href={p.datasheet_url} target="_blank" rel="noreferrer noopener"
-                  className="chip anim inline-flex items-center gap-1.5 px-3 h-8 text-[12px] mt-3">
-                  Manufacturer datasheet
-                </a>
-              )}
-            </Section>
+            {/* A "Sources" block used to close the sheet: every offer's
+                source_url, deduped, as a wall of raw links. It was removed
+                because it cited nothing — a flat list detached from the claims
+                it supported, and the longest thing on the page for a buyer who
+                came to compare prices.
+                No provenance is lost. Every URL is still one click away and
+                still attached to what it proves: the clicked seller's listing
+                in the opening block, each vendor's listing (and their alternate
+                listings) in the vendor table, and each spec's origin on its own
+                ProvenanceBadge. */}
           </div>
         )}
       </div>
@@ -504,7 +510,7 @@ function Section({ title, n, children }: { title: string; n?: number; children: 
 /** Delivery cost breakdown — the arithmetic, one tap from the figure. */
 function BreakdownModal({ offer, onClose }: { offer: OfferView; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-center p-6" style={{ background: 'rgba(28,25,22,.34)', WebkitBackdropFilter: 'blur(3px)', backdropFilter: 'blur(3px)' }}
+    <div className="fixed inset-0 z-[60] grid place-items-center p-6" style={{ background: 'var(--scrim)', WebkitBackdropFilter: 'blur(3px)', backdropFilter: 'blur(3px)' }}
       onClick={onClose} role="dialog" aria-modal="true" aria-label="Delivery cost breakdown">
       <div className="w-[min(560px,94vw)] p-5 fade-up corner-tick" onClick={(e) => e.stopPropagation()}
         style={{ background: 'var(--glass-strong)', border: '1px solid var(--rule)', borderRadius: '10px' }}>
@@ -534,7 +540,7 @@ function BreakdownModal({ offer, onClose }: { offer: OfferView; onClose: () => v
         </div>
         {offer.freight_basis === 'seeded_fallback' && (
           <p className="mt-3 text-[11px] leading-snug px-2 py-1.5"
-            style={{ color: 'var(--ageing)', border: '1px solid color-mix(in srgb, var(--ageing) 40%, transparent)' }}>
+            style={{ color: 'var(--ageing)', border: '1px solid color-mix(in srgb, var(--ageing) 52%, transparent)' }}>
             This seller's locality could not be geocoded, so the distance is derived from a hash of the seller id.
             It is stable on every reload — but it is an estimate of distance, not a measurement of it.
           </p>
@@ -570,8 +576,10 @@ function PriceHistory({ points, unit }: { points: Array<{ observed_at: string; n
     <div style={{ border: '1px solid var(--rule)', borderRadius: '10px' }} className="p-3 x-scroll">
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} role="img"
         aria-label={`Price history, ${points.length} observations, from ${rupees(lo)} to ${rupees(hi)} per ${unit}`}>
-        <rect x={pad} y={pad} width={W - pad * 2} height={H - pad * 2} fill="rgba(22,20,18,.045)" opacity=".55" />
-        <path d={`${d} L${x(points.length - 1)},${H - pad} L${x(0)},${H - pad} Z`} fill="var(--accent)" opacity=".07" />
+        <rect x={pad} y={pad} width={W - pad * 2} height={H - pad * 2} fill="var(--wash)" opacity=".55" />
+        {/* Lifted from .07: an area fill that read on white is not there at all
+            against this ground. */}
+        <path d={`${d} L${x(points.length - 1)},${H - pad} L${x(0)},${H - pad} Z`} fill="var(--accent)" opacity=".16" />
         <path d={d} fill="none" stroke="var(--accent)" strokeWidth="1.4" />
         {points.map((p, i) => (
           <circle key={i} cx={x(i)} cy={y(p.normalised_paise)} r="2" fill="var(--accent)" />

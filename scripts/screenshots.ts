@@ -30,7 +30,10 @@ async function shot(page: Page, name: string, full = false) {
 
 async function main() {
   const browser = await chromium.launch();
-  const ctx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2, colorScheme: 'light' });
+  // Patina is a dark theme. The emulated scheme decides how the headless
+  // browser paints native <select> popups and checkbox chrome, so a 'light'
+  // context would shoot white widgets the real page never renders.
+  const ctx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2, colorScheme: 'dark' });
   const page = await ctx.newPage();
 
   console.log(`capturing from ${BASE}\n`);
@@ -101,9 +104,17 @@ async function main() {
   await shot(page, '04-detail-sheet');
 
   // Scroll the sheet to the specification table so provenance badges are visible.
+  //
+  // This used to be `scrollTop = scrollHeight * 0.42`. That fraction was tuned
+  // against one rendering: the sheet's height is a stack of unpinned line boxes,
+  // so any change of typeface moves it and 42% lands somewhere else — with no
+  // error, just a screenshot of the wrong section. Scrolling to the thing the
+  // shot is actually of is face-independent.
   const sheet = page.locator('[role="dialog"]').first();
   if (await sheet.count()) {
-    await sheet.evaluate((el) => { el.scrollTop = el.scrollHeight * 0.42; });
+    const spec = sheet.getByRole('heading', { name: /^Specification/i }).first();
+    if (await spec.count()) await spec.scrollIntoViewIfNeeded().catch(() => {});
+    else await sheet.evaluate((el) => { el.scrollTop = el.scrollHeight * 0.42; });
     await page.waitForTimeout(600);
     await shot(page, '05-detail-sheet-provenance');
   }

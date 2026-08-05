@@ -1,129 +1,259 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Alabaster
+   Patina
    ─────────────────────────────────────────────────────────────────────────────
-   "Identity set down the way a site engineer sets down a boundary: with a thin,
-   certain line, measured twice, drawn once." — the bones of Drafted Ground,
-   rebuilt in glass.
+   The ground is what copper becomes. Alabaster spent one copper accent on a
+   warm ivory page; that copper has oxidised through, and what is left is the
+   patina itself — deep teal, lit from within — with silver for the ink and a
+   mineral aqua where the light concentrates.
 
-   Warm ivory is the ground. Light is the second material: every surface is a
-   pane held slightly above the page, lit along its top edge. Colour is still a
-   covenant — ONE copper accent, the colour of brick leaving the kiln, spent
-   once per view on the unit price and nowhere else. Its scarcity is its
-   authority.
+   The light model is inverted, and that is the whole difference. On paper a
+   pane is lifted by a shadow. Here there is no paper: there is depth, and a
+   pane is legible because it holds *more light* than the water around it. So
+   elevation is alpha and a specular top edge first, shadow second.
 
-   Two rules that are engineering, not taste:
+   Three rules that are engineering, not taste:
 
    1. BLUR IS RATIONED, AND THE RULE IS "DOES ANYTHING MOVE BEHIND IT?".
       `backdrop-filter` costs GPU on every repaint, and this page holds a
-      measured 200 ms keystroke-to-paint budget. Blurring every panel put it at
-      225 ms. Blur now belongs only to surfaces that content actually travels
-      under — the top bar, the search dropdown, the detail sheet and its scrim,
-      the compare tray. The filter rail and the vendor table sit over a static
-      canvas, so a blur there was invisible and cost real milliseconds: they
-      use .glass-card, which is the same look with no filter. Anything repeated
+      measured 200 ms keystroke-to-paint budget. Blur belongs only to surfaces
+      content actually travels under — the top bar, the search dropdown, the
+      detail sheet and its scrim, the compare tray. The filter rail and the
+      vendor table use .glass-card: the same look, no filter. Anything repeated
       per result is .glass-card by definition.
 
-   2. LEGIBILITY OUTRANKS THE EFFECT. This is a page of prices. Dense data sits
-      on .glass-strong, and every foreground/background pair here was measured
-      against WCAG AA rather than eyeballed.
+      The aurora does not reopen this. It drifts on a 72-96 s period, which is
+      slow enough that a blur of it is indistinguishable from a blur of a still
+      gradient — the rule is about content passing underneath, not about the
+      ground breathing.
+
+   2. LEGIBILITY OUTRANKS THE EFFECT. This is a page of prices. Every
+      foreground/surface pair here is composited and measured against WCAG AA
+      by `tests/run.ts` — not eyeballed, and not asserted in a comment that
+      nothing enforces. The first candidate palette for this theme failed 16 of
+      120 pairings; the values below are the ones that passed. Change a colour
+      and the suite tells you what you broke.
+
+   3. THE GROUND MOVES, THE CONTENT DOES NOT. The aurora is transform-only on
+      its own fixed layer, so it composites without repainting a single row of
+      the table. It is also the reason the grain exists: deep saturated
+      gradients band visibly at 8 bits, and the grain is what dissolves the
+      bands. Both stop dead under prefers-reduced-motion.
    ───────────────────────────────────────────────────────────────────────────── */
 
 @theme {
-  --color-canvas:     #ece7de;
-  --color-ink:        #14161a;
-  --color-ink-2:      #474c54;
-  --color-ink-3:      #5d636c;
-  --color-accent:     #a8431b;
-  --color-accent-ink: #8a3413;
-
-  --color-fresh:  #276843;
-  --color-ageing: #8a5f10;
-  --color-stale:  #5d636c;
-
-  --font-display: var(--font-instrument-serif), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --font-ui: var(--font-inter-tight), "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-figure: var(--font-jetbrains-mono), "SF Mono", "Cascadia Mono", ui-monospace, Menlo, monospace;
+  /* Fonts only. Colour lives in :root and nowhere else — this block used to
+     carry a second, parallel copy of the palette that nothing referenced and
+     that drifted the moment either half was edited. */
+  /* Plain @theme, never `@theme inline`: some components read these custom
+     properties directly — the .fig figures via var(--font-figure) and one
+     ChatPanel span via var(--font-ui) — and `inline` would erase the properties
+     and drop them silently to inherited. */
+  --font-display: var(--font-display-face), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-ui: var(--font-ui-face), "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-figure: var(--font-figure-face), "SF Mono", "Cascadia Mono", ui-monospace, Menlo, monospace;
 
   --radius-glass: 14px;
 }
 
 :root {
-  /* Deeper than the panes on purpose. At #F7F5F1 the white glass was the same
-     value as the ground and every card read as flat paper — glass is only
-     legible as a *difference* in light. */
-  --canvas: #ece7de;
-  --canvas-warm: rgba(198, 142, 92, .30);
-  --canvas-cool: rgba(108, 130, 186, .24);
+  /* ── the deep ─────────────────────────────────────────────────────────────
+     --abyss is the flat floor the aurora is painted onto; --canvas is the
+     value the blooms settle around. Panes are read against BOTH, plus against
+     each bloom at its peak, which is why four grounds appear in the test. */
+  --abyss:  #04141a;
+  --canvas: #08222a;
 
-  --glass:        rgba(255, 255, 255, .72);
-  --glass-strong: rgba(255, 255, 255, .86);
-  --glass-quiet:  rgba(255, 255, 255, .50);
-  --glass-border: rgba(255, 255, 255, .92);
-  --glass-hair:   rgba(22, 20, 18, .075);
-  --glass-shadow: 0 1px 2px rgba(28, 25, 22, .045), 0 12px 32px -16px rgba(28, 25, 22, .20);
-  --glass-shadow-lift: 0 2px 4px rgba(28, 25, 22, .06), 0 18px 44px -18px rgba(28, 25, 22, .22);
+  --bloom-teal:   rgba(24, 132, 140, .20);
+  --bloom-silver: rgba(198, 214, 219, .10);
+  --bloom-aqua:   rgba(92, 225, 230, .10);
 
-  /* Measured against the worst case — the low-alpha tail of each pane, and
-     bare canvas where a label sits outside one. AA (4.5:1) on all three:
-       ink   #14161A  17.4 card · 16.8 glass · 12.6 canvas
-       ink-2 #474C54   8.3 card ·  8.0 glass ·  6.0 canvas
-       ink-3 #5D636C   5.6 card ·  5.6 glass ·  4.9 canvas
-     ink-3 started at #6C727B and failed at 4.49 on glass and 3.94 on canvas —
-     the classic light-glass failure, and exactly why the pairs get measured
-     rather than eyeballed. It carries the 10–11 px labels, so it is darker
-     than this palette would otherwise want. AA is in the brief. */
-  --ink:   #14161a;
-  --ink-2: #474c54;
-  --ink-3: #5d636c;
+  /* ── the panes ────────────────────────────────────────────────────────────
+     Each value is the PEAK alpha of its gradient — the brightest point, and
+     therefore the surface a foreground is worst-case measured against. The
+     dim tail is derived from it below so there is one number to change. */
+  --glass:        rgba(198, 214, 219, .055);
+  --glass-strong: rgba(198, 214, 219, .085);
+  --glass-card:   rgba(198, 214, 219, .075);
+  --glass-quiet:  rgba(198, 214, 219, .035);
+  /* The selected segment of a .seg. Brighter than any pane, so the contrast
+     test carries it alongside them. */
+  --seg-on:       rgba(198, 214, 219, .20);
 
-  --rule:      rgba(22, 20, 18, .11);
-  --rule-soft: rgba(22, 20, 18, .06);
+  /* Light collects along a pane's top edge and the hairline that bounds it.
+     Both are silver at low alpha — a dark border would read as a gap. */
+  --glass-border: rgba(214, 232, 236, .16);
+  --glass-hair:   rgba(198, 214, 219, .10);
 
-  /* Copper. 5.8:1 on a pane, 4.9:1 on bare canvas — clears AA at badge sizes. */
-  --accent:      #a8431b;
-  --accent-lift: #c9561f;
-  --accent-ink:  #8a3413;
-  --accent-bg:   rgba(168, 67, 27, .075);
+  /* Shadow still works here — the ground is #08222a, not black, so it has
+     somewhere to darken to. But it is the second-order cue; the specular edge
+     above is what actually lifts a pane. */
+  --glass-shadow:      0 1px 2px rgba(0, 8, 11, .30), 0 14px 36px -18px rgba(0, 8, 11, .58);
+  --glass-shadow-lift: 0 2px 6px rgba(0, 8, 11, .34), 0 22px 52px -20px rgba(0, 8, 11, .64);
 
-  --fresh:  #276843;
-  --ageing: #8a5f10;
-  --stale:  #5d636c;
+  /* ── silver ───────────────────────────────────────────────────────────────
+     Worst case for every ink is .glass-strong composited over the silver
+     bloom — surface #2A424A. Measured there:
+       ink    #E8F0F2  9.20    ink-2  #B0C4CA  5.87
+       ink-3  #9BAEB3  4.60    stale  #ABADAD  4.71
+     ink-3 carries the 10–11 px labels, so 4.5:1 genuinely applies and the 3:1
+     large-text allowance is not available to it. It started at #8EA3A9 and
+     measured 4.03 — the classic dark-glass failure, and the reason these are
+     composited rather than guessed. See tests/run.ts. */
+  --ink:   #e8f0f2;
+  --ink-2: #b0c4ca;
+  --ink-3: #9baeb3;
+
+  --rule:      rgba(198, 214, 219, .13);
+  --rule-soft: rgba(198, 214, 219, .07);
+
+  /* The subtle fill. Eleven hardcoded copies of this used to live in the TSX
+     with no token behind them; every one now points here. */
+  --wash:        rgba(198, 214, 219, .045);
+  --wash-strong: rgba(198, 214, 219, .09);
+  --scrim:       rgba(1, 8, 11, .62);
+
+  /* Sticky chrome that content scrolls *under* — the top bar and the detail
+     sheet's header. It has to be more opaque than any pane, because a row of
+     figures travelling beneath a translucent header is unreadable for both. */
+  --chrome: rgba(9, 34, 42, .78);
+
+  /* ── the accent, spent once ───────────────────────────────────────────────
+     Aqua, drawn from the ground's own hue. The three stops are a gradient for
+     .hero-figure, and because that gradient is background-clip:text its
+     DIMMEST stop is read as text — so --accent-ink is pinned to the most
+     saturated aqua that still clears AA (5.68), not to something darker.
+     The old copper #A8431B measured 1.76 here: it failed not just AA text but
+     the 3:1 non-text bar, on every surface. It could not be carried over. */
+  --accent-lift: #7ceef2;   /* 7.78 */
+  --accent:      #5ce1e6;   /* 6.76 */
+  --accent-ink:  #3fd0d8;   /* 5.68 */
+  --accent-bg:   rgba(92, 225, 230, .10);
+
+  /* Text on a bright pill. Pressed states invert on this theme — a light chip
+     with dark type, where Alabaster had dark chip and light type. */
+  --on-bright: #062028;
+
+  /* Freshness. --fresh sits at ~142° rather than the ~160° it would naturally
+     want: at 160° a green reads as a dim cousin of the aqua accent instead of
+     a separate signal. Dropping copper is what frees --ageing to be
+     unambiguously the warning colour. --stale is deliberately NEUTRAL, matched
+     in luminance to --ink-3 but drained of hue, so "no longer current" reads
+     as colour having left it. */
+  --fresh:  #5ad888;   /* 5.88 */
+  --ageing: #e0b155;   /* 5.36 */
+  --stale:  #abadad;   /* 4.71 */
 
   --radius: 14px;
   --radius-pill: 999px;
 
-  color-scheme: light;
+  /* Not cosmetic. This is what renders native <select> popups, unchecked
+     checkbox and radio chrome, and any scrollbar without .scroll-thin. Left on
+     `light` it punches white boxes through the page. */
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 
-html, body {
-  /* The wash lives HERE, not on a ::before. A body background at z-index 0
-     paints straight over a ::before at z-index -1, which is why the blooms
-     were invisible and the ground read as flat card stock.
-     background-attachment: fixed anchors it to the viewport, so scrolling
-     never re-rasterises the gradient. */
-  background:
-    radial-gradient(1250px 820px at 6% -12%,  var(--canvas-warm), transparent 55%),
-    radial-gradient(1100px 760px at 98% 104%, var(--canvas-cool), transparent 54%),
-    radial-gradient(820px 560px at 58% 34%,   rgba(255,255,255,.72), transparent 64%),
-    var(--canvas);
-  background-attachment: fixed;
+html {
+  /* Flat. Everything else is painted by .aurora, on its own layer.
+     Alabaster stacked the wash directly on html/body because a ::before at
+     z-index -1 was being painted over; that constraint is why the blooms now
+     live on real elements with an explicit order rather than on pseudo
+     elements whose stacking depends on which ancestor happens to have a
+     background. */
+  background: var(--abyss);
+}
+
+body {
   color: var(--ink);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "cv05" 1, "ss01" 1;
+  /* `font-feature-settings: "cv05" 1, "ss01" 1` used to sit here. Those are
+     Inter-specific character variants, and the property INHERITS — so they were
+     also landing on the figure face and the display face, two families they
+     were never written for, selecting whatever those foundries happened to put
+     at those tags. Nothing font-specific belongs on an element that three
+     families inherit from. */
   margin: 0;
   padding: 0;
+}
+
+/* ── the aurora ───────────────────────────────────────────────────────────────
+   Two bloom fields drifting against each other on different periods, so the
+   interference never lands in the same place twice. Both are `transform` only:
+   the compositor moves an already-rasterised layer and the page below is never
+   repainted, which is what keeps this off the 200 ms budget.
+   ─────────────────────────────────────────────────────────────────────────── */
+.aurora,
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.aurora { overflow: hidden; background: var(--canvas); }
+
+.aurora::before,
+.aurora::after {
+  content: "";
+  position: absolute;
+  /* Oversized so a drifting layer never exposes its own edge. */
+  inset: -30%;
+  will-change: transform;
+}
+
+.aurora::before {
+  background:
+    radial-gradient(46% 40% at 18% 14%, var(--bloom-teal),   transparent 62%),
+    radial-gradient(38% 34% at 82% 78%, var(--bloom-silver), transparent 60%);
+}
+.aurora::after {
+  background:
+    radial-gradient(40% 36% at 74% 18%, var(--bloom-aqua),   transparent 60%),
+    radial-gradient(52% 44% at 26% 88%, var(--bloom-teal),   transparent 64%);
+}
+
+@keyframes drift-a {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(3.5%, -2.5%, 0) scale(1.08); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes drift-b {
+  0%   { transform: translate3d(0, 0, 0) scale(1.06); }
+  50%  { transform: translate3d(-3%, 3%, 0) scale(1); }
+  100% { transform: translate3d(0, 0, 0) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aurora::before { animation: drift-a 72s ease-in-out infinite; }
+  .aurora::after  { animation: drift-b 96s ease-in-out infinite; }
+}
+/* Under `reduce` the global rule below collapses durations to 0.01 ms, which
+   for an infinite loop is a strobe, not a stop. The blooms are simply held at
+   a composed position instead. */
+@media (prefers-reduced-motion: reduce) {
+  .aurora::before { transform: translate3d(2%, -1.5%, 0) scale(1.04); }
+  .aurora::after  { transform: translate3d(-1.5%, 1.5%, 0) scale(1.03); }
+}
+
+/* Above the aurora, below the content. Not decoration: an eight-bit gradient
+   this deep and this saturated bands into visible rings, and the grain is what
+   dissolves them. */
+.grain {
+  opacity: .028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* ── the panes ────────────────────────────────────────────────────────────────
    .glass        blurred. Persistent chrome ONLY — see rule 1 above.
    .glass-card   identical look, no filter. Anything repeated per result.
-   .glass-strong dense data; higher opacity so figures stay crisp.
+   .glass-strong dense data; higher alpha so figures stay crisp.
+
+   Each gradient runs from its token (the peak, and the value the contrast test
+   measures against) down to a derived tail, so light still falls from above.
    ─────────────────────────────────────────────────────────────────────────── */
 .glass,
 .glass-card,
@@ -132,10 +262,10 @@ html, body {
   border-radius: var(--radius);
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-border);
 }
-.glass        { background: linear-gradient(168deg, rgba(255,255,255,.86), rgba(255,255,255,.62) 62%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
-.glass-strong { background: linear-gradient(168deg, rgba(255,255,255,.94), rgba(255,255,255,.80) 62%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.glass        { background: linear-gradient(168deg, var(--glass),        color-mix(in srgb, var(--glass) 58%, transparent) 62%);        -webkit-backdrop-filter: blur(14px) saturate(1.12); backdrop-filter: blur(14px) saturate(1.12); }
+.glass-strong { background: linear-gradient(168deg, var(--glass-strong), color-mix(in srgb, var(--glass-strong) 62%, transparent) 62%); -webkit-backdrop-filter: blur(14px) saturate(1.12); backdrop-filter: blur(14px) saturate(1.12); }
 /* Same fall of light, no filter. Anything repeated per result uses this. */
-.glass-card   { background: linear-gradient(168deg, rgba(255,255,255,.95), rgba(255,255,255,.78) 68%); }
+.glass-card   { background: linear-gradient(168deg, var(--glass-card),   color-mix(in srgb, var(--glass-card) 60%, transparent) 68%); }
 
 .glass-quiet {
   background: var(--glass-quiet);
@@ -143,19 +273,39 @@ html, body {
   border-radius: var(--radius);
 }
 
-/* Cards lift toward the light rather than growing a heavier shadow. */
+/* Cards lift toward the light rather than growing a heavier shadow — on this
+   ground the tell is the edge brightening and a faint aqua bloom underneath,
+   not a darker shadow. */
 @media (prefers-reduced-motion: no-preference) {
   .lift { transition: box-shadow .18s cubic-bezier(.2,.7,.3,1), transform .18s cubic-bezier(.2,.7,.3,1); }
-  .lift:hover { transform: translateY(-2px); box-shadow: var(--glass-shadow-lift), inset 0 1px 0 var(--glass-border); }
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      var(--glass-shadow-lift),
+      0 16px 40px -24px color-mix(in srgb, var(--accent) 40%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--glass-border) 150%, transparent);
+  }
 }
 
 /* ── figures ──────────────────────────────────────────────────────────────────
    Every figure is tabular. Columns of prices must align to the decimal.
    ─────────────────────────────────────────────────────────────────────────── */
-.fig  { font-family: var(--font-figure); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.tnum { font-variant-numeric: tabular-nums; }
+/* `lining-nums` is not redundant. tabular-nums fixes the ADVANCE; it does not
+   force lining figures, and a face defaulting to old-style would set ₹1,035.50
+   with descending 3/5/7/9 inside a 44 px items-center row — ragged baseline in
+   the one column that exists to be read down its decimal. */
+/* 450 rather than 400: at 10-13 px on a dark ground a figure carries less
+   apparent weight than the same figure on paper, and the whole point of these
+   is to be read. Free in layout — a monospace holds its advance across the
+   weight axis, which is why this is a weight change and not a width change. */
+.fig  { font-family: var(--font-figure); font-weight: 450; font-variant-numeric: tabular-nums lining-nums; letter-spacing: -.02em; }
+.tnum { font-variant-numeric: tabular-nums lining-nums; }
 
-.display { font-family: var(--font-display); font-weight: 400; letter-spacing: -.01em; }
+/* No letter-spacing here any more. Fraunces carries an optical-size axis, so
+   the 15 px facet heading and the 24 px sheet title each get a drawn cut rather
+   than one design scaled and then corrected by hand. `auto` is the default, but
+   it is stated because the axis is the reason this face was chosen. */
+.display { font-family: var(--font-display); font-weight: 400; font-optical-sizing: auto; }
 
 /* ── the hairline ─────────────────────────────────────────────────────────── */
 .rule        { border-color: var(--rule); }
@@ -178,7 +328,7 @@ html, body {
 .corner-tick::before,
 .corner-tick::after {
   content: ""; position: absolute; width: 8px; height: 8px; pointer-events: none;
-  border-color: var(--accent); opacity: .34;
+  border-color: var(--accent); opacity: .42;
 }
 .corner-tick::before { top: 6px;    left: 6px;  border-top: 1px solid; border-left: 1px solid; }
 .corner-tick::after  { bottom: 6px; right: 6px; border-bottom: 1px solid; border-right: 1px solid; }
@@ -209,10 +359,10 @@ html, body {
 @keyframes shimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
 .skel {
   background: linear-gradient(90deg,
-    rgba(255,255,255,.42) 25%,
-    rgba(255,255,255,.86) 37%,
-    rgba(255,255,255,.42) 63%);
-  background-color: rgba(22,20,18,.045);
+    rgba(198,214,219,.03) 25%,
+    rgba(198,214,219,.13) 37%,
+    rgba(198,214,219,.03) 63%);
+  background-color: var(--wash);
   background-size: 200% 100%;
   animation: shimmer 1.5s linear infinite;
   border-radius: 8px;
@@ -228,7 +378,7 @@ html, body {
   font: inherit;
 }
 .field::placeholder { color: var(--ink-3); }
-.field:focus { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.field:focus { border-color: color-mix(in srgb, var(--accent) 62%, transparent); }
 
 .seg {
   border: 1px solid var(--glass-hair);
@@ -238,9 +388,15 @@ html, body {
   overflow: hidden;
 }
 .seg button { color: var(--ink-2); background: transparent; }
+/* Inverted from Alabaster, but not to full --ink. A segmented control marks
+   its selection by holding more light than its neighbours, and a near-white
+   slab on this ground reads as an unstyled browser default rather than a
+   choice. --seg-on is bright enough to be unmistakable and quiet enough to
+   sit next to the accent without competing with it. */
 .seg button[aria-pressed="true"] {
-  background: var(--ink);
-  color: #fbfaf8;
+  background: var(--seg-on);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 var(--glass-border);
 }
 
 .chip {
@@ -250,11 +406,11 @@ html, body {
   box-shadow: inset 0 1px 0 var(--glass-border);
   color: var(--ink-2);
 }
-.chip:hover { border-color: color-mix(in srgb, var(--accent) 34%, transparent); color: var(--ink); }
+.chip:hover { border-color: color-mix(in srgb, var(--accent) 48%, transparent); color: var(--ink); }
 .chip[aria-pressed="true"] {
-  background: var(--ink);
-  color: #fbfaf8;
-  border-color: var(--ink);
+  background: var(--accent);
+  color: var(--on-bright);
+  border-color: var(--accent);
 }
 
 /* Facets disable rather than vanish — a struck value tells the buyer the
@@ -269,18 +425,42 @@ html, body {
 
 /* ── freshness dot ────────────────────────────────────────────────────────── */
 .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-.dot-green { background: var(--fresh); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fresh) 16%, transparent); }
-.dot-amber { background: var(--ageing); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ageing) 16%, transparent); }
+.dot-green { background: var(--fresh);  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fresh) 24%, transparent); }
+.dot-amber { background: var(--ageing); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ageing) 24%, transparent); }
 .dot-grey  { background: var(--stale); }
 
 /* ── the accent, spent once ───────────────────────────────────────────────────
    The hero price is the one place colour is allowed to carry meaning, so it
-   gets the display face and a slight vertical gradient — ink that caught the
-   light, not a flat fill.
+   gets a slight vertical gradient — light caught on a metal edge rather than a
+   flat fill. Runs bright → saturated, never dark: the dimmest stop is text and
+   has to clear AA on its own.
+
+   THE FIGURE FACE, not the display face. This was Fraunces at 400 and it was
+   wrong three ways at once: light strokes thin further against a dark ground,
+   a 400-weight serif gives the clipped gradient almost no stroke area to show
+   in, and a warm editorial serif is the wrong register for a page of prices.
+   It also meant the same number rendered in a serif on the card and a mono in
+   the table — the last place two faces still split.
+
+   The weight is the other half. On a monospace the advance is constant across
+   the weight axis, so 500 costs nothing in layout: no column budget moves and
+   no width needed re-tuning. Verified by scripts/typography-probe.ts, which
+   reported zero wrapped, zero spilled and zero grown across the change.
    ─────────────────────────────────────────────────────────────────────────── */
 .hero-figure {
-  font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
+  /* The UI face, not the mono — and the reason is function, not taste.
+     A monospace earns its advance in a COLUMN, where every row has to align on
+     the decimal. The hero sits alone in a card and nothing aligns to it, so it
+     paid the cost of the constant advance and got none of the benefit: the
+     period took a full digit width and "₹286 . 20" read as three groups
+     instead of one number. Geist and Geist Mono are one superfamily and share
+     their skeletons, so the card price and the table price still look like the
+     same number written twice.
+     Tabular is kept anyway — a price that changes as you type should not make
+     the line jump. */
+  font-family: var(--font-ui);
+  font-weight: 560;
+  font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -.022em;
   background: linear-gradient(175deg, var(--accent-lift) 4%, var(--accent) 58%, var(--accent-ink) 100%);
   -webkit-background-clip: text;
@@ -292,11 +472,13 @@ html, body {
   .hero-figure { background: none; color: var(--accent); -webkit-text-fill-color: currentColor; }
 }
 
-/* A stale price is struck to secondary weight — never presented as current. */
+/* A stale price is struck to secondary weight — never presented as current.
+   It takes --stale rather than --ink-3: the neutral is the point, since what
+   marks it is colour having drained out of it. */
 .price-stale {
-  color: var(--ink-3);
+  color: var(--stale);
   background: none;
-  -webkit-text-fill-color: var(--ink-3);
+  -webkit-text-fill-color: var(--stale);
   text-decoration: line-through;
   text-decoration-thickness: 1px;
 }
@@ -309,18 +491,21 @@ html, body {
   background: var(--glass-quiet);
   color: var(--ink-3); white-space: nowrap;
 }
-.prov-derived { border-color: color-mix(in srgb, var(--ink-3) 42%, transparent); }
-.prov-typical { border-color: color-mix(in srgb, var(--ageing) 55%, transparent); color: var(--ageing); background: color-mix(in srgb, var(--ageing) 8%, transparent); }
+.prov-derived { border-color: color-mix(in srgb, var(--ink-3) 48%, transparent); }
+/* The tint percentages here are all higher than Alabaster's. A mix toward
+   transparent lands on the ground behind it, and on a dark ground an 8% wash
+   is simply not there. */
+.prov-typical { border-color: color-mix(in srgb, var(--ageing) 62%, transparent); color: var(--ageing); background: color-mix(in srgb, var(--ageing) 15%, transparent); }
 .prov-unknown { border-style: dashed; }
 
 /* ── scroll ───────────────────────────────────────────────────────────────── */
-.scroll-thin { scrollbar-width: thin; scrollbar-color: rgba(22,20,18,.22) transparent; }
+.scroll-thin { scrollbar-width: thin; scrollbar-color: rgba(198,214,219,.24) transparent; }
 .scroll-thin::-webkit-scrollbar { width: 10px; height: 10px; }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: rgba(22,20,18,.20); border-radius: 99px;
+  background: rgba(198,214,219,.22); border-radius: 99px;
   border: 3px solid transparent; background-clip: content-box;
 }
-.scroll-thin::-webkit-scrollbar-thumb:hover { background: rgba(22,20,18,.32); background-clip: content-box; }
+.scroll-thin::-webkit-scrollbar-thumb:hover { background: rgba(198,214,219,.36); background-clip: content-box; }
 .scroll-thin::-webkit-scrollbar-track { background: transparent; }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -329,4 +514,4 @@ html, body {
 /* Wide content scrolls inside its own container; the page body never does. */
 .x-scroll { overflow-x: auto; }
 
-::selection { background: var(--accent-bg); color: var(--accent-ink); }
+::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--ink); }

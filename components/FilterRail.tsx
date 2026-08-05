@@ -76,7 +76,7 @@ export default function FilterRail({
         )}
         {f.needs_verification && isOpen && (
           <p className="mt-1.5 text-[10px] leading-snug px-1.5 py-1"
-            style={{ color: 'var(--ageing)', border: '1px solid color-mix(in srgb, var(--ageing) 40%, transparent)' }}
+            style={{ color: 'var(--ageing)', border: '1px solid color-mix(in srgb, var(--ageing) 52%, transparent)' }}
             title={f.needs_verification}>
             ⚑ regulatory claim needs verification
           </p>

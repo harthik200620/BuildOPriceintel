@@ -7,20 +7,34 @@ import { Money, CertBadge, rupees } from './primitives';
 type Key = 'vendor' | 'platform' | 'base' | 'gst' | 'delivery' | 'landed' | 'norm'
   | 'moq' | 'stock' | 'eta' | 'rating' | 'verified';
 
-const COLS: Array<{ key: Key; label: string; align?: 'right'; w: string; title?: string }> = [
-  { key: 'vendor', label: 'Vendor', w: '200px' },
-  { key: 'platform', label: 'Platform', w: '96px' },
-  { key: 'base', label: 'Seller price', align: 'right', w: '104px', title: 'What the seller quotes, in the unit the seller quotes it in' },
-  { key: 'gst', label: 'GST', w: '96px', title: 'How the seller states tax, and at what rate' },
-  { key: 'delivery', label: 'Delivery', align: 'right', w: '92px', title: 'Freight + handling + loading, per canonical unit' },
-  { key: 'landed', label: 'Landed', align: 'right', w: '104px', title: 'base + GST + freight + handling + loading' },
-  { key: 'norm', label: 'Per unit', align: 'right', w: '112px', title: 'The landed price per canonical unit — the only figure computed identically for every seller' },
-  { key: 'moq', label: 'MOQ', align: 'right', w: '84px' },
-  { key: 'stock', label: 'Stock', w: '86px' },
-  { key: 'eta', label: 'ETA', w: '82px' },
-  { key: 'rating', label: 'Rating', align: 'right', w: '80px' },
-  { key: 'verified', label: 'Verified', w: '96px' },
+const COLS: Array<{ key: Key; label: string; align?: 'right'; w: number; title?: string }> = [
+  { key: 'vendor', label: 'Vendor', w: 200 },
+  { key: 'platform', label: 'Platform', w: 96 },
+  { key: 'base', label: 'Seller price', align: 'right', w: 104, title: 'What the seller quotes, in the unit the seller quotes it in' },
+  { key: 'gst', label: 'GST', w: 96, title: 'How the seller states tax, and at what rate' },
+  { key: 'delivery', label: 'Delivery', align: 'right', w: 92, title: 'Freight + handling + loading, per canonical unit' },
+  { key: 'landed', label: 'Landed', align: 'right', w: 104, title: 'base + GST + freight + handling + loading' },
+  { key: 'norm', label: 'Per unit', align: 'right', w: 112, title: 'The landed price per canonical unit — the only figure computed identically for every seller' },
+  { key: 'moq', label: 'MOQ', align: 'right', w: 84 },
+  { key: 'stock', label: 'Stock', w: 86 },
+  { key: 'eta', label: 'ETA', w: 82 },
+  { key: 'rating', label: 'Rating', align: 'right', w: 80 },
+  { key: 'verified', label: 'Verified', w: 96 },
 ];
+
+/** Trailing spacer that carries the row's source link. */
+const TAIL_W = 96;
+
+/**
+ * One source for every width.
+ *
+ * The body cells used to repeat each column's width as a second literal, so a
+ * header and its column could drift apart silently — and the declared minWidth
+ * had already drifted, sitting at 1240 against a real content width of 1328.
+ * Derived here so a width can only be changed in one place.
+ */
+const W = (k: Key): number => COLS.find((c) => c.key === k)!.w;
+const MIN_W = COLS.reduce((n, c) => n + c.w, 0) + TAIL_W;
 
 const ROW_H = 40;
 
@@ -110,9 +124,9 @@ export default function VendorTable({
       </div>
 
       <div className="x-scroll glass-card" style={{ overflow: 'hidden' }}>
-        <div style={{ minWidth: 1240 }}>
+        <div style={{ minWidth: MIN_W }}>
           {/* header */}
-          <div className="flex sticky top-0 z-10 rule-b" style={{ background: 'rgba(22,20,18,.045)' }}>
+          <div className="flex sticky top-0 z-10 rule-b" style={{ background: 'var(--wash)' }}>
             {COLS.map((c) => (
               <button
                 key={c.key}
@@ -129,7 +143,7 @@ export default function VendorTable({
                 {sort.key === c.key && <span aria-hidden style={{ fontSize: 8 }}>{sort.dir === 1 ? '▲' : '▼'}</span>}
               </button>
             ))}
-            <span style={{ width: 96, flexShrink: 0 }} />
+            <span style={{ width: TAIL_W, flexShrink: 0 }} />
           </div>
 
           <div
@@ -144,17 +158,17 @@ export default function VendorTable({
                   const delivery = o.freight_paise + o.handling_paise + o.loading_paise;
                   const cell = 'px-2.5 text-[12px] flex items-center';
                   return (
-                    <div key={o.offer_id} className="flex rule-soft-b anim hover:bg-[rgba(168,67,27,.045)]"
+                    <div key={o.offer_id} className="flex rule-soft-b anim hover:bg-[var(--accent-bg)]"
                       style={{
                         height: ROW_H, position: 'relative',
                         // Marked where it sorts, not lifted to the top: the
                         // table's order is the price comparison, and moving a
                         // row would misstate where this seller actually stands.
                         ...(o.vendor.vendor_id === highlightVendorId
-                          ? { background: 'rgba(22,20,18,.045)', boxShadow: 'inset 2px 0 0 var(--accent)' }
+                          ? { background: 'var(--wash)', boxShadow: 'inset 2px 0 0 var(--accent)' }
                           : null),
                       }}>
-                      <div className={cell} style={{ width: '200px', flexShrink: 0, gap: '6px' }}>
+                      <div className={cell} style={{ width: W('vendor'), flexShrink: 0, gap: '6px' }}>
                         <span className="truncate" title={`${o.vendor.name}${o.vendor.locality ? ` — ${o.vendor.locality}` : ''}`}>
                           <span style={{ color: 'var(--ink)' }}>{o.vendor.name}</span>
                           {o.vendor.locality && (
@@ -186,7 +200,7 @@ export default function VendorTable({
                           style={{
                             top: '100%', background: 'var(--glass-strong)',
                             border: '1px solid var(--rule)', borderRadius: '10px',
-                            boxShadow: '0 6px 20px rgba(0,0,0,.10)',
+                            boxShadow: '0 8px 26px -6px rgba(0,8,11,.62)',
                           }}
                         >
                           <div className="text-[10px] uppercase tracking-[0.11em] mb-1.5" style={{ color: 'var(--ink-3)' }}>
@@ -206,53 +220,53 @@ export default function VendorTable({
                           ))}
                         </div>
                       )}
-                      <div className={cell} style={{ width: '96px', flexShrink: 0, color: 'var(--ink-2)' }}>{o.platform}</div>
-                      <div className={`${cell} justify-end`} style={{ width: '104px', flexShrink: 0 }}>
+                      <div className={cell} style={{ width: W('platform'), flexShrink: 0, color: 'var(--ink-2)' }}>{o.platform}</div>
+                      <div className={`${cell} justify-end`} style={{ width: W('base'), flexShrink: 0 }}>
                         <span className="fig" style={{ color: 'var(--ink-2)' }}>
                           {rupees(o.base_paise)}<span className="opacity-55 text-[9px]">/{o.base_unit}</span>
                         </span>
                       </div>
-                      <div className={cell} style={{ width: '96px', flexShrink: 0 }}>
+                      <div className={cell} style={{ width: W('gst'), flexShrink: 0 }}>
                         <span className="text-[10.5px]" style={{ color: 'var(--ink-3)' }}>
                           {o.gst_treatment === 'INCL' ? 'incl' : 'excl'} {(o.gst_rate_bp / 100).toFixed(0)}%
                         </span>
                       </div>
-                      <div className={`${cell} justify-end`} style={{ width: '92px', flexShrink: 0 }}>
+                      <div className={`${cell} justify-end`} style={{ width: W('delivery'), flexShrink: 0 }}>
                         <button onClick={() => onBreakdown(o)} className="fig anim hover:opacity-70 underline decoration-dotted underline-offset-2"
                           style={{ color: 'var(--ink-2)' }} title="Show how this delivery cost was computed">
                           {rupees(delivery)}
                         </button>
                       </div>
-                      <div className={`${cell} justify-end`} style={{ width: '104px', flexShrink: 0 }}>
+                      <div className={`${cell} justify-end`} style={{ width: W('landed'), flexShrink: 0 }}>
                         <span className="fig" style={{ color: 'var(--ink)' }}>{rupees(o.landed_paise)}</span>
                       </div>
-                      <div className={`${cell} justify-end`} style={{ width: '112px', flexShrink: 0 }}>
+                      <div className={`${cell} justify-end`} style={{ width: W('norm'), flexShrink: 0 }}>
                         <Money paise={o.normalised_paise} unit={unit} size="sm" />
                       </div>
-                      <div className={`${cell} justify-end`} style={{ width: '84px', flexShrink: 0, color: 'var(--ink-2)' }}>
+                      <div className={`${cell} justify-end`} style={{ width: W('moq'), flexShrink: 0, color: 'var(--ink-2)' }}>
                         <span className="tnum text-[11.5px]">{o.moq_qty ? `${o.moq_qty}${o.moq_unit ? ' ' + o.moq_unit : ''}` : '—'}</span>
                       </div>
-                      <div className={cell} style={{ width: '86px', flexShrink: 0 }}>
+                      <div className={cell} style={{ width: W('stock'), flexShrink: 0 }}>
                         <span className="text-[11px]" style={{ color: o.stock_state === 'out_of_stock' ? 'var(--accent)' : 'var(--ink-3)' }}>
                           {o.stock_state === 'in_stock' ? 'in stock' : o.stock_state === 'out_of_stock' ? 'out' : o.stock_state === 'on_request' ? 'on request' : 'unknown'}
                         </span>
                       </div>
-                      <div className={cell} style={{ width: '82px', flexShrink: 0, color: 'var(--ink-3)' }}>
+                      <div className={cell} style={{ width: W('eta'), flexShrink: 0, color: 'var(--ink-3)' }}>
                         <span className="text-[11px]">{o.lead_time_days == null ? '—' : o.lead_time_days <= 1 ? 'tomorrow' : `${o.lead_time_days} d`}</span>
                       </div>
-                      <div className={`${cell} justify-end`} style={{ width: '80px', flexShrink: 0 }}>
+                      <div className={`${cell} justify-end`} style={{ width: W('rating'), flexShrink: 0 }}>
                         <span className="tnum text-[11.5px]" style={{ color: 'var(--ink-2)' }}>
                           {o.rating ? `${o.rating.toFixed(1)}` : '—'}
                           {o.review_count ? <span className="opacity-55 ml-0.5">({o.review_count})</span> : null}
                         </span>
                       </div>
-                      <div className={cell} style={{ width: '96px', flexShrink: 0 }}>
+                      <div className={cell} style={{ width: W('verified'), flexShrink: 0 }}>
                         <span className="text-[11px]" style={{ color: 'var(--ink-3)' }}
                           title={new Date(o.fetched_at).toLocaleString('en-IN')}>
                           {relative(o.fetched_at)}
                         </span>
                       </div>
-                      <div className="px-2.5 flex items-center gap-1.5" style={{ width: 96, flexShrink: 0 }}>
+                      <div className="px-2.5 flex items-center gap-1.5" style={{ width: TAIL_W, flexShrink: 0 }}>
                         <CertBadge state={o.cert_state} compact />
                         <a href={o.source_url} target="_blank" rel="noreferrer noopener"
                           className="anim hover:opacity-70" style={{ color: 'var(--ink-3)' }} title="Open the source listing">

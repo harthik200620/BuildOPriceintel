@@ -14,7 +14,12 @@ import { computeFreight, fallbackDistanceKm, seedFromId } from '../lib/freight';
 import { resolveGstRate, GST_RATES, gstKeyFor } from '../lib/gst';
 import { assess } from '../lib/freshness';
 import { parseCards, pageMeta } from '../collector/sources/exportersindia';
+import { parseTradeIndia, __targetsFor } from '../collector/sources/directories';
 import { normalise, normaliseUnit } from '../collector/normalize';
+import {
+  contrast, stack, parseRootTokens, resolveToken, AA_TEXT,
+  type RGB, type RGBA,
+} from '../lib/contrast';
 
 let pass = 0, fail = 0;
 const failures: string[] = [];
@@ -431,6 +436,266 @@ console.log('\nUNITS — the forms sellers really type');
   // Refusing is the correct answer; the collector records these and loads nothing.
   eq('"8000 pieces" is refused, not guessed', normaliseUnit('8000 pieces'), null);
   eq('"RBS PVC ABS" is refused', normaliseUnit('RBS PVC ABS'), null);
+}
+
+// ── TradeIndia: parsed from an archived page, no network ───────────────────
+// This source reported `parse_fail` on all eight category×region combinations
+// for the entire build. Three separate causes, and a fixture is the only thing
+// that would have distinguished them from "this city has no dealers".
+console.log('\nTRADEINDIA — the three failures that read as one');
+{
+  const tgt = (category: string, region_id: string) =>
+    __targetsFor(category, region_id).find((t) => t.platform === 'TradeIndia')!;
+
+  const cement = tgt('cement', 'hyderabad');
+  ok('the dead -city-183463.html id is gone from the URL', !cement.url.includes('183463'));
+  ok('the city travels in the keyword, because ?city= does not bind',
+    cement.url.includes('keyword=cement%20hyderabad'), cement.url);
+
+  const fx = fs.readFileSync(
+    path.join(process.cwd(), 'collector/fixtures/tradeindia_hyderabad_cement.html'), 'utf8',
+  );
+  // Cause 2: there is no rupee glyph anywhere, so the generic
+  // [class*=product|listing|card] + ₹ parser could never have matched this page
+  // no matter which URL it was pointed at.
+  ok('the page carries no rupee glyph to match on', !fx.includes('₹'));
+  ok('the listings live in a __NEXT_DATA__ island', fx.includes('id="__NEXT_DATA__"'));
+
+  const p = parseTradeIndia(fx, cement);
+  eq('the archived page yields one priced in-region offer', p.priced, 1);
+  eq('and reports itself ok rather than parse_fail', p.reason, 'ok');
+  ok('the price keeps TradeIndia\'s own "(Approx.)" hedge verbatim',
+    p.offers[0].price_text.includes('(Approx.)'), p.offers[0].price_text);
+  // The whole reason this source adds no supply: no unit is published, so
+  // normalise() refuses it by name instead of inventing a basis.
+  ok('no unit is invented for a listing that publishes none',
+    p.offers.every((o) => o.price_unit === null));
+  eq('and normalise refuses it rather than guessing',
+    normalise({ ...p.offers[0], price_unit: null } as any)?.ok, false);
+
+  // Cause 3: the category term is dropped on some queries, so a city-local
+  // mist maker would enter the surface as cement without this guard.
+  const tmt = tgt('tmt_steel', 'hyderabad');
+  const fxT = fs.readFileSync(
+    path.join(process.cwd(), 'collector/fixtures/tradeindia_hyderabad_tmt_steel.html'), 'utf8',
+  );
+  const pt = parseTradeIndia(fxT, tmt);
+  ok('an in-region listing that is off-topic is dropped, not loaded', pt.priced === 0);
+  eq('and it says so rather than claiming the category is empty', pt.reason, 'no_topic');
+  ok('the dropped row was genuinely in-region', pt.inRegion > 0);
+}
+
+// ── the typefaces, guarded by their metrics rather than their names ────────
+// A font swap is the change most likely to break this layout silently: money
+// columns are fixed-width, rows are hard-height with no clip, and nothing here
+// measures a rendered box. These assertions hold without a renderer. The ones
+// that need one live in scripts/typography-probe.ts.
+console.log('\nTYPE — the metrics contract');
+{
+  const layout = fs.readFileSync(path.join(process.cwd(), 'app', 'layout.tsx'), 'utf8');
+  const css = fs.readFileSync(path.join(process.cwd(), 'app', 'globals.css'), 'utf8');
+
+  // next ships the capsize metrics for every Google family it can serve, so the
+  // shape of a face is knowable offline, before anything is rendered.
+  const METRICS = path.join(process.cwd(), 'node_modules', 'next', 'dist', 'server', 'capsize-font-metrics.json');
+  ok('the font metrics database is where we expect it', fs.existsSync(METRICS),
+    'next moved it — fix this path rather than deleting the guard, or the checks below silently stop running');
+
+  if (fs.existsSync(METRICS)) {
+    const raw = JSON.parse(fs.readFileSync(METRICS, 'utf8')) as Record<string, any>;
+    const byName: Record<string, any> = {};
+    for (const v of Object.values(raw)) if (v?.familyName) byName[v.familyName] = v;
+
+    const imported = (layout.match(/import\s*\{([^}]+)\}\s*from\s*'next\/font\/google'/)?.[1] ?? '')
+      .split(',').map((s) => s.trim()).filter(Boolean);
+    eq('three families are loaded', imported.length, 3);
+
+    const metricOf = (ident: string) => byName[ident.replace(/_/g, ' ')];
+    for (const ident of imported) {
+      ok(`${ident} resolves in the metrics database`, !!metricOf(ident));
+    }
+
+    // Role is decided by which const the family is assigned to, so the guard
+    // follows a rename.
+    const roleOf = (role: string) =>
+      layout.match(new RegExp(`const ${role} = (\\w+)\\(`))?.[1] ?? '';
+    const box = (m: any) => (m.ascent - m.descent + (m.lineGap ?? 0)) / m.unitsPerEm;
+    const adv = (m: any) => m.xWidthAvg / m.unitsPerEm;
+
+    const fig = metricOf(roleOf('figure'));
+    if (fig) {
+      // The binding constraint is the unit-price column: w 126 less px-2.5 both
+      // sides leaves 106px, and the worst real string is ~90px at 0.60em. Guard
+      // at 0.65 and it stays inside with margin; past that it overflows a cell
+      // that has no clip and paints over its neighbour.
+      ok(`the figure face is monospace — ${roleOf('figure')}`, fig.category === 'monospace');
+      ok(`its advance fits the money columns — ${adv(fig).toFixed(4)}em ≤ 0.65`, adv(fig) <= 0.65,
+        `${adv(fig).toFixed(4)}em would overflow the 106px unit-price budget`);
+    }
+    const uiM = metricOf(roleOf('ui'));
+    if (uiM) {
+      // Nothing sets line-height on body, so every table cell resolves to
+      // `normal` — which is this number. ±8% of Inter Tight's 1.2100, because
+      // 8% of a 12px line compounds to about one spec row over the detail
+      // sheet, which is where a fixed scroll fraction stops landing right.
+      const b = box(uiM);
+      ok(`the UI face's line box is within 8% of 1.2100 — ${b.toFixed(4)}`, b >= 1.113 && b <= 1.307,
+        `${b.toFixed(4)} shifts every unpinned line box in the app`);
+    }
+  }
+
+  // ₹ is U+20B9, which Google serves from latin-ext, not latin. Without it the
+  // leading glyph of every price falls back to a system font at an unrelated
+  // advance width, inside right-aligned columns that exist to align.
+  const subsets = layout.match(/subsets:\s*\[[^\]]*\]/g) ?? [];
+  eq('every face declares its subsets', subsets.length, 3);
+  ok('and every one includes latin-ext, which is where ₹ lives',
+    subsets.every((s) => s.includes('latin-ext')), subsets.join(' | '));
+
+  // .hero-figure and .fig are different families. A call site that picks
+  // between them on data puts two faces in one column, which is what
+  // tabular-nums cannot fix.
+  const tsx = ['components', 'app'].flatMap((d) => {
+    const walk = (p: string): string[] => fs.readdirSync(p, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? walk(path.join(p, e.name)) : e.name.endsWith('.tsx') ? [path.join(p, e.name)] : []);
+    return walk(path.join(process.cwd(), d));
+  });
+  const dynamicAccent = tsx.filter((f) =>
+    /<Money[^>]*accent=\{(?!true\}|false\})/s.test(fs.readFileSync(f, 'utf8')));
+  ok('no <Money> picks its typeface from data', dynamicAccent.length === 0,
+    dynamicAccent.map((f) => path.relative(process.cwd(), f)).join(', '));
+
+  // A half-finished rename leaves a variable named after a face it no longer is.
+  const stale = ['Inter_Tight', 'JetBrains_Mono', 'Instrument_Serif',
+    'font-inter-tight', 'font-jetbrains-mono', 'font-instrument-serif'];
+  const found = stale.filter((s) => layout.includes(s) || css.includes(s));
+  ok('no outgoing family name survives the rename', found.length === 0, found.join(', '));
+
+  // Inter-specific character variants used to sit on body, where they inherited
+  // onto all three families.
+  // Comments stripped first: the rule now carries a comment explaining why the
+  // declaration was removed, and matching on that would fail forever.
+  const cssNoComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const bodyRule = cssNoComments.match(/\nbody\s*\{[^}]*\}/)?.[0] ?? '';
+  ok('body sets no font-feature-settings', !bodyRule.includes('font-feature-settings'),
+    'those tags mean different things per face and body is inherited by all three');
+
+  // tabular-nums fixes the advance; it does not force lining figures.
+  for (const cls of ['.fig', '.tnum']) {
+    const rule = css.match(new RegExp(`\\${cls}\\s+?\\{[^}]*\\}`))?.[0] ?? '';
+    ok(`${cls} asks for tabular AND lining figures`,
+      /tabular-nums/.test(rule) && /lining-nums/.test(rule), rule.slice(0, 80));
+  }
+
+  // lib/contrast.ts:parseRootTokens matches the FIRST :root block, and the
+  // whole contrast suite hangs on it. A type migration is exactly what tempts
+  // someone into reformatting this file.
+  ok(':root still follows @theme', css.indexOf(':root') > css.indexOf('@theme'));
+  ok('and still parses to a full token map', parseRootTokens(css).size > 20,
+    `${parseRootTokens(css).size} tokens — the contrast suite reads this same block`);
+}
+
+// ── the palette clears WCAG AA on every surface it can land on ─────────────
+// This used to be a comment in globals.css listing measured ratios. A comment
+// asserts nothing: when the theme was repainted from Alabaster to Patina, the
+// first candidate palette failed 16 of the 120 pairings below and the comment
+// would have shipped saying otherwise.
+//
+// The values are PARSED from the live stylesheet rather than copied here, so a
+// future colour edit that breaks contrast fails this suite instead of shipping.
+console.log('\nCONTRAST — every ink, on every pane, over every ground');
+{
+  const css = fs.readFileSync(path.join(process.cwd(), 'app', 'globals.css'), 'utf8');
+  const t = parseRootTokens(css);
+  const rgb = (name: string) => {
+    const v = resolveToken(t, name);
+    ok(`${name} is defined and parseable`, !!v);
+    return v ? (v.slice(0, 3) as unknown as RGB) : ([0, 0, 0] as const as RGB);
+  };
+  const rgba = (name: string) => resolveToken(t, name)!;
+
+  const base = rgb('--canvas');
+  // Four grounds, because a label can land on bare canvas, on the deep floor,
+  // or on either bloom at its peak. The blooms are the light ones and they are
+  // where the margin actually goes.
+  const grounds: Array<[string, RGB]> = [
+    ['abyss', rgb('--abyss')],
+    ['canvas', base],
+    ['teal bloom', stack(base, rgba('--bloom-teal'))],
+    ['silver bloom', stack(base, rgba('--bloom-silver'))],
+  ];
+  // Each pane token is the PEAK of its gradient — the brightest point, and so
+  // the worst case for a light foreground.
+  const panes: Array<[string, RGBA | null]> = [
+    ['bare', null],
+    ['glass-quiet', rgba('--glass-quiet')],
+    ['glass', rgba('--glass')],
+    ['glass-card', rgba('--glass-card')],
+    ['glass-strong', rgba('--glass-strong')],
+  ];
+
+  const surfaces = grounds.flatMap(([gn, g]) =>
+    panes.map(([pn, p]) => [`${pn} / ${gn}`, p ? stack(g, p) : g] as [string, RGB]),
+  );
+
+  // --ink-3 carries the 10–11 px labels, so 4.5:1 genuinely applies to it; the
+  // 3:1 large-text allowance starts at 18.66 px bold / 24 px regular.
+  const textTokens = ['--ink', '--ink-2', '--ink-3', '--stale', '--fresh', '--ageing',
+    '--accent', '--accent-lift', '--accent-ink'];
+
+  for (const name of textTokens) {
+    const fg = rgb(name);
+    let worst = Infinity, where = '';
+    for (const [sn, s] of surfaces) {
+      const r = contrast(fg, s);
+      if (r < worst) { worst = r; where = sn; }
+    }
+    ok(`${name} clears AA (4.5) on all 20 surfaces — worst ${worst.toFixed(2)} on ${where}`,
+      worst >= AA_TEXT, `${worst.toFixed(3)} < ${AA_TEXT}`);
+  }
+
+  // Text sitting ON a bright pill rather than under one — the pressed states,
+  // which invert on this theme.
+  for (const pill of ['--ink', '--accent']) {
+    const r = contrast(rgb('--on-bright'), rgb(pill));
+    ok(`--on-bright clears AA on a ${pill} pill — ${r.toFixed(2)}`, r >= AA_TEXT, r.toFixed(3));
+  }
+
+  // --seg-on is brighter than any pane and is deliberately NOT in the list
+  // above. It is not a general surface: the only thing that ever renders on a
+  // selected segment is its own label, and globals.css pins that to --ink.
+  // Measuring every ink against it would fail six of them for a pairing the
+  // page cannot produce — so it gets the one assertion that is real.
+  {
+    const segOn = stack(grounds[3][1], rgba('--seg-on'));
+    const r = contrast(rgb('--ink'), segOn);
+    ok(`--ink clears AA on a selected segment — ${r.toFixed(2)}`, r >= AA_TEXT, r.toFixed(3));
+    ok('nothing dimmer than --ink is styled onto a selected segment',
+      /\.seg button\[aria-pressed="true"\]\s*\{[^}]*color:\s*var\(--ink\)/.test(css),
+      'if that rule changes colour, add the new token to this check');
+  }
+
+  // Non-text UI: hairlines and borders only need 3:1, but they do need it, or
+  // a pane has no visible edge at all.
+  for (const name of ['--rule', '--glass-hair']) {
+    const v = rgba(name);
+    let worst = Infinity;
+    for (const [, s] of surfaces) worst = Math.min(worst, contrast(stack(s, v), s));
+    ok(`${name} is visible against every surface — worst ${worst.toFixed(2)}`, worst > 1.06,
+      `${worst.toFixed(3)} is indistinguishable from its background`);
+  }
+
+  // The theme is dark now; leaving color-scheme on `light` renders native
+  // <select> popups and unchecked checkboxes as white boxes punched through it.
+  eq('color-scheme is dark', t.get('color-scheme'), 'dark');
+
+  // --stale is deliberately neutral: what marks a dead price is colour having
+  // drained out of it, which only reads if it is not tinted like everything else.
+  {
+    const [r, g, b] = rgb('--stale');
+    ok('--stale is neutral, not tinted like --ink-3', Math.max(r, g, b) - Math.min(r, g, b) <= 6,
+      `spread ${Math.max(r, g, b) - Math.min(r, g, b)}`);
+  }
 }
 
 console.log(`\n${fail === 0 ? 'PASS' : 'FAIL'} — ${pass} passed, ${fail} failed`);

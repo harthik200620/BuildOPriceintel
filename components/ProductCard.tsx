@@ -88,7 +88,7 @@ export default function ProductCard({
                 {card.spec_chips.slice(0, 3).map((c) => (
                   <span key={c} className="text-[10.5px] px-2 py-[2px]"
                     style={{
-                      color: 'var(--ink-2)', background: 'rgba(22,20,18,.04)',
+                      color: 'var(--ink-2)', background: 'var(--wash)',
                       border: '1px solid var(--glass-hair)', borderRadius: 'var(--radius-pill)',
                     }}>
                     {c}
@@ -102,7 +102,13 @@ export default function ProductCard({
         {/* The hero number — the accent, spent once. */}
         <div className="mt-4 flex items-end justify-between gap-3">
           <div className="min-w-0">
-            <Money paise={card.normalised_paise} unit={card.unit_canonical} size="hero" accent={!stale} stale={stale} />
+            {/* `accent` is unconditional. It used to be `!stale`, which flipped
+                the face between the display serif and the figure face at 38px
+                and reflowed this min-w-0 flex child as a price aged. `stale`
+                alone is enough: .price-stale sets background:none and
+                -webkit-text-fill-color, and sits after .hero-figure at equal
+                specificity, so it already neutralises the gradient. */}
+            <Money paise={card.normalised_paise} unit={card.unit_canonical} size="hero" accent stale={stale} />
             <div className="text-[10.5px] mt-1.5 uppercase tracking-[.07em]" style={{ color: 'var(--ink-3)' }}>
               delivered to {' '}
               <span style={{ color: 'var(--ink-2)' }}>your pincode</span> · incl {(card.gst_rate_bp / 100).toFixed(0)}% GST
@@ -164,7 +170,7 @@ export default function ProductCard({
           aria-pressed={compared}
           title={compared ? 'Remove from compare' : 'Add to compare'}
           className="chip anim w-7 h-7 grid place-items-center"
-          style={compared ? { background: 'var(--ink)', color: '#fbfaf8', borderColor: 'var(--ink)' } : undefined}
+          style={compared ? { background: 'var(--ink)', color: 'var(--on-bright)', borderColor: 'var(--ink)' } : undefined}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden>
             <path d="M4 18V9M10 18V5M16 18v-6M22 18V8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -175,7 +181,7 @@ export default function ProductCard({
           aria-pressed={saved}
           title={saved ? 'Remove from my list' : 'Add to my list'}
           className="chip anim w-7 h-7 grid place-items-center"
-          style={saved ? { background: 'var(--accent)', color: '#fff', borderColor: 'var(--accent)' } : undefined}
+          style={saved ? { background: 'var(--accent)', color: 'var(--on-bright)', borderColor: 'var(--accent)' } : undefined}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden>
             <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />

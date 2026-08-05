@@ -25,6 +25,22 @@ import React from 'react';
 
 const INTERVAL_MS = 1150;
 
+/**
+ * Every one of the 1,796 collected photographs is a white-background studio
+ * shot, and on this ground each one is a lit rectangle punched through a dark
+ * page. They are damped rather than left glaring — but only at rest.
+ *
+ * The moment attention lands on a card the damping releases and the goods are
+ * shown as they are. The detail sheet's gallery renders its own <img> and is
+ * untouched by any of this, which is the point: a page where the photograph is
+ * part of the purchase cannot show cement the wrong colour at the moment
+ * someone is deciding.
+ *
+ * Exported because the table and the suggestion list show the same photographs
+ * at thumbnail size and need the same treatment, from one definition.
+ */
+export const DAMPED = 'brightness(.86) contrast(1.08) saturate(1.06)';
+
 export default function CardGallery({
   images, alt, size = 92, active = false,
 }: {
@@ -65,9 +81,9 @@ export default function CardGallery({
       className="relative shrink-0 overflow-hidden"
       style={{
         width: size, height: size, borderRadius: '10px',
-        background: 'linear-gradient(160deg, rgba(255,255,255,.92), rgba(22,20,18,.06))',
+        background: 'linear-gradient(160deg, var(--glass-card), rgba(1,8,11,.34))',
         border: '1px solid var(--glass-hair)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,.9)',
+        boxShadow: 'inset 0 1px 0 var(--glass-border)',
       }}
     >
       {live.map((src, i) => {
@@ -89,18 +105,34 @@ export default function CardGallery({
             style={{
               opacity: i === idx ? 1 : 0,
               transform: i === idx ? 'scale(1)' : 'scale(1.035)',
+              filter: active ? undefined : DAMPED,
               transition: reduceMotion
                 ? 'none'
-                : 'opacity .34s ease, transform .5s cubic-bezier(.2,.7,.3,1)',
+                : 'opacity .34s ease, filter .28s ease, transform .5s cubic-bezier(.2,.7,.3,1)',
             }}
           />
         );
       })}
 
+      {/* What actually does the blending. The photograph is object-cover and
+          absolutely positioned, so it covers the plate completely — darkening
+          the backing would achieve nothing. This sits ABOVE the image and
+          dissolves its edges into the plate, so a white studio background ends
+          in a fade rather than a hard rectangle. */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden
+        style={{
+          background: 'radial-gradient(118% 118% at 50% 42%, transparent 46%, rgba(4,20,26,.62) 100%)',
+          opacity: active ? 0 : 1,
+          transition: reduceMotion ? 'none' : 'opacity .28s ease',
+        }}
+      />
+
       {live.length > 1 && (
         <div
           className="absolute left-0 right-0 bottom-0 flex gap-[2px] p-[3px]"
-          style={{ background: 'linear-gradient(to top, rgba(22,20,18,.34), transparent)' }}
+          style={{ background: 'linear-gradient(to top, rgba(1,8,11,.66), transparent)' }}
         >
           {live.map((src, i) =>
             reduceMotion ? (
@@ -110,14 +142,14 @@ export default function CardGallery({
                 aria-label={`Picture ${i + 1} of ${live.length}`}
                 aria-current={i === idx}
                 className="flex-1 pointer-events-auto"
-                style={{ height: 3, borderRadius: 2, background: i === idx ? 'var(--accent-lift)' : 'rgba(255,255,255,.55)' }}
+                style={{ height: 3, borderRadius: 2, background: i === idx ? 'var(--accent-lift)' : 'rgba(232,240,242,.42)' }}
               />
             ) : (
               <span
                 key={src}
                 aria-hidden
                 className="flex-1 anim"
-                style={{ height: 3, borderRadius: 2, background: i === idx ? 'var(--accent-lift)' : 'rgba(255,255,255,.55)' }}
+                style={{ height: 3, borderRadius: 2, background: i === idx ? 'var(--accent-lift)' : 'rgba(232,240,242,.42)' }}
               />
             ),
           )}
@@ -136,9 +168,9 @@ function EmptyPlate({ size }: { size: number }) {
       className="shrink-0 grid place-items-center"
       style={{
         width: size, height: size, borderRadius: '10px',
-        background: 'linear-gradient(160deg, rgba(255,255,255,.9), rgba(22,20,18,.05))',
+        background: 'linear-gradient(160deg, var(--glass-card), rgba(1,8,11,.30))',
         border: '1px solid var(--glass-hair)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,.9)',
+        boxShadow: 'inset 0 1px 0 var(--glass-border)',
       }}
       title="No photograph was published with any listing for this product"
     >

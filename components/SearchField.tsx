@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Money } from './primitives';
+import { DAMPED } from './CardGallery';
 
 interface Suggestion {
   products: Array<{ product_id: string; title: string; brand: string | null; category: string; unit_canonical: string; image_url: string | null; normalised_paise: number; offer_count: number }>;
@@ -139,7 +140,7 @@ export default function SearchField({
           role="listbox"
           className="absolute left-0 right-0 top-full mt-1.5 z-50 fade-up scroll-thin"
           style={{
-            background: 'var(--glass)', WebkitBackdropFilter: 'blur(20px) saturate(1.7)', backdropFilter: 'blur(20px) saturate(1.7)',
+            background: 'var(--chrome)', WebkitBackdropFilter: 'blur(20px) saturate(1.15)', backdropFilter: 'blur(20px) saturate(1.15)',
             border: '1px solid var(--glass-hair)', borderRadius: 'var(--radius)',
             boxShadow: 'var(--glass-shadow-lift), inset 0 1px 0 var(--glass-border)',
             maxHeight: '68vh', overflowY: 'auto',
@@ -212,12 +213,12 @@ export default function SearchField({
                     onMouseEnter={() => setActive(idx)}
                     onClick={() => { window.dispatchEvent(new CustomEvent('buildo:open-sku', { detail: p.product_id })); setOpen(false); }}
                     className="w-full flex items-center gap-3 px-3.5 py-2 text-left anim"
-                    style={active === idx ? { background: 'rgba(22,20,18,.045)' } : undefined}
+                    style={active === idx ? { background: 'var(--wash)' } : undefined}
                   >
                     <span className="w-8 h-8 shrink-0 grid place-items-center overflow-hidden"
-                      style={{ background: 'rgba(22,20,18,.045)', border: '1px solid var(--rule)' }}>
+                      style={{ background: 'var(--wash)', border: '1px solid var(--rule)' }}>
                       {p.image_url
-                        ? <img src={p.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        ? <img src={p.image_url} alt="" className="w-full h-full object-cover" loading="lazy" style={{ filter: DAMPED }} />
                         : <span className="text-[9px]" style={{ color: 'var(--ink-3)' }}>—</span>}
                     </span>
                     <span className="flex-1 min-w-0">
