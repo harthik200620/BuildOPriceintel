@@ -86,6 +86,46 @@ export const VOCAB: VocabEntry[] = [
     forms: ['chajja', 'chhajja', 'sunshade'] },
 ];
 
+/**
+ * Vocabulary terms that name a stored attribute value.
+ *
+ * `lookupTerm` resolved "opc" to the canonical token and the parser pushed it
+ * into free text, where it only ever moved the lexical score. So "bangur opc
+ * 53 grade" ranked the OPC bags first and then listed thirteen PPC and one PSC
+ * underneath them — a different cement, a different IS code, and a different
+ * pour, presented as the same answer.
+ *
+ * The values are the ones actually stored in product.attrs, read out of the
+ * catalogue rather than guessed:
+ *   cement_type   OPC · PPC · PSC · White cement · Sulphate resisting
+ *   pipe_system   UPVC / PVC · CPVC · HDPE · SWR
+ *   grade         Fe 550 · Fe 500 · Fe 550D · Fe 500D
+ *   block_type    Concrete solid block · Fly ash brick · CLC block ·
+ *                 Red clay brick · Concrete hollow block · AAC block
+ *
+ * Two are deliberately absent. 'concrete block' spans both the solid and the
+ * hollow value, so binding it to either would silently drop half the stock;
+ * 'brick' names the category, not a type. Both stay free text.
+ *
+ * 'gi pipe' IS bound even though the catalogue currently stocks no GI. A query
+ * for it now falls to the relaxation ladder, which says so — better than the
+ * UPVC and HDPE it used to answer with.
+ */
+export const TERM_CONSTRAINTS: Record<string, { key: string; value: string }> = {
+  opc: { key: 'cement_type', value: 'OPC' },
+  ppc: { key: 'cement_type', value: 'PPC' },
+  psc: { key: 'cement_type', value: 'PSC' },
+  cpvc: { key: 'pipe_system', value: 'CPVC' },
+  upvc: { key: 'pipe_system', value: 'UPVC / PVC' },
+  swr: { key: 'pipe_system', value: 'SWR' },
+  hdpe: { key: 'pipe_system', value: 'HDPE' },
+  'gi pipe': { key: 'pipe_system', value: 'GI' },
+  fe500: { key: 'grade', value: 'Fe 500' },
+  fe500d: { key: 'grade', value: 'Fe 500D' },
+  'aac block': { key: 'block_type', value: 'AAC block' },
+  'fly ash brick': { key: 'block_type', value: 'Fly ash brick' },
+};
+
 /** Brand aliases. Corrections are shown to the user, never applied silently. */
 export const BRAND_ALIASES: Record<string, string> = {
   ultratec: 'UltraTech', ultratech: 'UltraTech', 'ultra tech': 'UltraTech', ultrateck: 'UltraTech',

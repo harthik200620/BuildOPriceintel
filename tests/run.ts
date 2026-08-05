@@ -698,6 +698,118 @@ console.log('\nCONTRAST — every ink, on every pane, over every ground');
   }
 }
 
+// ── the query means what it says ─────────────────────────────────────────────
+//
+// "bangur opc 53 grade" used to return 85 sellers, of which 9 were Bangur and
+// 14 were PPC or PSC — a different cement under a different IS code — beneath a
+// heading that read "85 sellers". Two causes: typed constraints were OR'd
+// (`matched > 0`), so a row failing the brand still qualified on the grade; and
+// a brand was only recognised when it appeared in a hand-written alias table,
+// which carried UltraTech and not Bangur.
+console.log('\nQUERY — a stated constraint is a filter, not a hint');
+{
+  const q = (s: string) => search({ q: s, pincode: '500001', region_id: 'hyderabad', limit: 500 });
+
+  {
+    const r = q('bangur opc 53 grade');
+    const wrongBrand = r.results.filter((x: any) => !/^bangur/i.test(String(x.brand ?? '')));
+    ok('a named brand excludes every other brand', wrongBrand.length === 0,
+      `${wrongBrand.length} of ${r.results.length}: ${[...new Set(wrongBrand.map((x: any) => x.brand))].slice(0, 5).join(', ')}`);
+    ok('the brand query still returns stock', r.results.length > 0);
+  }
+
+  for (const [query, needle] of [
+    ['bangur opc 53 grade', 'OPC'], ['ppc cement', 'PPC'], ['cpvc pipe', 'CPVC'],
+  ] as const) {
+    const r = q(query);
+    const wrong = r.results.filter((x: any) => !new RegExp(`\\b${needle}\\b`, 'i').test(String(x.title ?? '')));
+    ok(`"${query}" returns only ${needle}`, wrong.length === 0,
+      `${wrong.length} of ${r.results.length}, e.g. ${wrong[0]?.title}`);
+  }
+
+  {
+    // The catalogue stocks no GI. Answering with UPVC and HDPE anyway is the
+    // failure; relaxing and SAYING so is the fix.
+    const r = q('gi pipe');
+    ok('an unstocked type relaxes rather than answering with something else',
+      r.zero_result !== null && (r.zero_result?.relaxed ?? []).some((k: string) => /pipe/i.test(k)),
+      JSON.stringify(r.zero_result?.relaxed ?? null));
+  }
+
+  // A facet count is a promise about what clicking it leaves you looking at.
+  // These counted offers while the list showed one card per vendor, so the rail
+  // read "OPC 145" above a list of 85 and no click could ever reach that number.
+  {
+    const base = search({ q: 'cement', pincode: '500001', region_id: 'hyderabad', limit: 1 });
+    let checked = 0;
+    const broken: string[] = [];
+    for (const f of base.facets) {
+      for (const v of f.values.filter((x: any) => x.count > 0).slice(0, 3)) {
+        const got = search({
+          q: 'cement', pincode: '500001', region_id: 'hyderabad', limit: 1,
+          facets: { [f.facet_id]: [v.label] },
+        });
+        checked++;
+        if (got.total !== v.count) broken.push(`${f.facet_id}=${v.label} promised ${v.count}, got ${got.total}`);
+      }
+    }
+    ok(`every facet count predicts its own result size (${checked} checked)`,
+      broken.length === 0, broken.slice(0, 4).join(' · '));
+    ok('the facet sample was not empty', checked >= 10, `only ${checked}`);
+  }
+
+  // A category chip keeps the query and changes the category, so its count is a
+  // promise about that click. It used to be a catalogue-wide COUNT(*) that
+  // ignored the query entirely: "bangur opc 53 grade" offered "Bricks & blocks
+  // 260" and delivered nothing.
+  {
+    const base = search({ q: 'cement', pincode: '500001', region_id: 'hyderabad', limit: 1 });
+    const broken: string[] = [];
+    for (const c of base.intent_chips) {
+      const got = search({ q: 'cement', pincode: '500001', region_id: 'hyderabad', limit: 1, category: c.category });
+      if (got.total !== c.count) broken.push(`${c.label} promised ${c.count}, got ${got.total}`);
+    }
+    ok('every category chip predicts its own result size', broken.length === 0, broken.join(' · '));
+    ok('a query only offers categories it can actually reach',
+      base.intent_chips.every((c: any) => c.count > 0));
+  }
+
+  // Sellers attach the wrong bag, and the photo pool is per product — so one
+  // seller's mistake became the still frame on every card for that product. The
+  // Bangur OPC 53 card was showing shree-opc-53-cement.png.
+  {
+    const src = new Map<string, string>();
+    for (const row of prep(
+      `SELECT local_path, source_url FROM product_image WHERE kind='photo' AND local_path IS NOT NULL`,
+    ).all() as any[]) {
+      if (row.source_url) src.set(row.local_path, String(row.source_url).toLowerCase());
+    }
+    const heads = new Set(
+      (prep(`SELECT DISTINCT brand FROM product WHERE brand IS NOT NULL`).all() as any[])
+        .map((r) => String(r.brand).toLowerCase().split(/\s+/)[0])
+        .filter((b) => b.length >= 4),
+    );
+    const r = search({ q: '', pincode: '500001', region_id: 'hyderabad', limit: 600 });
+    const wrong: string[] = [];
+    for (const card of r.results as any[]) {
+      const mine = String(card.brand ?? '').toLowerCase().split(/\s+/)[0];
+      if (mine.length < 4) continue;
+      for (const img of card.images ?? []) {
+        const u = src.get(img);
+        if (!u || u.includes(mine)) continue;
+        for (const other of heads) {
+          if (other !== mine && u.includes(other)) {
+            wrong.push(`${card.title} [${card.brand}] <- ${u.split('/').pop()}`);
+            break;
+          }
+        }
+      }
+    }
+    ok(`no card carries a photo that names another maker (${r.results.length} cards)`,
+      wrong.length === 0, wrong.slice(0, 3).join(' · '));
+  }
+}
+
 console.log(`\n${fail === 0 ? 'PASS' : 'FAIL'} — ${pass} passed, ${fail} failed`);
 if (failures.length) { console.log('\nFailures:'); for (const f of failures) console.log(`  · ${f}`); }
 close();

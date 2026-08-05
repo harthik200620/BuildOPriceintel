@@ -302,20 +302,58 @@ function attrOf(row: Row): Record<string, unknown> {
   return v;
 }
 
-/** Typed constraints are filters, not text. */
+/**
+ * Typed constraints are filters, not text.
+ *
+ * A row passes when it CONTRADICTS nothing the query stated. That is not the
+ * same as matching something, which is what this used to test: `matched > 0`
+ * admitted a row on any single constraint, so "bangur opc 53 grade" returned
+ * every OPC 53 cement in the catalogue — a Shree bag matched cement_type and
+ * grade, failed brand, and shipped anyway. 76 of the 85 results were the wrong
+ * brand, under a heading that read "85 sellers".
+ *
+ * An attribute the row does not declare is unknown, not wrong, and is still
+ * tolerated — a seller who omits the grade should not vanish from a grade
+ * query, and that tolerance is why the old OR looked like it worked. So the
+ * test is: of the constraints this row can actually answer, it must answer all
+ * of them. When that leaves nothing, the relaxation ladder below recovers and
+ * names what it dropped, which is the honest form of what the OR did silently.
+ */
 function matchesConstraints(row: Row, constraints: Record<string, string | number>): { ok: boolean; matched: number; total: number } {
   const a = attrOf(row);
   const keys = Object.keys(constraints).filter((k) => !k.startsWith('_'));
   if (!keys.length) return { ok: true, matched: 0, total: 0 };
   let matched = 0;
+  let contradicted = 0;
   for (const k of keys) {
     const want = constraints[k];
-    if (k === 'brand') { if (String(row.brand ?? '').toLowerCase() === String(want).toLowerCase()) matched++; continue; }
+    if (k === 'brand') {
+      const got = String(row.brand ?? '').toLowerCase();
+      const w = String(want).toLowerCase();
+      // Brand is the one constraint where absence is a contradiction rather
+      // than a gap. A missing grade is a seller who did not fill the field in
+      // on a real graded product; a missing brand is a listing the pipeline
+      // titled "Unbranded", and it is not the brand the buyer named. Nine of
+      // them were riding along in every Bangur search.
+      if (got === w || (got && got.startsWith(`${w} `))) matched++;
+      else contradicted++;
+      continue;
+    }
     const got = a[k];
     if (got === undefined || got === null) continue;
     if (typeof want === 'number' ? Number(got) === want : String(got).toLowerCase() === String(want).toLowerCase()) matched++;
+    else contradicted++;
   }
-  return { ok: matched > 0 || keys.length === 0, matched, total: keys.length };
+  // Both halves are load-bearing, and dropping either one is a visible defect.
+  //
+  //   contradicted === 0  — the row must not fail anything it can answer. Without
+  //   it, "bangur opc 53" returns every OPC 53 cement in the catalogue.
+  //
+  //   matched > 0  — the row must affirmatively answer something. Without it, a
+  //   listing that declares no brand and no attributes contradicts nothing by
+  //   vacuum and rides in on lexical relevance alone; that alone took the same
+  //   query from 85 rows to 139, most of them unbranded.
+  return { ok: matched > 0 && contradicted === 0, matched, total: keys.length };
 }
 
 function facetValueOf(row: Row, facetKey: string): string | null {
@@ -629,14 +667,30 @@ export function search(input: SearchInput): SearchResponse {
     const c = compiled[fi];
     const { defs, selected } = c;
 
-    const counts = new Array<number>(defs.length).fill(0);
+    /*
+     * Counted in SELLERS, which is the unit the results list is in.
+     *
+     * These were counts of offers, and the page then rolled those offers up
+     * one-per-vendor before showing them — so a rail reading "OPC 16" sat above
+     * a list of 13, and the header called the same 13 "sellers" while the rail
+     * called them "offers". Three numbers, three units, one screen.
+     *
+     * A facet count is a promise about what clicking it leaves you looking at,
+     * so it has to be counted in the thing you end up looking at. Distinct
+     * vendor per value does that, and matches groupByVendor below.
+     */
+    const perValue = defs.map(() => new Set<string>());
     for (let ri = 0; ri < constrained.length; ri++) {
       const fail = failing[ri];
       // In this facet's base iff it fails no other selection.
       if (fail.length > 1 || (fail.length === 1 && fail[0] !== fi)) continue;
-      const ctx = rowCtx(constrained[ri].r, c);
-      for (let vi = 0; vi < c.vals.length; vi++) if (ctxMatches(ctx, c.vals[vi], c.isPrice)) counts[vi]++;
+      const row = constrained[ri].r;
+      const ctx = rowCtx(row, c);
+      for (let vi = 0; vi < c.vals.length; vi++) {
+        if (ctxMatches(ctx, c.vals[vi], c.isPrice)) perValue[vi].add(row.vendor_id);
+      }
     }
+    const counts = perValue.map((s) => s.size);
 
     const values: FacetValueView[] = defs.map((d, vi) => {
       const count = counts[vi];
@@ -804,23 +858,59 @@ export function search(input: SearchInput): SearchResponse {
   // Joined on the page's offers, never on the whole candidate set — 24 rows,
   // not 800. Datasheet scans are excluded: they belong in the sheet's datasheet
   // block, not in a rotation where a buyer expects to see the goods.
-  const imagesByProduct = new Map<string, Array<{ url: string; offer_id: string | null }>>();
+  const imagesByProduct = new Map<string, Array<{ url: string; offer_id: string | null; src: string | null }>>();
   if (displayRows.length) {
     const pids = [...new Set(displayRows.map((r) => r.product_id))];
     const rowsImg = prep(
-      `SELECT product_id, offer_id, local_path FROM product_image
+      `SELECT product_id, offer_id, local_path, source_url FROM product_image
         WHERE kind = 'photo' AND local_path IS NOT NULL
           AND product_id IN (SELECT value FROM json_each(?))
         ORDER BY rank, width DESC`,
-    ).all(JSON.stringify(pids)) as Array<{ product_id: string; offer_id: string | null; local_path: string }>;
+    ).all(JSON.stringify(pids)) as Array<{ product_id: string; offer_id: string | null; local_path: string; source_url: string | null }>;
     for (const r of rowsImg) {
       if (!imagesByProduct.has(r.product_id)) imagesByProduct.set(r.product_id, []);
-      imagesByProduct.get(r.product_id)!.push({ url: r.local_path, offer_id: r.offer_id });
+      imagesByProduct.get(r.product_id)!.push({ url: r.local_path, offer_id: r.offer_id, src: r.source_url });
     }
   }
+
+  /**
+   * A photograph that names a different product is not a photograph of this one.
+   *
+   * Sellers attach the wrong bag. Sixteen listings carry a photo whose own
+   * filename names another maker and twenty-seven name another cement type —
+   * and because the pool is per product, one seller's mistake becomes the still
+   * frame on every card for that product. The Bangur OPC 53 card was showing
+   * shree-opc-53-cement.png.
+   *
+   * Filename evidence only, and only when it positively names something ELSE.
+   * An uninformative URL is not evidence and is left alone; brands under four
+   * characters are skipped because "acc" and "jsw" appear inside unrelated
+   * words and a false rejection costs a real picture.
+   */
+  const brandHeads = new Set(
+    vocab.map((b) => b.split(/\s+/)[0]).filter((b) => b.length >= 4),
+  );
+  const CEMENT_TYPES = ['opc', 'ppc', 'psc'];
+  const contradicts = (r: DisplayRow, src: string | null): boolean => {
+    if (!src) return false;
+    const u = src.toLowerCase();
+    const mine = String(r.brand ?? '').toLowerCase().split(/\s+/)[0];
+    if (mine.length >= 4 && !u.includes(mine)) {
+      for (const other of brandHeads) if (other !== mine && u.includes(other)) return true;
+    }
+    if (r.category === 'cement') {
+      const t = String(attrOf(r).cement_type ?? '').toLowerCase();
+      if (CEMENT_TYPES.includes(t)) {
+        const named = CEMENT_TYPES.filter((x) => new RegExp(`[-_/]${x}[-_/.]`).test(u));
+        if (named.length && !named.includes(t)) return true;
+      }
+    }
+    return false;
+  };
+
   const MAX_CARD_IMAGES = 5;
   const imagesFor = (r: DisplayRow): string[] => {
-    const pool = imagesByProduct.get(r.product_id) ?? [];
+    const pool = (imagesByProduct.get(r.product_id) ?? []).filter((x) => !contradicts(r, x.src));
     const mine = pool.filter((x) => x.offer_id === r.offer_id).map((x) => x.url);
     const others = pool.filter((x) => x.offer_id !== r.offer_id).map((x) => x.url);
     const out: string[] = [];
@@ -831,7 +921,7 @@ export function search(input: SearchInput): SearchResponse {
     // Fallback for a database where `npm run images` has not been run yet: the
     // remote thumbnail the collector already stored. One picture, no rotation,
     // but never a grid of empty plates on a fresh clone.
-    if (!out.length && r.image_url) out.push(r.image_url);
+    if (!out.length && r.image_url && !contradicts(r, r.image_url)) out.push(r.image_url);
     return out;
   };
 
@@ -866,7 +956,7 @@ export function search(input: SearchInput): SearchResponse {
     };
   });
 
-  const intentChips = buildIntentChips(input.region_id, parsed, category);
+  const intentChips = buildIntentChips(input.region_id, parsed, input.vendor_id ?? null, rel, hasQuery);
   const sor = sorAnchorFor(input.region_id, category);
 
   timings.total = performance.now() - t0;
@@ -925,13 +1015,41 @@ function chipsFor(category: string, a: Record<string, any>): string[] {
   }
 }
 
-function buildIntentChips(region_id: string, parsed: ParseResult, current: string | null) {
-  const rows = prep(
-    `SELECT p.category, COUNT(*) n FROM price_current pc
-       JOIN product p ON p.product_id = pc.product_id
-      WHERE pc.region_id = ? GROUP BY p.category ORDER BY n DESC`,
-  ).all(region_id) as any[];
-  return rows.map((r) => ({ label: CATEGORY_LABEL[r.category] ?? r.category, category: r.category, count: r.n }));
+/**
+ * What THIS query finds in each category — not what the catalogue holds.
+ *
+ * Tapping a chip keeps the query and switches the category, so a count that
+ * ignores the query is a promise the click cannot keep: "bangur opc 53 grade"
+ * offered "Bricks & blocks 260" and delivered nothing at all. It also counted
+ * offers via COUNT(*) while the page shows one card per vendor, so even the
+ * browse numbers overstated what you would see.
+ *
+ * Counted in sellers now, like the heading and the rail, and a category the
+ * query cannot reach does not get a chip. With nothing typed it still reports
+ * the whole catalogue, which is the right answer to "what is in here".
+ *
+ * `parsed` and the current category were both parameters here and neither was
+ * ever read.
+ */
+function buildIntentChips(
+  region_id: string, parsed: ParseResult, vendor_id: string | null,
+  rel: Map<string, number>, hasQuery: boolean,
+) {
+  // Category-free on purpose: a chip's job is to move you to another category,
+  // so its count has to be computed outside the one currently in force.
+  const all = baseRows(region_id, null, vendor_id);
+  const per = new Map<string, Set<string>>();
+  for (const r of all) {
+    if (hasQuery && !rel.has(r.product_id)) continue;
+    if (hasQuery && !matchesConstraints(r, parsed.constraints).ok) continue;
+    let s = per.get(r.category);
+    if (!s) { s = new Set<string>(); per.set(r.category, s); }
+    s.add(r.vendor_id);
+  }
+  return [...per]
+    .map(([c, s]) => ({ label: CATEGORY_LABEL[c] ?? c, category: c, count: s.size }))
+    .filter((c) => c.count > 0)
+    .sort((a, b) => b.count - a.count);
 }
 
 function sorAnchorFor(region_id: string, category: string | null): SorAnchor | null {

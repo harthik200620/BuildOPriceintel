@@ -145,9 +145,11 @@ export default function FilterRail({
             </button>
           </div>
         </div>
-        {/* Offers, not products. Every count in this rail counts sellers'
-            listings, because that is what the results list is made of. */}
-        <p className="pt-1.5 pb-1 text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} offers</p>
+        {/* Sellers, matching the heading above the results and the counts
+            below. This read "offers" while the number handed to it was the
+            seller count and the facets underneath counted listings — three
+            units on one screen, none of which agreed. */}
+        <p className="pt-1.5 pb-1 text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} sellers</p>
 
         {conditional.map((f) => renderFacet(f, true))}
         {primary.map((f) => renderFacet(f))}

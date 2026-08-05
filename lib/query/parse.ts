@@ -10,7 +10,7 @@
  * Runs in-process before retrieval. No network, no model call.
  */
 import type { Category, ParsedQuery } from '../types';
-import { lookupTerm, BRAND_ALIASES, VOCAB } from './vocab';
+import { lookupTerm, BRAND_ALIASES, VOCAB, TERM_CONSTRAINTS } from './vocab';
 import { inchToBoreMm, TMT_KG_PER_M } from '../units';
 
 const FRACTIONS: Record<string, number> = {
@@ -128,6 +128,43 @@ export function parseQuery(raw: string, vocabulary: string[] = []): ParseResult 
   const tokens = q.split(/[\s,]+/).filter(Boolean);
   const freeText: string[] = [];
 
+  /*
+   * The catalogue's own brands, which BRAND_ALIASES is not.
+   *
+   * That table is a hand-written list of spellings and misspellings, and it is
+   * the only thing that used to produce a brand constraint. `vocabulary` — the
+   * real DISTINCT brand list the caller reads out of the database — reached
+   * here and was used solely for edit-distance correction, which requires
+   * d > 0 and therefore never fires on an exact brand name.
+   *
+   * So "ultratech cement" filtered correctly because UltraTech happened to be
+   * in the table, while "bangur opc 53 grade" parsed as "opc 53 grade" and
+   * returned every OPC 53 cement in the region: 76 of 85 rows the wrong brand,
+   * under a heading that read "85 sellers". A brand the catalogue actually
+   * sells is a brand the grammar has to know.
+   */
+  const brandVocab = new Set(vocabulary.map((v) => v.trim().toLowerCase()).filter(Boolean));
+  // First words too, so "bangur" reaches "Bangur Rockstrong" and "birla"
+  // reaches "Birla Shakti" without every sub-brand being spelled out. Three
+  // characters minimum: a two-letter head matches far too much.
+  const brandHeads = new Set<string>();
+  for (const v of brandVocab) {
+    const head = v.split(/\s+/)[0];
+    if (head.length >= 3) brandHeads.add(head);
+  }
+
+  /**
+   * A vocabulary term that names an attribute value becomes a filter on it.
+   *
+   * First one wins, so "opc or ppc" narrows to OPC rather than to whichever
+   * token happened to be last. Terms with no entry — 'cement', 'pipe', 'brick'
+   * — stay free text and go on scoring lexically, which is all they can mean.
+   */
+  const applyTermConstraint = (canonical: string) => {
+    const c = TERM_CONSTRAINTS[canonical];
+    if (c && !(c.key in constraints)) constraints[c.key] = c.value;
+  };
+
   for (const tok of tokens) {
     if (/^\d+$/.test(tok)) continue;
 
@@ -137,6 +174,7 @@ export function parseQuery(raw: string, vocabulary: string[] = []): ParseResult 
       else {
         if (hit.category && !category) category = hit.category as Category;
         freeText.push(hit.canonical);
+        applyTermConstraint(hit.canonical);
         if (hit.script !== 'latin' || /[^\x00-\x7F]/.test(tok) || tok !== hit.canonical) {
           matched.push({ term: tok, means: hit.gloss, script: hit.script });
         }
@@ -150,6 +188,7 @@ export function parseQuery(raw: string, vocabulary: string[] = []): ParseResult 
     if (hit2) {
       if (hit2.category && !category) category = hit2.category as Category;
       freeText.push(hit2.canonical);
+      applyTermConstraint(hit2.canonical);
       continue;
     }
 
@@ -160,6 +199,13 @@ export function parseQuery(raw: string, vocabulary: string[] = []): ParseResult 
       if (brand.toLowerCase() !== tok) correction = { from: tok, to: brand };
       continue;
     }
+
+    // A brand the catalogue sells, matched exactly. The two-word form wins so
+    // "ultratech super" narrows to that range rather than to all of UltraTech;
+    // the head form catches "bangur" for "Bangur Rockstrong". Generic words
+    // cannot land here — lookupTerm above has already claimed them.
+    if (brandVocab.has(two)) { constraints.brand = two; continue; }
+    if (brandVocab.has(tok) || brandHeads.has(tok)) { constraints.brand = tok; continue; }
 
     // edit-distance-2 correction over the real catalogue vocabulary
     if (tok.length >= 4) {
@@ -235,7 +281,14 @@ export function relaxationOrder(constraints: Record<string, string | number>): s
   // than dropping a bore or a grade.
   const priority = [
     'pack_size_kg', 'thickness_mm', 'size_mm', 'swr_type', 'sdr', 'opc_grade',
-    'grade', 'brand', 'nominal_bore_mm', 'diameter_mm',
+    'grade', 'brand',
+    // Material type outranks brand: a buyer will take another maker's OPC long
+    // before they will take PPC from the one they named, because that is a
+    // different cement under a different IS code. Anything not listed here can
+    // never be relaxed, so a constraint added without a line here turns its
+    // zero-result query into a dead end.
+    'cement_type', 'pipe_system', 'block_type',
+    'nominal_bore_mm', 'diameter_mm',
   ];
   return priority.filter((k) => k in constraints);
 }
