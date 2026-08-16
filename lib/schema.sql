@@ -1,4 +1,4 @@
--- BuildO Price Intelligence — local schema
+-- Build Objects Price Intelligence — local schema
 --
 -- Two invariants this file exists to enforce:
 --   1. All money is integer paise. No column anywhere holds rupees as a float.

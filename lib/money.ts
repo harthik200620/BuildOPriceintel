@@ -1,5 +1,5 @@
 /**
- * All money in BuildO is integer paise. No float touches a rupee anywhere.
+ * All money in Build Objects is integer paise. No float touches a rupee anywhere.
  *
  * The reason is not fastidiousness: a cart total that differs from the sum of
  * its lines by a rupee is a dispute on a signed contract, and floating-point

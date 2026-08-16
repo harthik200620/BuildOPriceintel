@@ -23,7 +23,7 @@ PROBE_URL=${PROBE_URL:-"https://www.indiamart.com/proddetail/acc-suraksha-power-
 PROBE_GAP=${PROBE_GAP:-600}      # 10 min between probes
 MAX_WAIT=${MAX_WAIT:-14400}      # give up after 4 h
 PAGES=${PAGES:-400}
-UA="BuildOPriceIntel/0.1 (local research demo; contact harthikvarma0@gmail.com)"
+UA="BuildObjectsPriceIntel/0.1 (local research demo; contact harthikvarma0@gmail.com)"
 LOG="data/logs/images-when-clear.out"
 
 mkdir -p data/logs

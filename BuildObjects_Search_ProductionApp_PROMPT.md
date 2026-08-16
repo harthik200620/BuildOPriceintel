@@ -1,8 +1,8 @@
-# BuildO Price Intelligence — production web application
+# Build Objects Price Intelligence — production web application
 
 **A complete, self-contained brief.** Hand this to an engineering team with no other context. Everything needed to build the production system is here: the architecture, the component tree and design tokens as actually built, the search and ranking behaviour, the data contracts, the migration path off local SQLite, and an explicit list of what the local demo simplified.
 
-A working reference implementation exists at `~/Desktop/BuildO-PriceIntel` — Next.js + TypeScript + Tailwind over SQLite, with the collector, the freight model, the benchmark and the daily refresh job. Read it. It is not a mock: it holds real collected prices with provenance on every field, and the three laws below are asserted by its test suite.
+A working reference implementation exists at `~/Desktop/BuildObjects-PriceIntel` — Next.js + TypeScript + Tailwind over SQLite, with the collector, the freight model, the benchmark and the daily refresh job. Read it. It is not a mock: it holds real collected prices with provenance on every field, and the three laws below are asserted by its test suite.
 
 ---
 
@@ -162,7 +162,7 @@ A **published linear function over nine features with four penalties**, reranked
 
 ### Certification is a label, not a gate
 
-**Do not hide uncertified goods.** Most of the Indian construction market is legal, everyday material carrying no BIS mark: local bricks, laterite blocks, river sand, aggregate, wooden props, fabricated items. BuildO's own source product list contains 994 items under a `LOCAL PRODUCTS` heading. A broad certification filter would delete half the market and substitute our judgement for the customer's. The facet defaults to **off**.
+**Do not hide uncertified goods.** Most of the Indian construction market is legal, everyday material carrying no BIS mark: local bricks, laterite blocks, river sand, aggregate, wooden props, fabricated items. Build Objects' own source product list contains 994 items under a `LOCAL PRODUCTS` heading. A broad certification filter would delete half the market and substitute our judgement for the customer's. The facet defaults to **off**.
 
 The exception is legal, not editorial. Where a **Quality Control Order** makes BIS certification a condition of lawful sale, a product without a valid licence is not a cheaper option — it is a product that cannot legally be sold. Confirmed: cement (Cement (Quality Control) Order 2003, S.O. 191(E) — *named in a secondary source; read the gazette*), and IS 1786 deformed bars (mandatory confirmed; the instrument number was **not** identified). `sku.qco_regulated` is a **versioned data table with one citation per row**, re-checked quarterly, never a constant in code.
 

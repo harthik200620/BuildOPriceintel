@@ -17,7 +17,7 @@ interface Suggestion {
   };
 }
 
-const RECENT_KEY = 'buildo-recent';
+const RECENT_KEY = 'buildobjects-recent';
 
 export default function SearchField({
   value, onChange, onSubmit, pincode, inputRef,
@@ -99,7 +99,7 @@ export default function SearchField({
     else if (e.key === 'Enter') {
       e.preventDefault();
       const r = rows[active];
-      if (r?.kind === 'product') { window.dispatchEvent(new CustomEvent('buildo:open-sku', { detail: r.key })); setOpen(false); }
+      if (r?.kind === 'product') { window.dispatchEvent(new CustomEvent('buildobjects:open-sku', { detail: r.key })); setOpen(false); }
       else commit(r ? r.value : value);
     }
   }
@@ -120,7 +120,7 @@ export default function SearchField({
           onKeyDown={onKeyDown}
           role="combobox"
           aria-expanded={open}
-          aria-controls="buildo-suggest"
+          aria-controls="buildobjects-suggest"
           aria-autocomplete="list"
           aria-label="Search construction materials"
           placeholder="Try “53 grade cement”, “8mm tmt”, “4 inch cpvc”, “sariya rate”, “ఇటుక”"
@@ -136,7 +136,7 @@ export default function SearchField({
 
       {open && (rows.length > 0 || sug?.parsed?.correction) && (
         <div
-          id="buildo-suggest"
+          id="buildobjects-suggest"
           role="listbox"
           className="absolute left-0 right-0 top-full mt-1.5 z-50 fade-up scroll-thin"
           style={{
@@ -188,7 +188,7 @@ export default function SearchField({
                   <button
                     key={i.category}
                     onMouseEnter={() => setActive(n)}
-                    onClick={() => { window.dispatchEvent(new CustomEvent('buildo:set-category', { detail: i.category })); setOpen(false); }}
+                    onClick={() => { window.dispatchEvent(new CustomEvent('buildobjects:set-category', { detail: i.category })); setOpen(false); }}
                     className="chip anim px-2 py-1 text-[12px]"
                     aria-selected={active === n}
                     role="option"
@@ -211,7 +211,7 @@ export default function SearchField({
                     role="option"
                     aria-selected={active === idx}
                     onMouseEnter={() => setActive(idx)}
-                    onClick={() => { window.dispatchEvent(new CustomEvent('buildo:open-sku', { detail: p.product_id })); setOpen(false); }}
+                    onClick={() => { window.dispatchEvent(new CustomEvent('buildobjects:open-sku', { detail: p.product_id })); setOpen(false); }}
                     className="w-full flex items-center gap-3 px-3.5 py-2 text-left anim"
                     style={active === idx ? { background: 'var(--wash)' } : undefined}
                   >

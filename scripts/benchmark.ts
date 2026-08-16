@@ -17,7 +17,7 @@ import { prep, initSchema, close } from '../lib/db';
 import { CATEGORIES, CATEGORY_LABEL } from '../lib/types';
 
 const N = Number(process.argv.find((a) => a.startsWith('--n='))?.split('=')[1] ?? 1000);
-const BASE = process.env.BUILDO_URL ?? 'http://localhost:3000';
+const BASE = process.env.BUILDOBJECTS_URL ?? 'http://localhost:3000';
 const SKIP_HTTP = process.argv.includes('--no-http');
 
 /** Representative queries: head terms, unit-bearing, trade vocabulary, typos, multilingual. */
@@ -78,7 +78,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`\nBuildO Price Intelligence — latency benchmark`);
+  console.log(`\nBuild Objects Price Intelligence — latency benchmark`);
   console.log(`${N} queries across ${CATEGORIES.length} categories and ${new Set(PINCODES.map((p) => p.region)).size} cities`);
   console.log(`price_current rows: ${total.c}\n`);
 

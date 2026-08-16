@@ -6,7 +6,7 @@
   "scope_note": "Plumbing branch only. Electrical conduit (rigid PVC, flexible, FRLS, casing-capping, HDPE DWC, MS/GI conduit) is a separate L1 branch under Electrical › Conduit & raceway with its own tree — it shares the word 'pipe' and almost none of the filters.",
   "result_count": 249,
   "counts_are_illustrative": false,
-  "counts_note": "Counts measured from data/buildo.db on 2026-08-05 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "counts_note": "Counts measured from data/buildobjects.db on 2026-08-05 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
   "regions": [
     "hyderabad",
     "vijayawada"

@@ -5,7 +5,7 @@
   "canonical_unit_note": "₹/kg. Also quoted per tonne and per 12 m rod — the rod↔kg conversion needs unit_weight_kg per diameter (8 mm ≈ 4.74 kg, 10 mm ≈ 7.40, 12 mm ≈ 10.66 per 12 m rod), which is a table, never arithmetic.",
   "result_count": 146,
   "counts_are_illustrative": false,
-  "counts_note": "Counts measured from data/buildo.db on 2026-08-05 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "counts_note": "Counts measured from data/buildobjects.db on 2026-08-05 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
   "regions": [
     "hyderabad",
     "vijayawada"

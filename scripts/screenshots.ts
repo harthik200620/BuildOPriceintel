@@ -2,7 +2,7 @@
  * Screenshots of the finished UI, into screenshots/.
  *
  * Drives the real running app with Playwright rather than mocking anything, so
- * every figure in these images is a price actually in data/buildo.db.
+ * every figure in these images is a price actually in data/buildobjects.db.
  *
  *   npx playwright install chromium     (once)
  *   npm run shots
@@ -11,7 +11,7 @@ import { chromium, type Page } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BASE = process.env.BUILDO_URL ?? 'http://localhost:3000';
+const BASE = process.env.BUILDOBJECTS_URL ?? 'http://localhost:3000';
 const OUT = path.join(process.cwd(), 'screenshots');
 const VIEWPORT = { width: 1512, height: 950 };
 
@@ -162,7 +162,7 @@ async function main() {
   // any more — the scoped sweep filled it — so the shot shows what is actually
   // there rather than preserving a screenshot of a gap that has closed.
   await page.evaluate(() => {
-    window.dispatchEvent(new CustomEvent('buildo:set-category', { detail: 'water_pipes' }));
+    window.dispatchEvent(new CustomEvent('buildobjects:set-category', { detail: 'water_pipes' }));
   });
   await settle(page, 1400);
   await shot(page, '09-water-pipes');

@@ -412,7 +412,7 @@ export default function DetailSheet({
                     const delta = price ? s.normalised_paise - price.normalised_paise : 0;
                     return (
                       <button key={s.product_id}
-                        onClick={() => window.dispatchEvent(new CustomEvent('buildo:open-sku', { detail: s.product_id }))}
+                        onClick={() => window.dispatchEvent(new CustomEvent('buildobjects:open-sku', { detail: s.product_id }))}
                         className="text-left p-3 anim hover:bg-[var(--wash)]"
                         style={{ border: '1px solid var(--rule)', borderRadius: '10px' }}>
                         <div className="text-[12.5px] truncate" style={{ color: 'var(--ink)' }}>{s.title}</div>

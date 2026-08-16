@@ -26,7 +26,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, type Page } from 'playwright';
 
-const BASE = process.env.BUILDO_URL ?? 'http://localhost:3000';
+const BASE = process.env.BUILDOBJECTS_URL ?? 'http://localhost:3000';
 const OUT = path.join(process.cwd(), 'screenshots', 'typography-baseline.json');
 const CHECK = process.argv.includes('--check');
 const VIEWPORT = { width: 1512, height: 950 };

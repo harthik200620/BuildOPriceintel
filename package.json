@@ -1,8 +1,8 @@
 {
-  "name": "buildo-priceintel",
+  "name": "buildobjects-priceintel",
   "version": "0.1.0",
   "private": true,
-  "description": "BuildO Price Intelligence — local demo. Dynamic pricing search for construction materials in Hyderabad and Vijayawada. Zero cloud: SQLite in-process, no network on the query path.",
+  "description": "Build Objects Price Intelligence — local demo. Dynamic pricing search for construction materials in Hyderabad and Vijayawada. Zero cloud: SQLite in-process, no network on the query path.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

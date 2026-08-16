@@ -1,4 +1,4 @@
-# BuildO Price Intelligence - daily refresh.
+# Build Objects Price Intelligence - daily refresh.
 #
 # Runs the collector, writes a dated snapshot, appends to price_history,
 # replaces price_current inside a single transaction, and emits
@@ -15,10 +15,10 @@
 # breaks the parse - box-drawing rules in comments are enough to do it.
 #
 # Register (one line, from the repo root):
-#   schtasks /Create /TN "BuildO PriceIntel Daily Refresh" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%CD%\scripts\schedule\buildo-refresh.ps1\"" /SC DAILY /ST 06:30 /F
+#   schtasks /Create /TN "Build Objects PriceIntel Daily Refresh" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%CD%\scripts\schedule\buildobjects-refresh.ps1\"" /SC DAILY /ST 06:30 /F
 #
 # macOS / Linux equivalent (crontab -e):
-#   30 6 * * *  cd /path/to/BuildO-PriceIntel && /usr/bin/env npm run collect >> data/logs/cron.out 2>&1
+#   30 6 * * *  cd /path/to/BuildObjects-PriceIntel && /usr/bin/env npm run collect >> data/logs/cron.out 2>&1
 
 $ErrorActionPreference = 'Continue'
 
@@ -43,7 +43,7 @@ function Write-Log([string]$Message) {
     Add-Content -Path $RunLog -Value $line -Encoding utf8
 }
 
-Write-Log "BuildO refresh starting in $Root"
+Write-Log "Build Objects refresh starting in $Root"
 
 $npxCmd = Get-Command npx.cmd -ErrorAction SilentlyContinue
 if ($null -eq $npxCmd) { $npxCmd = Get-Command npx -ErrorAction SilentlyContinue }

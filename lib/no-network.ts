@@ -52,7 +52,7 @@ export function armNetworkGuard(): void {
     if (isAllowedHost(url)) return realFetch(input, init);
     violations.push(url);
     throw new Error(
-      `[BuildO] Law 1 violation: the query path attempted an outbound request to ${url}. ` +
+      `[Build Objects] Law 1 violation: the query path attempted an outbound request to ${url}. ` +
       `Prices are served from the local store only; collection is asynchronous and offline.`,
     );
   }) as typeof globalThis.fetch;

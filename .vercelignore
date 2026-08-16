@@ -1,14 +1,14 @@
 # The CLI does not apply .gitignore to a linked project, so the working store
-# and its 128 MB journal have to be excluded again here. `data/buildo.prod.db`
+# and its 128 MB journal have to be excluded again here. `data/buildobjects.prod.db`
 # — the snapshot the deployment actually opens — is deliberately not listed.
 node_modules
 .next
 .git
 *.tsbuildinfo
 
-data/buildo.db
-data/buildo.db-wal
-data/buildo.db-shm
+data/buildobjects.db
+data/buildobjects.db-wal
+data/buildobjects.db-shm
 data/logs
 
 # Collector inputs and run outputs. Nothing on the query path reads these; the

@@ -163,7 +163,7 @@ function main() {
     spec.result_count = rows.length;
     spec.counts_are_illustrative = false;
     spec.counts_note =
-      `Counts measured from data/buildo.db on ${new Date().toISOString().slice(0, 10)} for ${REGION}. ` +
+      `Counts measured from data/buildobjects.db on ${new Date().toISOString().slice(0, 10)} for ${REGION}. ` +
       `Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the ` +
       `rail counts sellers' listings and these numbers match it exactly. ` +
       `A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.`;

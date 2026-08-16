@@ -319,7 +319,7 @@ async function main() {
   ).run(runId, startedAt, MODE);
 
   const categories = (ONLY_CATEGORY ? [ONLY_CATEGORY] : [...CATEGORIES]) as string[];
-  log(`\nBuildO collector — run ${runId}, mode=${MODE}`);
+  log(`\nBuild Objects collector — run ${runId}, mode=${MODE}`);
   log(`categories: ${categories.join(', ')}  regions: ${REGIONS.join(', ')}\n`);
 
   const totals = {

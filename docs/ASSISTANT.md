@@ -1,6 +1,6 @@
 # The buying assistant
 
-A chat surface over the BuildO price catalogue that answers two questions —
+A chat surface over the Build Objects price catalogue that answers two questions —
 *what does this cost* and *how much of it do I need* — and refuses everything
 else.
 

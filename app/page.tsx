@@ -77,11 +77,11 @@ export default function Page() {
       setSelections({});
       setVendorFilter(null);
     }
-    window.addEventListener('buildo:open-sku', openSkuEv);
-    window.addEventListener('buildo:set-category', setCatEv);
+    window.addEventListener('buildobjects:open-sku', openSkuEv);
+    window.addEventListener('buildobjects:set-category', setCatEv);
     return () => {
-      window.removeEventListener('buildo:open-sku', openSkuEv);
-      window.removeEventListener('buildo:set-category', setCatEv);
+      window.removeEventListener('buildobjects:open-sku', openSkuEv);
+      window.removeEventListener('buildobjects:set-category', setCatEv);
     };
   }, []);
 
@@ -218,7 +218,10 @@ export default function Page() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Wraps below the heading on a phone. `shrink-0` alone pinned this
+                  row to one line at 390 px and the Cards/Table toggle bled off
+                  the right edge of the viewport. */}
+              <div className="flex flex-wrap items-center gap-2 shrink-0 max-w-full">
                 <label className="flex items-center gap-1.5 text-[12px] cursor-pointer" style={{ color: 'var(--ink-2)' }}>
                   <input type="checkbox" checked={inStockOnly} onChange={() => setInStockOnly((v) => !v)}
                     className="accent-[var(--accent)]" style={{ width: 12, height: 12 }} />

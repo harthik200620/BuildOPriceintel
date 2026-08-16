@@ -19,21 +19,21 @@ import fs from 'node:fs';
  * its own errors, so a read-only store serves the same results.
  */
 export const READ_ONLY =
-  process.env.BUILDO_READONLY === '1' || !!process.env.VERCEL;
+  process.env.BUILDOBJECTS_READONLY === '1' || !!process.env.VERCEL;
 
 /**
  * Two stores, because a live WAL cannot be shipped.
  *
- * `data/buildo.db` is the working copy the collector writes to; it carries a
+ * `data/buildobjects.db` is the working copy the collector writes to; it carries a
  * -wal alongside it that holds committed pages not yet folded into the file,
  * so the file on its own is behind the data. `npm run db:snapshot` folds the
- * WAL in and VACUUMs the result into `data/buildo.prod.db` — one self-contained
+ * WAL in and VACUUMs the result into `data/buildobjects.prod.db` — one self-contained
  * file, safe to commit and to serve read-only. That snapshot is what a
  * deployment reads.
  */
-export const DB_PATH = process.env.BUILDO_DB
-  ? path.resolve(process.env.BUILDO_DB)
-  : path.join(process.cwd(), 'data', READ_ONLY ? 'buildo.prod.db' : 'buildo.db');
+export const DB_PATH = process.env.BUILDOBJECTS_DB
+  ? path.resolve(process.env.BUILDOBJECTS_DB)
+  : path.join(process.cwd(), 'data', READ_ONLY ? 'buildobjects.prod.db' : 'buildobjects.db');
 
 let _db: Database.Database | null = null;
 
@@ -84,7 +84,7 @@ export function checkpoint(mode: 'PASSIVE' | 'FULL' | 'TRUNCATE' = 'TRUNCATE'):
  * schema.sql is all CREATE TABLE IF NOT EXISTS, which is idempotent for new
  * tables and silently does nothing for a new *column* on an existing one. Each
  * entry here is applied once, ignoring the "duplicate column" error, so an
- * existing data/buildo.db picks up the change without being rebuilt from empty.
+ * existing data/buildobjects.db picks up the change without being rebuilt from empty.
  */
 const ADDED_COLUMNS: Array<[table: string, column: string, ddl: string]> = [
   ['offer', 'listing_title', 'TEXT'],

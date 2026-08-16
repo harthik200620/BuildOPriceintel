@@ -5,7 +5,7 @@
   "canonical_unit_note": "₹/piece. Also quoted per 1,000 and, for AAC, per cubic metre — a ₹/piece band and a ₹/cum band differ by roughly the number of blocks in a cubic metre, so the conversion needs piece volume from the size attribute.",
   "result_count": 487,
   "counts_are_illustrative": false,
-  "counts_note": "Counts measured from data/buildo.db on 2026-08-05 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "counts_note": "Counts measured from data/buildobjects.db on 2026-08-05 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
   "regions": [
     "hyderabad",
     "vijayawada"

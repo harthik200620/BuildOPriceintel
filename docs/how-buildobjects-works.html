@@ -1,0 +1,1338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Build Objects works — explained twice, simply and deeply</title>
+<style>
+  :root{
+    --abyss:#04141a;
+    --ink:#e8f0f2; --ink-2:#b0c4ca; --ink-3:#9baeb3;
+    --accent:#5ce1e6; --accent-lift:#7ceef2; --accent-ink:#3fd0d8;
+    --simple:#5ad888; --simple-dim:rgba(90,216,136,.09); --simple-edge:rgba(90,216,136,.30);
+    --deep:#7ceef2;   --deep-dim:rgba(92,225,230,.07);  --deep-edge:rgba(92,225,230,.26);
+    --warn:#e0b155;
+    --wash:rgba(198,214,219,.055);
+    --rule:rgba(198,214,219,.14); --hair:rgba(198,214,219,.09);
+    --mono:"SF Mono","Cascadia Mono",ui-monospace,Menlo,Consolas,monospace;
+    --ui:"Inter","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:
+      radial-gradient(1100px 700px at 12% -8%, rgba(24,132,140,.20), transparent 60%),
+      radial-gradient(900px 620px at 88% 4%, rgba(198,214,219,.10), transparent 62%),
+      radial-gradient(800px 500px at 50% 100%, rgba(92,225,230,.10), transparent 60%),
+      var(--abyss);
+    color:var(--ink); font-family:var(--ui); font-size:15.5px; line-height:1.68;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:48px 20px 120px}
+
+  /* ── header ─────────────────────────────────────────────── */
+  header.hero{padding-bottom:24px; border-bottom:1px solid var(--rule)}
+  .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); margin:0 0 10px}
+  h1{font-size:clamp(28px,5vw,44px); line-height:1.1; margin:0 0 14px; letter-spacing:-.02em;
+     background:linear-gradient(175deg,var(--accent-lift) 4%,var(--accent) 58%,var(--accent-ink) 100%);
+     -webkit-background-clip:text; background-clip:text; color:transparent}
+  .lede{color:var(--ink-2); font-size:17px; max-width:68ch; margin:0}
+
+  /* ── the mode switch ────────────────────────────────────── */
+  .switch{position:sticky; top:0; z-index:40; margin:0 -20px 0; padding:12px 20px;
+    background:rgba(4,20,26,.86); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--rule); display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .switch .lbl{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
+  .switch button{font:inherit; font-size:13px; padding:5px 13px; border-radius:999px; cursor:pointer;
+    background:var(--wash); border:1px solid var(--rule); color:var(--ink-2); transition:.15s}
+  .switch button:hover{color:var(--ink)}
+  .switch button[aria-pressed="true"]{background:rgba(92,225,230,.15); border-color:var(--deep-edge); color:var(--accent-lift)}
+  body.only-simple .deep{display:none}
+  body.only-deep .simple{display:none}
+  body.only-deep .plain-only{display:none}
+
+  /* ── the two panels ─────────────────────────────────────── */
+  .simple,.deep{border-radius:14px; padding:16px 20px; margin:14px 0}
+  .simple{background:var(--simple-dim); border:1px solid var(--simple-edge)}
+  .deep{background:var(--deep-dim); border:1px solid var(--deep-edge)}
+  .tag{display:inline-flex; align-items:center; gap:7px; font-size:10.5px; letter-spacing:.13em;
+       text-transform:uppercase; font-weight:700; margin-bottom:8px}
+  .simple .tag{color:var(--simple)}
+  .deep .tag{color:var(--deep)}
+  .tag::before{content:''; width:7px; height:7px; border-radius:50%; background:currentColor}
+  .simple > :last-child, .deep > :last-child{margin-bottom:0}
+
+  h2{font-size:24px; letter-spacing:-.012em; margin:64px 0 4px; scroll-margin-top:70px; line-height:1.25}
+  h2 .num{font-family:var(--mono); font-size:12.5px; color:var(--accent-ink); display:block; margin-bottom:6px;
+          letter-spacing:.1em; text-transform:uppercase}
+  h3{font-size:17px; margin:34px 0 4px}
+  h4{font-size:13.5px; margin:18px 0 4px; color:var(--accent-lift); font-weight:650; letter-spacing:.02em}
+  .simple h4{color:var(--simple)}
+  p{margin:11px 0; max-width:76ch}
+  a{color:var(--accent)}
+  strong{color:var(--ink)}
+  em.q{color:var(--accent-lift); font-style:normal}
+  code{font-family:var(--mono); font-size:.87em; background:rgba(2,12,16,.5); border:1px solid var(--hair);
+       border-radius:5px; padding:1px 5px; color:var(--ink)}
+  pre{background:rgba(2,12,16,.62); border:1px solid var(--rule); border-radius:12px;
+      padding:15px 17px; overflow-x:auto; font-family:var(--mono); font-size:12.4px; line-height:1.6; color:var(--ink-2)}
+  pre code{background:none; border:none; padding:0; font-size:inherit}
+  .file{font-family:var(--mono); font-size:11.5px; color:var(--accent-ink)}
+  ul,ol{max-width:76ch; padding-left:22px}
+  li{margin:7px 0}
+  .tbl{width:100%; overflow-x:auto; margin:14px 0}
+  table{width:100%; border-collapse:collapse; font-size:13.4px; min-width:480px}
+  th,td{text-align:left; padding:8px 12px; border-bottom:1px solid var(--hair); vertical-align:top}
+  th{color:var(--ink-3); font-weight:600; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; white-space:nowrap}
+  td.n{font-family:var(--mono); white-space:nowrap; color:var(--accent-lift)}
+  .analogy{border-left:3px solid var(--simple); padding:2px 0 2px 16px; margin:14px 0; color:var(--ink-2)}
+  .analogy strong{color:var(--simple)}
+  .warn{border-radius:14px; padding:15px 19px; margin:16px 0;
+        background:rgba(224,177,85,.055); border:1px solid rgba(224,177,85,.30)}
+  .warn h4{color:var(--warn); margin-top:0}
+  .warn > :last-child{margin-bottom:0}
+  .step{display:grid; grid-template-columns:30px 1fr; gap:13px; align-items:start; padding:10px 0;
+        border-bottom:1px solid var(--hair)}
+  .flow .step:last-child{border-bottom:none}
+  .idx{width:25px; height:25px; border-radius:8px; display:grid; place-items:center;
+       background:rgba(92,225,230,.11); border:1px solid rgba(92,225,230,.28);
+       color:var(--accent-lift); font-size:11px; font-family:var(--mono)}
+  .t{font-size:13.6px; font-weight:650}
+  .d{color:var(--ink-2); font-size:13.3px; margin-top:2px}
+  .m{color:var(--ink-3); font-size:11.3px; margin-top:4px; font-family:var(--mono)}
+  .toc{background:var(--wash); border:1px solid var(--rule); border-radius:14px; padding:16px 20px; margin:24px 0 0}
+  .toc ol{columns:2; column-gap:30px; margin:0; padding-left:20px; font-size:13.4px}
+  @media(max-width:640px){ .toc ol{columns:1} }
+  .toc a{text-decoration:none; color:var(--ink-2)}
+  .toc a:hover{color:var(--accent)}
+  dl.kv{display:grid; grid-template-columns:auto 1fr; gap:7px 16px; font-size:13.4px; margin:12px 0}
+  dl.kv dt{font-family:var(--mono); color:var(--accent-ink); white-space:nowrap}
+  dl.kv dd{margin:0; color:var(--ink-2)}
+  @media(max-width:640px){ dl.kv{grid-template-columns:1fr; gap:1px 0} dl.kv dd{margin-bottom:11px} }
+  .gloss dt{color:var(--simple); font-family:var(--ui); font-weight:650; white-space:normal}
+  footer{margin-top:70px; padding-top:22px; border-top:1px solid var(--rule); color:var(--ink-3); font-size:12.4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">Build Objects Price Intelligence</p>
+  <h1>How the whole thing works</h1>
+  <p class="lede">Every part of this application, explained twice: once in plain language for anyone,
+  and once in full technical detail for whoever has to maintain it. Read one track, or read both.</p>
+</header>
+
+<div class="switch" role="group" aria-label="Explanation depth">
+  <span class="lbl">Show</span>
+  <button id="b-both"   aria-pressed="true"  onclick="setMode('both')">Both</button>
+  <button id="b-simple" aria-pressed="false" onclick="setMode('simple')">Simple only</button>
+  <button id="b-deep"   aria-pressed="false" onclick="setMode('deep')">Technical only</button>
+</div>
+
+<div class="toc">
+  <ol>
+    <li><a href="#what">What this app is</a></li>
+    <li><a href="#rules">The three rules it lives by</a></li>
+    <li><a href="#picture">The whole system in one picture</a></li>
+    <li><a href="#collect">Getting the prices</a></li>
+    <li><a href="#clean">Cleaning the prices</a></li>
+    <li><a href="#store">Where everything is kept</a></li>
+    <li><a href="#screen">What you actually see</a></li>
+    <li><a href="#typing">Typing — the suggestions</a></li>
+    <li><a href="#search">Pressing Enter — the search</a></li>
+    <li><a href="#filters">The filters on the left</a></li>
+    <li><a href="#rank">Why <em>that</em> one is first</a></li>
+    <li><a href="#click">Clicking a product</a></li>
+    <li><a href="#price">How one price is built</a></li>
+    <li><a href="#chat">The chat assistant</a></li>
+    <li><a href="#fast">Why it is fast</a></li>
+    <li><a href="#trust">How we know it is true</a></li>
+    <li><a href="#ship">How it goes live</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+    <li><a href="#gaps">What is still missing</a></li>
+  </ol>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="what"><span class="num">Part 1</span>What this app is</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>If you are building a house in Hyderabad or Vijayawada, you need cement, steel rods, water pipes
+  and bricks. Prices for these change constantly, every shop quotes differently, and almost nobody
+  quotes the <em>real</em> price — the one that includes tax and delivery to your site.</p>
+  <p>Build Objects is a price comparison site for exactly those four things. You type what you want, and it
+  shows you what each seller charges <strong>delivered to your pincode, tax included</strong>, so the
+  numbers can honestly be compared side by side.</p>
+  <div class="analogy">
+    <strong>The analogy we will use all the way through:</strong> imagine a very careful man who walks
+    around every building-material shop in the city each morning with a notebook. He writes down every
+    price. Then he does something unusual — he converts every price into the same form ("rupees per
+    50 kg bag, delivered to your door, tax included") so they can be compared. And when he is not sure
+    about something, <em>he leaves it blank rather than guessing</em>.
+    <br><br>
+    This whole application is that man, his notebook, and the counter he stands behind when you ask him
+    a question.
+  </div>
+  <p>Two cities. Four categories. Around <strong>1,081 products</strong> from <strong>729 sellers</strong>,
+  covering <strong>2,005 individual listings</strong>.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p>A local-first price intelligence engine for four construction categories (<code>cement</code>,
+  <code>tmt_steel</code>, <code>water_pipes</code>, <code>bricks_blocks</code>) across two regions
+  (<code>hyderabad</code>, <code>vijayawada</code>).</p>
+  <p>Next.js 16 / React 19 / TypeScript, with <code>better-sqlite3</code> running in-process — the
+  database is a file the web server opens directly, not a service it talks to over a socket. Money is
+  integer paise end to end; no floating-point value ever touches a price.</p>
+  <p>Two processes that never run concurrently: <strong>collection</strong>
+  (<code>npm run collect</code>) writes, <strong>serving</strong> (<code>next dev</code>, or Vercel)
+  only reads.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="rules"><span class="num">Part 2</span>The three rules it lives by</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>Almost every design decision in this app comes from three promises. They sound obvious. Keeping
+  them is what most of the code is actually for.</p>
+  <p><strong>Rule 1 — When you ask a question, it never phones anyone.</strong><br>
+  The answer comes entirely out of the notebook it already has. It does not go off to a website to
+  check. That is why answers arrive in a fraction of a second, and why an answer can never be half-loaded
+  or fail because someone else's website is down.</p>
+  <p><strong>Rule 2 — A number never appears on its own.</strong><br>
+  "₹362.90" means nothing by itself. Per what? Including what? Checked when? So every price on screen
+  carries its unit, what is included in it, and how recently it was verified.</p>
+  <p><strong>Rule 3 — The price you see is the price you would pay.</strong><br>
+  Plenty of sites show one price in the list and a different one at checkout. Here there is only one
+  price-calculating function in the entire codebase, and everything uses it. There is no separate
+  "display price" that could drift.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <dl class="kv">
+    <dt>Law 1</dt>
+    <dd><code class="file">lib/no-network.ts</code> arms a guard that replaces <code>fetch</code> during
+    a request; any outbound call throws and the URL is recorded. Asserted by the first test in
+    <code class="file">tests/run.ts</code>: an outbound fetch during a request must throw, and the
+    violation must be recorded with its URL.</dd>
+    <dt>Law 2</dt>
+    <dd><code class="file">lib/money.ts</code> — <code>formatPaise</code> deliberately will not produce
+    a bare number with no basis attached; the unit is always passed separately. Freshness comes from
+    <code class="file">lib/freshness.ts</code>, which grades an age against a category-specific SLA and
+    returns a state, a dot colour, a human label and an exact timestamp.</dd>
+    <dt>Law 3</dt>
+    <dd>One resolver — <code>landedFor()</code> in <code class="file">lib/rebuild.ts</code> — serves the
+    results list, the detail sheet and the chat assistant. <code class="file">lib/price.ts</code> states
+    the intent: making it a property of the code rather than a promise in a document.</dd>
+  </dl>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="picture"><span class="num">Part 3</span>The whole system in one picture</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>There are only two halves, and they never run at the same time.</p>
+  <p><strong>The gathering half</strong> runs when you tell it to. It visits the listing sites, reads the
+  prices, cleans them up, and writes them into the notebook. This is the slow, messy, careful part.</p>
+  <p><strong>The answering half</strong> runs whenever someone opens the website. It only ever
+  <em>reads</em> the notebook. It never writes, and never goes online.</p>
+  <p>Keeping them apart is what makes the site fast and predictable: by the time you type anything, all
+  the hard work has already been done.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+<pre><code>  COLLECTION  (npm run collect, writes)     SERVING  (read-only)
+  ─────────────────────────────────────     ──────────────────────────────
+  collector/sources/*.ts                    SearchField ──▶ /api/suggest
+        │  fetch + parse                    page.tsx    ──▶ /api/search
+        ▼                                   DetailSheet ──▶ /api/sku/[id]
+  collector/normalize.ts                    ChatPanel   ──▶ /api/chat
+        │  unit + price normalisation       TopBar      ──▶ /api/meta
+        ▼                                                │
+  vendor / product / offer  ────────▶  data/buildobjects.db  ◀─┴─ lib/search.ts
+        │                                (WAL, FTS5,          lib/price.ts
+        ▼                                 trigram)            lib/rank.ts
+  lib/rebuild.ts
+    price_current · product_fts · product_trgm
+        │
+        ▼  npm run db:snapshot
+  data/buildobjects.prod.db   ← committed, read-only, what a deployment serves</code></pre>
+  <p>In production, <code class="file">lib/db.ts:21</code> flips read-only automatically
+  (<code>READ_ONLY = BUILDOBJECTS_READONLY==='1' || !!process.env.VERCEL</code>) and opens
+  <code>data/buildobjects.prod.db</code>, a committed snapshot with the write-ahead log folded in. Locally it
+  opens <code>data/buildobjects.db</code> read-write in WAL mode.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="collect"><span class="num">Part 4</span>Getting the prices</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>This is the man walking to the shops. In practice the "shops" are listing websites — IndiaMART,
+  ExportersIndia, TradeIndia and a few others — where sellers post what they have and what it costs.</p>
+  <p>For each site, each product type, and each city, the app downloads the listing pages and reads them.
+  Two things about how it does this are worth understanding:</p>
+  <p><strong>It keeps the raw pages.</strong> Before trying to make sense of anything, it saves exactly
+  what each website sent back. That way, if the reading logic turns out to be wrong, it can be fixed and
+  re-run on the saved copies without bothering those websites again — and anyone can check what the
+  site actually said versus what we recorded.</p>
+  <p><strong>It writes down its failures.</strong> If a site blocks it, or returns nothing useful, that
+  is recorded with the specific reason — "the page had no listings", "the listings had no prices",
+  "nothing was in our city". It never quietly skips something. A silent skip would make the final
+  collection look complete when it wasn't.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code class="file">collector/run.ts</code>. Adapters live in
+  <code class="file">collector/sources/</code>: <code>indiamart.ts</code>, <code>exportersindia.ts</code>,
+  <code>directories.ts</code> (TradeIndia), <code>platforms.ts</code>, <code>tgpred.ts</code>,
+  <code>assisted.ts</code>.</p>
+
+  <div class="flow">
+    <div class="step"><div class="idx">1</div><div>
+      <div class="t">Adapters fetch, per source × category × region</div>
+      <div class="d">Each is handed <code>fetchText</code>, a logger and the pass number. Multiple passes
+      run, and each reports offers and vendors added.</div>
+      <div class="m">run.ts:347</div>
+    </div></div>
+    <div class="step"><div class="idx">2</div><div>
+      <div class="t">Raw responses written before parsing</div>
+      <div class="d">One JSONL per source/category/region/date under <code>collector/raw/</code>. A parser
+      change can be re-run and diffed without re-fetching, and stays auditable against what the site
+      actually returned.</div>
+    </div></div>
+    <div class="step"><div class="idx">3</div><div>
+      <div class="t">Parse into candidate rows</div>
+      <div class="d">Title, price text, unit text, seller, locality, images, source URL. A source that
+      yields nothing usable records <em>which</em> failure: <code>no_json</code>, <code>no_rows</code>,
+      <code>no_in_region</code>, <code>no_topic</code>, <code>no_priced</code>.</div>
+    </div></div>
+    <div class="step"><div class="idx">4</div><div>
+      <div class="t">Normalise — see Part 5</div>
+      <div class="m">collector/normalize.ts · run.ts:176</div>
+    </div></div>
+    <div class="step"><div class="idx">5</div><div>
+      <div class="t">Upsert vendor, product, offer</div>
+      <div class="d">Listings describing the same goods collapse onto one <code>product</code> via a
+      normalised item code; each seller's listing stays its own <code>offer</code> row.</div>
+    </div></div>
+    <div class="step"><div class="idx">6</div><div>
+      <div class="t">Rebuild the price surface</div>
+      <div class="d"><code>rebuildPrices()</code> prices every offer for every region and writes
+      <code>price_current</code>: one row per (product, region) with the cheapest normalised price, the
+      market floor/median/ceiling, offer and vendor counts, and the SLA clock.</div>
+      <div class="m">lib/rebuild.ts · run.ts:396</div>
+    </div></div>
+    <div class="step"><div class="idx">7</div><div>
+      <div class="t">The absurdity gate</div>
+      <div class="d">Any price outside <strong>[0.1×, 10×] of its category median</strong> is quarantined
+      and never published; the log prints each with its ratio and key.</div>
+      <div class="m">run.ts:401–403</div>
+    </div></div>
+    <div class="step"><div class="idx">8</div><div>
+      <div class="t">Rebuild the search indexes</div>
+      <div class="d"><code>rebuildSearchIndex()</code> repopulates <code>product_fts</code> and
+      <code>product_trgm</code>.</div>
+    </div></div>
+    <div class="step"><div class="idx">9</div><div>
+      <div class="t">Snapshots and the written collection log</div>
+      <div class="d">CSV/JSON per category under <code>data/snapshots/&lt;date&gt;/</code>, then a log of
+      sources attempted, outcome breakdown, offers captured vs new, the provenance ladder
+      (quoted / derived / typical), and everything skipped with its reason. The run warns loudly if the
+      outcome breakdown does not sum to the sources attempted.</div>
+      <div class="m">run.ts:413, 429–441</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="warn">
+  <h4>No silent caps</h4>
+  <p><strong>Plain:</strong> if something stopped us collecting — a site blocked us, or cut us off after
+  20 pages — it is written down, with an estimate of what we missed. Otherwise the results would look
+  complete when they aren't, which is a lie by omission.</p>
+  <p class="deep" style="margin-bottom:0"><strong>Technical:</strong> blocks, rate limits, truncated
+  pagination and login walls are each recorded in <code>source_log</code> with the outcome and the
+  estimated volume missed, and surfaced in the written collection log.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="clean"><span class="num">Part 5</span>Cleaning the prices — where most of the honesty lives</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>This is the most important part of the whole application, and the least visible.</p>
+  <p>Sellers post prices in wildly different ways. One says <em class="q">₹380 per bag</em>. Another says
+  <em class="q">₹7,600 per tonne</em>. A third says <em class="q">₹360</em> and doesn't say per what.
+  A fourth quotes <em class="q">₹350 + GST</em>, a fifth quotes <em class="q">₹413 inclusive</em>.</p>
+  <p>You cannot compare those five numbers. They aren't the same kind of thing. So before anything is
+  stored, every price is converted into one single form:</p>
+  <div class="analogy">
+    <strong>rupees per standard unit, tax handled the same way for everyone.</strong><br>
+    For cement that unit is one 50 kg bag. For steel it's a kilogram. For pipe it's a metre.
+    For bricks it's one piece.
+  </div>
+  <p>And here is the rule that matters most: <strong>if it cannot work out the unit, it throws the
+  listing away.</strong> It does not assume "probably per bag". A guessed unit produces a number that
+  looks perfectly reasonable and is completely wrong — a ₹7,600-per-tonne listing recorded as
+  ₹7,600 per bag would sit at the top of every search as the most expensive cement in the city, or at
+  the bottom as an unbelievable bargain, depending which way the mistake went.</p>
+  <p>Every listing thrown away is counted and reported at the end of the run, under a heading that reads
+  <em class="q">not loaded (recorded, never invented)</em>.</p>
+  <p>The same care applies to specifications. If a listing says "53 grade", that gets recorded as a
+  fact with a note saying <em>the seller stated this</em>. If the app worked it out from something else,
+  it is marked <em>derived</em>. If it is a reasonable industry assumption, it is marked
+  <em>typical</em>. Those three labels travel with the value everywhere it goes.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code class="file">collector/normalize.ts</code>. The entry point is
+  <code>normalise(raw: RawOffer): Normalised | { ok: false; reason: string }</code> at line 639 — the
+  return type is the design: a refusal is a first-class result carrying its reason, not an exception and
+  not a null.</p>
+
+  <h4>Unit resolution</h4>
+  <p><code>normaliseUnit(quoted)</code> at line 37 returns <code>{ unit, perCanonical } | null</code>.
+  The <code>null</code> is what makes the refusal possible: no unit, no load. Conversions come from the
+  <code>unit_conversion</code> table, not from constants in code, so bag↔kg↔tonne and m↔ft are data.</p>
+
+  <h4>Per-category attribute extraction</h4>
+  <p>Four extractors, one per category — <code>cementAttrs</code> (364), <code>tmtAttrs</code> (409),
+  <code>pipeAttrs</code> (467), <code>brickAttrs</code> (544). Each receives a <code>Ladder</code> and a
+  field-recorder <code>fi(field, label, unit)</code>, which is how every extracted value gets its
+  provenance row in <code>spec_value</code>.</p>
+
+  <h4>The provenance ladder</h4>
+  <div class="tbl"><table>
+    <thead><tr><th>Confidence</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="n">quoted</td><td>The seller stated it in the listing.</td></tr>
+      <tr><td class="n">derived</td><td>Computed from something the seller stated, with the derivation recorded.</td></tr>
+      <tr><td class="n">typical</td><td>An industry-standard assumption, labelled as such.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Specs are ordered <code>quoted → derived → typical</code> everywhere they are read, and a field with
+  no provenance cannot render at all.</p>
+
+  <h4>Other normalisation</h4>
+  <ul>
+    <li><code>matchRoster</code> (132) resolves brand names against a per-category roster.</li>
+    <li><code>canonicalCountry</code> (209) and <code>canonicalMoqUnit</code> (229) collapse free-text
+    variants.</li>
+    <li><code>moqFromSpecs</code> (322) pulls minimum order quantity out of spec text.</li>
+    <li><code>buildTitle</code> (829) generates the canonical display title from category, brand and
+    attributes — which is why titles read uniformly ("Bangur OPC 53 grade cement — 50 kg bag") rather
+    than echoing whatever the seller typed. The seller's own <code>listing_title</code> is preserved
+    separately.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="store"><span class="num">Part 6</span>Where everything is kept</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>Everything lives in <strong>one single file</strong> on disk. Not a database server humming away on
+  another machine — one file, about 30 megabytes, sitting next to the code. The website opens it
+  directly, the way a program opens a document.</p>
+  <p>That is unusual and it is deliberate. It removes an entire category of problems: no connection to
+  drop, no server to fall over, no network delay between asking and answering.</p>
+  <p>Inside that file, information is separated into tables — think of them as sheets in a workbook:</p>
+  <ul>
+    <li><strong>Products</strong> — the things themselves. "Bangur OPC 53 grade cement, 50 kg bag."</li>
+    <li><strong>Offers</strong> — one row for every seller selling that thing, at their price.</li>
+    <li><strong>Vendors</strong> — who the sellers are and where they are located.</li>
+    <li><strong>Prices</strong> — the current best price per product per city, plus the market range.</li>
+    <li><strong>Price history</strong> — what it used to cost, so a chart can be drawn.</li>
+    <li><strong>Specs</strong> — every specification with its source and how confident we are.</li>
+    <li>…and about a dozen more, for tax rates, pincodes, unit conversions and government rates.</li>
+  </ul>
+  <h4>What an "index" is, and why there are two</h4>
+  <p>Finding the word "cement" by reading all 1,081 products every time would be slow — like finding a
+  topic by reading a whole book. So the app keeps an index, exactly like the index at the back of a
+  book: a pre-sorted list of every word and where it appears.</p>
+  <p>There are two of them, doing different jobs:</p>
+  <p><strong>The word index</strong> handles normal searching, and it knows some words matter more than
+  others. A match in the <em>title</em> counts six times as much as a match in the general description.
+  A match in the <em>brand</em> counts four times as much.</p>
+  <p><strong>The three-letter index</strong> exists only to catch typos. It chops every word into
+  overlapping three-letter pieces — "ultratech" becomes "ult", "ltr", "tra", "rat", "ate"… — so that if
+  you type "ultratec", most of those pieces still match and you still find it.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code class="file">lib/schema.sql</code>. SQLite via <code>better-sqlite3</code>, WAL journal mode
+  locally, integer paise throughout.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Table</th><th>Holds</th></tr></thead>
+    <tbody>
+      <tr><td class="n">region, pincode</td><td>Two regions; pincode → region, lat/lon, locality. Freight is computed from these coordinates.</td></tr>
+      <tr><td class="n">unit_conversion</td><td>bag↔kg↔tonne, m↔ft, and the inch→nominal-bore mapping. Data, not code.</td></tr>
+      <tr><td class="n">gst_rate</td><td>HSN → rate in basis points, with effective dates.</td></tr>
+      <tr><td class="n">sor_rate</td><td>Government Schedule-of-Rates anchors per state and category, with source URL and note.</td></tr>
+      <tr><td class="n">vendor</td><td>Seller identity, locality, lat/lon, rating, free-delivery threshold.</td></tr>
+      <tr><td class="n">product</td><td>Normalised item: title, brand, category, <code>attrs</code> JSON, canonical and trade unit, pack size, HSN, GST rate, QCO flag + citation, cert standards, <code>search_blob</code>.</td></tr>
+      <tr><td class="n">offer</td><td>One seller's listing: base paise, GST treatment (INCL/EXCL), delivery scope, MOQ, stock state, lead time, cert state, source URL, fetched-at.</td></tr>
+      <tr><td class="n">serviceability</td><td>Which vendors reach which areas.</td></tr>
+      <tr><td class="n">offer_price</td><td>Per-offer resolved price, indexed on (region, normalised_paise) so "cheapest" is a seek, not a scan.</td></tr>
+      <tr><td class="n">price_current</td><td>One row per (product, region): normalised and landed price, floor/median/ceiling, offer and vendor counts, priced-at, SLA hours.</td></tr>
+      <tr><td class="n">price_history</td><td>Time series. A CHECK constraint restricts the trigger to <code>schedule | seed | user_verify | backfill</code>.</td></tr>
+      <tr><td class="n">spec_value</td><td>value, unit, source URL, fetched-at, confidence, derivation.</td></tr>
+      <tr><td class="n">product_image</td><td>Photos and datasheet scans: asset key, offer id, source URL, page URL, local path, width, kind, rank.</td></tr>
+      <tr><td class="n">facet_definition</td><td>The filter rail per category — label, control, cluster, visibility, dependency, and the <em>why</em> shown to the buyer.</td></tr>
+      <tr><td class="n">collection_run, source_log</td><td>Every run and every source attempt with its outcome.</td></tr>
+      <tr><td class="n">search_log</td><td>Query, region, hit count, timestamp.</td></tr>
+    </tbody>
+  </table></div>
+
+<pre><code>CREATE VIRTUAL TABLE product_fts USING fts5(
+  product_id UNINDEXED, title, brand, blob,
+  tokenize = 'unicode61 remove_diacritics 2'
+);
+
+CREATE VIRTUAL TABLE product_trgm USING fts5(
+  product_id UNINDEXED, blob,
+  tokenize = 'trigram'
+);</code></pre>
+  <p>Both are standalone rather than external-content FTS5 tables: the catalogue is small enough that the
+  duplicated text costs nothing, and it removes the sync-trigger failure mode entirely.
+  <code>remove_diacritics 2</code> is what lets accented and transliterated forms match.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="screen"><span class="num">Part 7</span>What you actually see</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>A quick tour of the screen, so the rest of this document has names to refer to.</p>
+  <ul>
+    <li><strong>Top bar</strong> — the logo, the search box, a city switch (Hyderabad / Vijayawada) and
+    your pincode. The pincode matters more than it looks: delivery cost is calculated from it, so
+    changing it changes every price on the page.</li>
+    <li><strong>Category chips</strong> — a row under the search box: All, Cement, TMT steel, and so on,
+    each with a count of how many sellers your current search finds in that category.</li>
+    <li><strong>The filter rail</strong> — the "Narrow by" column on the left, with checkboxes for type,
+    grade, brand, price band, delivery speed and so on.</li>
+    <li><strong>The results</strong> — either cards or a table, your choice. Each is one seller.</li>
+    <li><strong>The detail sheet</strong> — slides in when you click a result. Every seller for that
+    product, every specification with its source, a price history chart and similar products.</li>
+    <li><strong>The compare tray</strong> — hold two or three products side by side.</li>
+    <li><strong>The assistant</strong> — a chat panel that can answer questions and work out quantities.</li>
+  </ul>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p>Twelve components under <code class="file">components/</code>, one page at
+  <code class="file">app/page.tsx</code> holding the state, and six API routes.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td class="n">TopBar</td><td>Logo, region switch, pincode entry with validation against the <code>pincode</code> table.</td></tr>
+      <tr><td class="n">SearchField</td><td>The input and the suggestion dropdown. Owns the ⌘K shortcut and recent searches.</td></tr>
+      <tr><td class="n">FilterRail</td><td>Renders <code>facet_definition</code> rows with live counts; handles conditional facets.</td></tr>
+      <tr><td class="n">ProductCard</td><td>One seller's card. Price, freshness dot, cert badge, "why this is here" chip.</td></tr>
+      <tr><td class="n">CardGallery</td><td>Up to five photos, rotating on hover, with an <code>EmptyPlate</code> fallback.</td></tr>
+      <tr><td class="n">ResultsTable</td><td>The table view, with sortable column headers.</td></tr>
+      <tr><td class="n">DetailSheet</td><td>Vendor table, specs with provenance, price history, substitutes, datasheets.</td></tr>
+      <tr><td class="n">VendorTable</td><td>Per-seller rows inside the sheet, each independently priced.</td></tr>
+      <tr><td class="n">CompareTray</td><td>Side-by-side comparison with a units-incomparability note.</td></tr>
+      <tr><td class="n">ChatPanel</td><td>The assistant, its structured card blocks and its trace panel.</td></tr>
+      <tr><td class="n">States</td><td>Skeleton, zero-result, no-data-yet, empty-category, error, offline, degraded.</td></tr>
+      <tr><td class="n">primitives</td><td><code>Money</code>, <code>FreshnessDot</code>, <code>CertBadge</code>, <code>rupees</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Route</th><th>Serves</th></tr></thead>
+    <tbody>
+      <tr><td class="n">/api/search</td><td>The whole result page: results, facets, chips, disclosure, timings.</td></tr>
+      <tr><td class="n">/api/suggest</td><td>The typeahead dropdown.</td></tr>
+      <tr><td class="n">/api/sku/[id]</td><td>Everything behind one product.</td></tr>
+      <tr><td class="n">/api/meta</td><td>Regions, category labels, last collection run, degraded flag.</td></tr>
+      <tr><td class="n">/api/price/resolve</td><td>Re-price for a specific quantity.</td></tr>
+      <tr><td class="n">/api/chat</td><td>The assistant, streaming.</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="typing"><span class="num">Part 8</span>Typing — where the suggestions come from</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>You start typing "bang…" and a panel drops down with products, categories and prices. Here is
+  exactly what happens.</p>
+  <p><strong>First, it waits.</strong> It does not react to every letter. It waits 80 milliseconds —
+  less than a tenth of a second — after you stop typing. If you keep typing, the timer restarts. So
+  typing "bangur" quickly asks the database <em>once</em>, not six times.</p>
+  <div class="analogy">
+    <strong>Why the waiting matters twice over.</strong> Without it you'd do six times the work. But
+    there's a subtler problem: replies can come back out of order. If the answer for "bang" arrives after
+    the answer for "bangur", you'd see suggestions for the wrong thing. So every request is given a
+    ticket number, and when a reply arrives, it is only used if its ticket is still the latest one.
+    Older replies are thrown away.
+  </div>
+  <p><strong>Then it asks three questions at once:</strong></p>
+  <ol>
+    <li><em>Which products contain what they've typed?</em> — up to 7, cheapest first. That is why the
+    top suggestion is the cheapest match, and why each row shows a real price.</li>
+    <li><em>Which categories do those fall into?</em> — up to 4, which become the category chips at the
+    top of the dropdown.</li>
+    <li><em>What have other people in this city searched for successfully?</em> — the trending list. Note
+    <em>successfully</em>: a search that found nothing never becomes a suggestion for someone else.</li>
+  </ol>
+  <p><strong>And separately, it shows you what it understood.</strong> This is the part most search boxes
+  don't do. Before searching, the app reads your words and tells you how it interpreted them:</p>
+  <ul>
+    <li>If you typed <em class="q">ultratec</em>, it says <em class="q">Showing results for UltraTech —
+    search instead for ultratec</em>. It corrects, but it tells you it corrected, and lets you undo it.
+    It never silently changes what you asked for.</li>
+    <li>If you typed a Telugu word or a trade term — <em class="q">సిమెంట్</em>, <em class="q">sariya</em>,
+    <em class="q">basta</em> — it shows you what it read that as.</li>
+    <li>If you typed <em class="q">4 inch cpvc</em>, it shows a little chip reading
+    <em class="q">nominal bore mm = 25</em> so you can see the conversion it applied.</li>
+  </ul>
+  <div class="analogy">
+    <strong>That inch conversion is not arithmetic.</strong> A 1-inch CPVC pipe is 25 mm. But a 4-inch
+    SWR drainage pipe is 110 mm, not 101.6 mm. Pipe sizes are trade conventions, not measurements. So
+    the app uses a lookup table, and names which table it used — because a plumber who orders the wrong
+    bore has bought a lorry of unusable pipe.
+  </div>
+  <p><strong>Clicking a suggestion does one of two different things.</strong> Clicking a <em>product</em>
+  opens that product's detail page directly — it does not run a search. Clicking a <em>category</em> chip
+  switches you to that category. Pressing Enter on plain text runs a normal search.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p>Client: <code class="file">components/SearchField.tsx</code>. Server:
+  <code class="file">app/api/suggest/route.ts</code> → <code>suggest()</code> at
+  <code class="file">lib/search.ts:1083</code>. This path never touches the ranker.</p>
+
+  <h4>The debounce and the sequence guard</h4>
+<pre><code>React.useEffect(() =&gt; {
+  if (!value.trim()) { setSug(null); return; }
+  const id = ++seq.current;                        // ticket
+  const t = setTimeout(async () =&gt; {
+    const r = await fetch(`/api/suggest?q=…&amp;pincode=…`);
+    const j = await r.json();
+    if (id === seq.current) setSug(j);             // still the latest?
+  }, 80);
+  return () =&gt; clearTimeout(t);                    // typing again cancels
+}, [value, pincode]);</code></pre>
+  <p>No spinner, deliberately: the file notes the request lands in single-digit milliseconds off a local
+  file, so a spinner would only ever be a flash. A failed fetch is swallowed —
+  <em>the dropdown is an enhancement; the field still submits</em>.</p>
+
+  <h4>The three queries</h4>
+<pre><code>-- 1 · products, cheapest first
+SELECT p.product_id, p.title, p.brand, p.category, p.unit_canonical,
+       p.image_url, pc.normalised_paise, pc.offer_count
+  FROM price_current pc JOIN product p ON p.product_id = pc.product_id
+ WHERE pc.region_id = ? AND lower(p.title) LIKE '%typed%'
+ ORDER BY pc.normalised_paise ASC LIMIT 7;
+
+-- 2 · category counts (also searches search_blob)
+SELECT p.category, COUNT(*) n
+  FROM price_current pc JOIN product p ON p.product_id = pc.product_id
+ WHERE pc.region_id = ?
+   AND (lower(p.title) LIKE '%typed%' OR lower(p.search_blob) LIKE '%typed%')
+ GROUP BY p.category ORDER BY n DESC LIMIT 4;
+
+-- 3 · trending
+SELECT q, COUNT(*) n FROM search_log
+ WHERE region_id = ? AND hits &gt; 0
+ GROUP BY q ORDER BY n DESC, MAX(at) DESC LIMIT 6;</code></pre>
+  <p>Query 1 is a plain <code>LIKE</code>, <strong>not</strong> the FTS index — cheap and predictable at
+  this scale, and joining <code>price_current</code> is what gives every suggestion a live in-zone price.
+  Query 2 also covers <code>search_blob</code>, so a trade or Telugu term absent from the title still
+  routes to the right category.</p>
+
+  <h4>The parse preview</h4>
+  <p>The route additionally runs <code>parseQuery(q)</code> and returns <code>category</code>,
+  <code>constraints</code>, <code>matched_vocabulary</code>, <code>correction</code> and
+  <code>unit_bearing</code> — without running a search. Those drive the correction banner, the
+  vocabulary gloss and the "read as" chips. <code>_inch_source</code> names the mapping table used.</p>
+
+  <h4>Interaction</h4>
+  <dl class="kv">
+    <dt>⌘K / Ctrl+K</dt><dd>Focus and select the field from anywhere.</dd>
+    <dt>Escape</dt><dd>Close the dropdown.</dd>
+    <dt>↑ / ↓</dt><dd>Move the active row; Down also opens it.</dd>
+    <dt>Enter</dt><dd>On a product row, dispatches <code>buildobjects:open-sku</code> — no search runs. Otherwise commits the text.</dd>
+    <dt>Category chip</dt><dd>Dispatches <code>buildobjects:set-category</code>, clearing facet selections and any vendor drill-down.</dd>
+    <dt>commit(q)</dt><dd>Pushes to the front of <code>localStorage['buildobjects-recent']</code> (deduped, cap 6), submits, closes, blurs.</dd>
+  </dl>
+</div>
+
+<div class="warn">
+  <h4>An honest defect in this section</h4>
+  <p><strong>Plain:</strong> the "Trending here" list never actually appears. It is only supposed to show
+  when the box is empty — but when the box is empty, the app skips the request entirely, so there is
+  nothing to show. "Recent searches" does work, because that is stored in your own browser.</p>
+  <p class="deep" style="margin-bottom:0"><strong>Technical:</strong>
+  <code class="file">SearchField.tsx:65</code> returns early on an empty value, leaving <code>sug</code>
+  null; the trending block at line 248 requires both an empty value and non-empty
+  <code>sug.trending</code>. Mutually exclusive, so unreachable. <code>suggest()</code> does return
+  trending for an empty prefix — the fix is one fetch on focus.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="search"><span class="num">Part 9</span>Pressing Enter — the search itself</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>We will follow one real search all the way through: <em class="q">bangur opc 53 grade</em>. That
+  means: the Bangur brand, ordinary portland cement, 53 grade. A specific request.</p>
+
+  <h4>Step 1 — Reading what you asked for</h4>
+  <p>Before searching, the app breaks your words into <strong>requirements</strong> rather than treating
+  them as text to match. From "bangur opc 53 grade" it extracts three separate demands:
+  brand must be Bangur, cement type must be OPC, grade must be 53.</p>
+  <div class="analogy">
+    <strong>Why this distinction is everything.</strong> If those words were just text to match against,
+    a Shree Cement OPC 53 bag would score quite well — it matches two words out of three. It would appear
+    in your results. But you didn't ask for "something a bit like Bangur". You asked for Bangur. A
+    requirement is a gate, not a hint.
+  </div>
+
+  <h4>Step 2 — Finding candidates</h4>
+  <p>Two searches run at once. The word index finds things that genuinely match your words. The
+  three-letter index finds things that <em>nearly</em> match, in case you made a typo. Their results are
+  blended, with the proper word search counted three times as heavily as the typo-rescue one — so a typo
+  can save you, but it can never outvote an exact match.</p>
+
+  <h4>Step 3 — Applying the requirements</h4>
+  <p>Now each candidate is checked against your three demands. The rule is subtle and worth stating
+  carefully:</p>
+  <p><strong>A product stays if it contradicts nothing you asked for, and positively satisfies at least
+  one thing.</strong></p>
+  <ul>
+    <li>A Bangur OPC 53 bag: satisfies all three. Stays.</li>
+    <li>A Shree OPC 53 bag: satisfies type and grade, but <em>contradicts</em> the brand. Removed.</li>
+    <li>A Bangur bag where the seller never mentioned the grade: satisfies brand and type, contradicts
+    nothing — the grade is simply <em>unknown</em>. It stays, because a seller being lazy about filling
+    in a field is not evidence the product is wrong.</li>
+  </ul>
+  <p>That last case is the important one. Missing information is treated as unknown, not as wrong. The
+  one exception is brand: a listing explicitly recorded as "Unbranded" isn't an unknown brand, it is a
+  <em>stated non-brand</em>, so it is removed from a branded search.</p>
+  <p><strong>The result: this search went from 85 results to 13</strong> — and all 13 are genuinely
+  Bangur OPC 53. Before this rule was correct, 76 of those 85 were the wrong brand and 14 were a
+  completely different type of cement.</p>
+
+  <h4>Step 4 — One row per seller</h4>
+  <p>A seller who lists the same cement four times shouldn't fill your screen. So after everything else,
+  results are collapsed to one card per seller, showing their best-scoring listing, with a note saying
+  how many others they have.</p>
+
+  <h4>Step 5 — If nothing is left</h4>
+  <p>Sometimes a request is too specific and nothing matches. The app does not show an empty page and it
+  does not quietly ignore part of your request. It drops <em>one</em> requirement, tries again, and
+  <strong>tells you which one it dropped</strong>.</p>
+  <p>The order is chosen deliberately — least important first. Pack size goes before grade. Grade goes
+  before brand. Brand goes before <em>cement type</em>, because most buyers would sooner accept a
+  different brand's OPC than accept PPC from the brand they named: those are different products under
+  different standards. Bore size is given up last, because a plumber cannot compromise on it at all.</p>
+  <p>Real example: we stock no GI pipe. Search "gi pipe" and you get pipes, with a clear note saying
+  the pipe-type requirement was relaxed — rather than being quietly handed UPVC as though that were
+  what you asked for.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code>search()</code> at <code class="file">lib/search.ts:597</code>. The client effect in
+  <code class="file">app/page.tsx</code> is keyed on
+  <code>[query, pincode, sort, category, selections, vendorFilter, colSort, limit]</code>, with the same
+  80 ms debounce and sequence guard, and a spinner only after 150 ms. Page size 24. Each stage stamps a
+  timing that ships in the response.</p>
+
+  <h4>1 · Parse <span style="color:var(--ink-3)">(timings.parse)</span></h4>
+  <p><code class="file">lib/query/parse.ts</code>. Deterministic, in-process, no model call. In order:
+  fractions and inch marks (mapped through a table, recording <code>_inch_source</code>); dimensions,
+  diameters, thicknesses, SDR and pressure class; pack size (which sets <code>unit_bearing</code>);
+  vocabulary including Telugu, Devanagari and transliterations; attribute-bearing terms
+  (<code>opc → cement_type = OPC</code>, <code>cpvc → pipe_system = CPVC</code>) from
+  <code>TERM_CONSTRAINTS</code>; brands, first via <code>BRAND_ALIASES</code> then by exact match against
+  the catalogue's own <code>DISTINCT brand</code> list, two-word form first with a head form so
+  <code>bangur</code> reaches <code>Bangur Rockstrong</code>; then edit-distance-2 correction.</p>
+
+  <h4>2 · Base rows <span style="color:var(--ink-3)">(timings.fetch)</span></h4>
+  <p><code>baseRows(region, category, vendor_id)</code> — one row per <strong>offer</strong>, carrying
+  only what filtering, faceting and ranking read. Display columns are deliberately absent. Cached on
+  <code>PRAGMA data_version</code>.</p>
+
+  <h4>3 · Retrieve <span style="color:var(--ink-3)">(timings.retrieve)</span></h4>
+<pre><code>SELECT product_id, -bm25(product_fts, 6.0, 4.0, 1.0) AS s   -- title 6, brand 4, blob 1
+  FROM product_fts WHERE product_fts MATCH ? ORDER BY s DESC LIMIT 600;
+
+SELECT product_id, -bm25(product_trgm) AS s
+  FROM product_trgm WHERE product_trgm MATCH ? ORDER BY s DESC LIMIT 400;
+
+rel = 0.75 × normalise(lexical) + 0.25 × normalise(trigram)</code></pre>
+  <p>Each set is min–max normalised to [0,1] independently, then fused. Not reciprocal-rank fusion — the
+  file gives the reasoning: normalisation is the accuracy choice and the vocabulary is understood well
+  enough to keep it tuned. Both queries are individually wrapped in <code>try/catch</code>; a malformed
+  MATCH degrades to the other index, never to an error page.</p>
+
+  <h4>4 · Constrain <span style="color:var(--ink-3)">(timings.filter)</span></h4>
+<pre><code>ok = (matched &gt; 0) AND (contradicted === 0)</code></pre>
+  <p>Both halves are load-bearing. Without <code>contradicted === 0</code>, a constraint is a hint and
+  "bangur opc 53 grade" returns every OPC 53 cement in the region. Without <code>matched &gt; 0</code>, a
+  listing declaring nothing contradicts nothing by vacuum and rides in on lexical relevance alone — that
+  alone took the same query from 85 rows to 139. An undeclared attribute is tolerated;
+  <strong>brand is the exception</strong>, where absence is a contradiction.</p>
+
+  <h4>5 · Facets <span style="color:var(--ink-3)">(timings.facets)</span> — see Part 10</h4>
+  <h4>6 · Score <span style="color:var(--ink-3)">(timings.rank)</span> — see Part 11</h4>
+
+  <h4>7 · Roll up by vendor</h4>
+  <p><code>groupByVendor()</code>, applied <em>after</em> scoring and <em>after</em> facet selections.
+  Each vendor is represented by their best-scoring qualifying offer; the number rolled up rides along as
+  <code>also_from_vendor</code>. Drilling into one seller skips the roll-up.</p>
+
+  <h4>8 · Sorts</h4>
+  <p>Semantic sorts (<code>recommended</code>, <code>price_low</code>, <code>fastest</code>,
+  <code>freshest</code>, <code>best_value</code>) are separate from mechanical column sorts, which each
+  carry an <code>explain</code> string. An unrecognised sort key <strong>throws</strong> — it used to
+  fall through silently, which is how the assistant shipped calling itself "cheapest live offer per line"
+  while passing a key that did not exist. Column sorts run over the whole result set before pagination,
+  so page 2 agrees with page 1.</p>
+
+  <h4>9 · The relaxation ladder</h4>
+<pre><code>pack_size_kg → thickness_mm → size_mm → swr_type → sdr → opc_grade
+  → grade → brand → cement_type → pipe_system → block_type
+  → nominal_bore_mm → diameter_mm</code></pre>
+  <p>A constraint absent from this list can never be relaxed, turning its zero-result query into a dead
+  end. The response reports <code>zero_result.relaxed</code>.</p>
+
+  <h4>10 · Page, join, decorate</h4>
+  <ul>
+    <li>Sliced to 24, then joined to <code>DISPLAY_SQL</code> for titles, vendor names, HSN, MRP,
+    country of origin. 24 rows, not 800.</li>
+    <li>Images pooled per product, own-seller first, max five — with a contradiction filter that drops a
+    photo whose filename names a different maker or cement type (16 and 27 such listings respectively).
+    If nothing survives, an <code>EmptyPlate</code> renders.</li>
+    <li><code>logSearch()</code> is wrapped in <code>try/catch</code> — "logging must never break a
+    search", which is also what makes the read-only production store safe.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="filters"><span class="num">Part 10</span>The filters on the left</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>The "Narrow by" column shows checkboxes with numbers beside them: <em class="q">OPC 117</em>,
+  <em class="q">PPC 94</em>. That number is a promise: <strong>tick this box and you will be looking at
+  that many sellers.</strong> Not approximately. Exactly.</p>
+  <p>That sounds trivial and it isn't. The count and the list have to be counting the same kind of thing.
+  If the filter counts <em>listings</em> while the page shows one card per <em>seller</em>, the numbers
+  never agree and every count is a small lie. Both now count sellers.</p>
+  <div class="analogy">
+    <strong>Counting while you already have filters on.</strong> Suppose you've ticked "OPC". What number
+    should "PPC" show? If it counted only within your current results, it would show 0 — you've filtered
+    PPC out. Useless. So each filter's counts are worked out <em>ignoring its own group's selections but
+    respecting everyone else's</em>. That way you can always see what switching to PPC would give you.
+  </div>
+  <p><strong>Options with nothing behind them are crossed out, not hidden.</strong> If no seller has
+  white cement, "White cement" stays visible with a line through it. An option that silently disappears
+  teaches you nothing; one crossed out tells you the catalogue doesn't go there.</p>
+  <p>The filters shown depend on what you're looking at — pipes get bore size and pressure class, cement
+  gets type and grade. And the rail only appears once the app is confident which category you're in;
+  showing the cement filters over a mixed list would be a promise it couldn't keep.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p>Definitions live in the <code>facet_definition</code> table — label, control, cluster, visibility,
+  dependency, sort order, and the <code>why</code> string shown to the buyer — so the rail is data, not
+  code.</p>
+  <p>The rail renders only when <code>facetCategory</code> resolves: chosen explicitly, inferred by the
+  grammar, or because one category holds ≥ 60% of the result set.</p>
+  <h4>Cross-selection counting, in one pass</h4>
+  <p>For each row, one pass computes the list of selection-bearing facets it fails. A row is in facet
+  <em>f</em>'s base exactly when that list is empty, or contains only <em>f</em>. This replaces a
+  per-facet <code>others.every()</code> rescan and answers the filter stage at the same time.</p>
+  <h4>Counted in distinct vendors</h4>
+<pre><code>const perValue = defs.map(() =&gt; new Set&lt;string&gt;());
+…
+if (ctxMatches(ctx, c.vals[vi], c.isPrice)) perValue[vi].add(row.vendor_id);
+…
+const counts = perValue.map((s) =&gt; s.size);</code></pre>
+  <p>Because a vendor can carry both OPC and PPC, per-value counts legitimately overlap and their sum
+  can exceed the total — each individual count remains a truthful answer to "how many sellers will I see".
+  A test in <code class="file">tests/run.ts</code> clicks through every facet value and asserts
+  <code>search(...with that selection).total === value.count</code>.</p>
+  <p>Facet predicates are compiled once per query rather than per row: each label's range, under/over and
+  lead-time patterns are parsed out of the inner loop, which took the naive
+  O(facets × values × rows) shape down to something that runs in single-digit milliseconds.
+  <code>__facetEquivalence()</code> exists to assert the fast path and the readable definition agree.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="rank"><span class="num">Part 11</span>Why <em>that</em> one is first</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>Once the app knows which sellers qualify, it has to decide what order to show them in. It scores
+  each one out of 1 on eight things, adds the scores with different weights, then subtracts penalties.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>What it looks at</th><th>Weight</th></tr></thead>
+    <tbody>
+      <tr><td>How closely it matches what you typed</td><td class="n">31%</td></tr>
+      <tr><td>Whether it matches the exact specification you asked for</td><td class="n">16%</td></tr>
+      <tr><td>How cheap it is, delivered, compared with the others</td><td class="n">16%</td></tr>
+      <tr><td>Whether it is in stock and can reach you</td><td class="n">10%</td></tr>
+      <tr><td>Seller rating and reliability</td><td class="n">10%</td></tr>
+      <tr><td>Whether it carries a BIS certification</td><td class="n">7%</td></tr>
+      <tr><td>How fast it can be delivered</td><td class="n">6%</td></tr>
+      <tr><td>How recently we verified the price</td><td class="n">4%</td></tr>
+    </tbody>
+  </table></div>
+  <p>Then penalties: a stale price loses 0.25, out of stock loses 0.60, and a minimum order bigger than
+  the quantity you want loses 0.35.</p>
+  <p><strong>Notice price is only 16%.</strong> This is a price comparison site, and price is not the
+  biggest factor. That is deliberate: the cheapest listing is often stale, out of stock, or from a seller
+  who can't deliver. If you want pure price, the "cheapest" sort is one click away — and then it really
+  is pure price.</p>
+  <div class="analogy">
+    <strong>Every card tells you why it is there.</strong> A small line at the bottom of each card names
+    the two things that contributed most to its position — "closest match to your search · matches the
+    exact spec you asked for". This is not decoration. Indian e-commerce rules require the main ranking
+    factors to be disclosed in plain language, and that line is generated from the same function that
+    does the ranking, so it cannot drift out of date.
+  </div>
+  <p>Related: there is a ninth factor, "most bought", weighted at 5%. There is no order history in this
+  build, so it would be a constant — the same for everything, therefore meaningless. Rather than let a
+  dead factor absorb 5%, its weight is redistributed to matching and price, and the factor reports zero.
+  It is <em>not</em> faked with a plausible-looking number.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code class="file">lib/rank.ts</code>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>#</th><th>Feature</th><th>Base</th><th>Cold start</th><th>Computed as</th></tr></thead>
+    <tbody>
+      <tr><td class="n">f1</td><td>closest match to your search</td><td class="n">0.28</td><td class="n">0.31</td><td>fused relevance, clamped [0,1]</td></tr>
+      <tr><td class="n">f2</td><td>matches the exact spec</td><td class="n">0.16</td><td class="n">0.16</td><td>fraction of typed constraints matched</td></tr>
+      <tr><td class="n">f3</td><td>lowest delivered price</td><td class="n">0.14</td><td class="n">0.16</td><td><code>1 − percentile(normalised_paise)</code></td></tr>
+      <tr><td class="n">f4</td><td>in stock and deliverable</td><td class="n">0.10</td><td class="n">0.10</td><td>0 / 0.5 (&gt;7 d) / 1</td></tr>
+      <tr><td class="n">f5</td><td>seller rating</td><td class="n">0.10</td><td class="n">0.10</td><td>shrunk toward the mean by review count</td></tr>
+      <tr><td class="n">f6</td><td>BIS certification</td><td class="n">0.07</td><td class="n">0.07</td><td>graded by cert state</td></tr>
+      <tr><td class="n">f7</td><td>fastest delivery</td><td class="n">0.06</td><td class="n">0.06</td><td><code>exp(−lead_time_days / 7)</code></td></tr>
+      <tr><td class="n">f8</td><td>most bought</td><td class="n">0.05</td><td class="n">0.00</td><td>inert — no order history</td></tr>
+      <tr><td class="n">f9</td><td>most recently verified</td><td class="n">0.04</td><td class="n">0.04</td><td><code>1 − min(1, ageHours / slaHours)</code></td></tr>
+    </tbody>
+  </table></div>
+  <p><code>COLD_START_WEIGHTS</code> is what actually runs. Penalties: <code>stale 0.25</code>,
+  <code>outOfStock 0.60</code>, <code>moqAboveQty 0.35</code>. <code>hardFiltered()</code> removes
+  candidates that must never be ranked at all, before scoring.</p>
+  <p>Candidates are keyed on <code>offer_id</code>, not <code>product_id</code> — a product appears once
+  per seller and keying on the product would silently collapse them.</p>
+  <div class="warn" style="margin-top:14px">
+    <h4>Diversity damping was removed, not disabled</h4>
+    <p style="margin-bottom:0">A vendor's 3rd result used to score ×0.85, and no seller could hold more
+    than 4 of the first 10. Since the list became one card per vendor those rules are unreachable.
+    Leaving them in would be worse than dead code: CP(E-Commerce) Rule 5(3)(f) requires the parameters
+    disclosed to a customer to be the ones actually applied, and the "why this is here" chip reads from
+    this function.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="click"><span class="num">Part 12</span>Clicking a product</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>Clicking a card slides in a panel with everything known about that product:</p>
+  <ul>
+    <li><strong>Every seller</strong>, each priced identically so they are genuinely comparable — not
+    just the one whose card you clicked.</li>
+    <li><strong>Every specification</strong>, each with a link to where it came from, when it was
+    fetched, and whether the seller stated it, we derived it, or it is an industry assumption.</li>
+    <li><strong>A price chart</strong> over time.</li>
+    <li><strong>Similar products</strong>, chosen by closeness in price rather than by an algorithm you
+    can't inspect.</li>
+    <li><strong>The government rate</strong> for that material in that state, so you can see the market
+    price against the official one.</li>
+  </ul>
+  <div class="analogy">
+    <strong>A bug worth knowing about, because it shows what Rule 3 is for.</strong> The table shows one
+    row per seller — their <em>cheapest</em> listing. But if a seller has posted the same cement twice at
+    two prices, and you clicked the more expensive card, looking that seller up in the table found their
+    other listing. The panel showed ₹315.70 under a card that said ₹321.60. Same seller, two numbers,
+    both real, neither matching what you clicked. The fix was to find the exact listing you clicked
+    <em>before</em> collapsing to one row per seller.
+  </div>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code class="file">app/api/sku/[id]/route.ts</code>, opened by a <code>buildobjects:open-sku</code> event
+  carrying the product id and offer id.</p>
+  <dl class="kv">
+    <dt>product</dt><dd><code>attrs</code> and <code>cert_standards</code> parsed, category label, QCO flag + citation.</dd>
+    <dt>price</dt><dd>The <code>price_current</code> row plus freshness state, dot, label and exact timestamp.</dd>
+    <dt>offers</dt><dd><code>resolveAllOffers()</code> prices every seller identically; <code>rollUpByVendor()</code> gives one row per seller.</dd>
+    <dt>clicked_offer</dt><dd>Found <strong>before</strong> the roll-up, by <code>offer_id</code>. Null when the caller did not say which, or when that offer is no longer active.</dd>
+    <dt>specs</dt><dd>Ordered <code>quoted → derived → typical</code>, deduplicated by field.</dd>
+    <dt>images / datasheet_images</dt><dd>Split by <code>kind</code> — datasheet scans do not belong in a photo rotation.</dd>
+    <dt>history</dt><dd>Up to 400 points from <code>price_history</code>.</dd>
+    <dt>substitutes</dt><dd>Same category, ordered by <code>ABS(price − this price)</code>, limit 6.</dd>
+    <dt>sor_anchor</dt><dd>The <code>sor_rate</code> row for this state and category.</dd>
+    <dt>total_offers<br>total_vendors</dt><dd>Two counts kept deliberately distinct.</dd>
+  </dl>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="price"><span class="num">Part 13</span>How one price is built</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>A seller says "₹350". Here is everything that happens before that becomes the ₹362.90 you see.</p>
+  <ol>
+    <li><strong>Work out the price before tax.</strong> Some sellers quote with GST included, some
+    without. Both are converted to the same "before tax" figure, otherwise the comparison is meaningless
+    from the start.</li>
+    <li><strong>Add GST back, at the correct rate.</strong> The rate comes from the product's HSN tax
+    code, not from a guess.</li>
+    <li><strong>Add delivery.</strong> Calculated from the straight-line distance between the seller's
+    location and your pincode, the weight and bulk of the goods, and how much you are buying — because
+    a lorry-load spreads its delivery cost over more bags than a single bag does. If the seller offers
+    free delivery above a certain order value, that is applied.</li>
+    <li><strong>Add handling and loading.</strong> Real costs at both ends that quotes usually omit.</li>
+    <li><strong>Divide down to one standard unit.</strong> Rupees per bag, per kilo, per metre, per piece.</li>
+  </ol>
+  <div class="analogy">
+    <strong>That last figure is the only one ever used for comparison.</strong> Every sort, every "cheapest",
+    every filter band works on it and nothing else. That is what makes two sellers who quote in completely
+    different ways genuinely comparable.
+  </div>
+  <p>One more detail that matters: all money is stored as whole numbers of <strong>paise</strong>, never
+  as decimal rupees. Decimals drift — add ₹0.10 ten times in a computer and you may not get exactly ₹1.00.
+  Whole paise cannot drift.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code>landedFor()</code> at <code class="file">lib/rebuild.ts:39</code>.</p>
+<pre><code>const baseEx = o.gst_treatment === 'EXCL'
+  ? o.base_paise_canonical
+  : baseFromInclusive(o.base_paise_canonical, o.gst_rate_bp);
+const gst = gstOn(baseEx, o.gst_rate_bp);
+
+const logistics    = CATEGORY_LOGISTICS[o.category] ?? CATEGORY_LOGISTICS.cement;
+const amortiseQty  = qtyOverride ?? (o.moq_qty &gt; 0 ? o.moq_qty : logistics.referenceQty);
+
+const f = computeFreight({
+  vendorId, vendorGeo, destGeo, category: o.category,
+  unitWeightKg: o.unit_weight_kg ?? 1, unitVolumeM3: o.unit_volume_m3,
+  amortiseQty, orderValuePaise: (baseEx + gst) * amortiseQty,
+  vendorFreeDeliveryThresholdPaise: o.free_delivery_threshold_paise,
+});
+
+const landed = baseEx + gst + f.freightPaise + f.handlingPaise + f.loadingPaise;</code></pre>
+  <p>Then divided to the canonical unit → <code>normalised_paise</code>, the only field prices are ever
+  compared on. <code>roundHalfUp</code> from <code class="file">lib/money.ts</code>; every value is
+  <code>Paise</code>, a branded integer type.</p>
+  <p>The comparability note ships with every response: <em>"Every price on this page is a delivered total
+  to your pincode, inclusive of GST at the stated HSN rate, expressed per canonical unit. Prices are only
+  ever sorted against each other on that one basis."</em></p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="chat"><span class="num">Part 14</span>The chat assistant</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>The panel on the right answers questions in ordinary language — <em class="q">what is cement going
+  for today?</em>, <em class="q">how much cement for a 20 × 15 foot slab?</em> — and it can do arithmetic
+  a buyer actually needs, like how many bricks a wall takes.</p>
+  <p>It uses an AI model, and the interesting part is how tightly it is fenced in.</p>
+  <div class="analogy">
+    <strong>The design in one line:</strong> the AI is allowed to write sentences, but it is not allowed
+    to know anything. Every fact must come from a database lookup performed during that exact
+    conversation turn.
+  </div>
+  <p>Here is how that is enforced, and it is unusual. Most systems ask the AI to cite its sources and
+  trust it. This one does the opposite: it <strong>checks the AI's homework mechanically</strong>.</p>
+  <ol>
+    <li>Every time a lookup runs, it deposits every number and name it stands behind into a list.</li>
+    <li>When the AI writes its reply, every number and every name in that reply is checked against the
+    list.</li>
+    <li>Anything not on the list is rejected. The AI is shown exactly what it got wrong and gets
+    <em>one</em> chance to rewrite.</li>
+    <li>If it fails again, the app throws the sentence away and shows you the raw data instead, saying so.</li>
+  </ol>
+  <p>So an invented price cannot reach you. Not because the AI is well behaved, but because a number that
+  isn't in the ledger simply cannot get through.</p>
+  <p>Two other guards: questions completely outside construction materials are refused by a plain pattern
+  check <em>before</em> the AI is ever called, which costs nothing; and repeated questions are answered
+  from a cache, which is cleared automatically whenever new prices are collected, so a cached answer can
+  never be stale.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code class="file">lib/chat/</code> over Gemini 2.5 Flash via hand-rolled <code>fetch</code>
+  (no SDK). Route at <code class="file">app/api/chat/route.ts</code>, streaming SSE, with an in-memory
+  token bucket (capacity 8, refill 0.5/s) returning 429 + <code>Retry-After</code>.</p>
+  <div class="flow">
+    <div class="step"><div class="idx">1</div><div>
+      <div class="t">Scope gate — before a token is spent</div>
+      <div class="d">Deterministic layers in <code class="file">lib/chat/validator.ts</code>: unsafe,
+      injection patterns, non-Latin bypass, then domain-signal absence (only fires at ≥ 4 words).</div>
+    </div></div>
+    <div class="step"><div class="idx">2</div><div>
+      <div class="t">Answer cache</div>
+      <div class="d"><code>sha1(data_version + pincode + normalise(message))</code>. First turns only,
+      model-spending turns only, never a failure, never a turn carrying a grounding violation. LRU 400.</div>
+    </div></div>
+    <div class="step"><div class="idx">3</div><div>
+      <div class="t">Tool loop — up to 4 rounds</div>
+      <div class="d">Eight tools in <code class="file">lib/chat/tools.ts</code>: catalogue scope, product
+      search, product detail, quality ranking, quantity estimation, price estimation, option lists,
+      comparison. Each returns a payload <em>and</em> a <code>FactLedger</code>.</div>
+    </div></div>
+    <div class="step"><div class="idx">4</div><div>
+      <div class="t">Grounding validation</div>
+      <div class="d">Numbers are checked with a magnitude-scaled tolerance; capitalised runs are checked
+      as entities, with exemptions for user-supplied values, a closed domain vocabulary and
+      sentence-initial words. A toolless reply containing a rupee sign or a superlative is itself a
+      violation.</div>
+    </div></div>
+    <div class="step"><div class="idx">5</div><div>
+      <div class="t">One repair, then honest fallback</div>
+      <div class="d">The repair call carries the violations and no tool schemas. If it errors or fails
+      revalidation, the turn returns <code>honestFallback()</code> with <code>refused: true</code>,
+      keeping the UI blocks and dropping the prose.</div>
+    </div></div>
+  </div>
+  <p>A draft that is <em>only</em> too long is trimmed locally rather than re-asked — it already cleared
+  the grounding checks, so a sentence-boundary prefix of it is grounded too, and truncation can only
+  drop, never invent. A parity test asserts that every tool's own payload passes its own validator: if a
+  tool cannot survive a verbatim quote of itself, the model can never win.</p>
+  <p>Quantity estimation is fully deterministic — <code class="file">lib/chat/estimator.ts</code> and
+  <code class="file">coefficients.ts</code>, cited to IS codes, returning the arithmetic, every
+  coefficient used and every assumption. The model never multiplies anything.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="fast"><span class="num">Part 15</span>Why it is fast</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>Target: <strong>a fifth of a second</strong> from your keystroke to the results on screen — including
+  the 80 ms it deliberately spends waiting for you to stop typing. Four things get it there.</p>
+  <p><strong>It never goes online.</strong> Reading a local file takes microseconds; a network round trip
+  takes tens of milliseconds at best.</p>
+  <p><strong>It remembers the candidate list.</strong> The set of cement offers in Hyderabad doesn't
+  change between your keystrokes, so it is read once and reused.</p>
+  <div class="analogy">
+    <strong>The clever bit is knowing when to forget.</strong> A cache that hangs on to old data is worse
+    than no cache. SQLite keeps an internal counter that ticks up whenever a different program writes to
+    the file. The app checks that counter; if it moved, the collector has run and everything cached is
+    dropped. No timers, no guessing, no window in which stale prices are served.
+  </div>
+  <p><strong>It only fetches what it will show.</strong> Ranking works on a slim version of each row.
+  Titles, seller names and tax codes are fetched only for the 24 rows that will actually appear.</p>
+  <p><strong>It avoids repeated work.</strong> Each product's details are decoded once per request rather
+  than once per filter — that alone was about 8,000 redundant operations on a single cement search.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <dl class="kv">
+    <dt>base-row cache</dt>
+    <dd><code>baseCache</code> keyed on (region, category, vendor), guarded by <code>PRAGMA data_version</code>. SQLite bumps it whenever <em>another connection</em> commits, so a collection run in a separate process invalidates it with no signalling. A wall-clock TTL would serve a stale catalogue for its duration; an in-process counter would never see the collector.</dd>
+    <dt>same-connection blind spot</dt>
+    <dd><code>data_version</code> does not move for commits on the same connection, so <code>rebuildPrices()</code> calls <code>invalidateSearchCache()</code> directly — correctness does not depend on the collector happening to be a separate process.</dd>
+    <dt>attrOf memoisation</dt>
+    <dd>Parsed <code>attrs</code> cached on the row object. 13 facets × 627 rows ≈ 8,000 <code>JSON.parse</code> calls per query otherwise; it was the single largest cost once results went offer-level. Cannot outlive the request, since rows are fresh objects each time.</dd>
+    <dt>compiled facets</dt>
+    <dd>Range, under/over and lead-time patterns parsed once per query, hoisted out of the row loop. <code>__facetEquivalence()</code> asserts the fast path matches the readable definition.</dd>
+    <dt>split SQL</dt>
+    <dd><code>BASE_SQL</code> (rank on) / <code>DISPLAY_SQL</code> (render 24) / <code>SORT_SQL</code> (lazy, on first column sort, same <code>data_version</code> stamp).</dd>
+    <dt>indexes</dt>
+    <dd><code>offer_price(region_id, normalised_paise)</code> and <code>pc_rank</code> make "cheapest" a seek rather than a scan.</dd>
+  </dl>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="trust"><span class="num">Part 16</span>How we know it is true</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>There are <strong>436 automated checks</strong>. They run in a few seconds without an internet
+  connection, and they mostly do not test that the code runs — they test that its <em>promises</em> hold.</p>
+  <ul>
+    <li>Trying to go online during a request must fail.</li>
+    <li>The quantity calculations are checked against published engineering figures.</li>
+    <li>Every filter count is clicked through and must equal the number of results it produced.</li>
+    <li>A brand search must not return another brand.</li>
+    <li>No product card may carry a photograph naming a different manufacturer.</li>
+    <li>Every colour pairing in the interface must pass the standard contrast requirement.</li>
+  </ul>
+  <div class="analogy">
+    <strong>The test the whole assistant rests on.</strong> Each of the eight database lookups is asked
+    to produce its own output, and then that output is fed through the AI's own fact-checker. If a lookup
+    hands the AI a number the checker would reject, the AI is being set up to fail through no fault of
+    its own. That is exactly what was happening: the assistant was rejecting its own database — which is
+    why "which is the best cement?" used to fail every single time.
+  </div>
+  <p>And a category of test that is easy to forget: checking the guard doesn't fire on <em>correct</em>
+  answers. A safety check that rejects true statements gets switched off within a week — and then it
+  isn't protecting anything at all.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <p><code>npm test</code> chains three offline suites; a fourth requires an API key and is excluded.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Suite</th><th>Tests</th><th>Covers</th></tr></thead>
+    <tbody>
+      <tr><td class="n">tests/run.ts</td><td class="n">186</td><td>The three laws, collector parsers, normalisation, price resolution, freight, GST, search relevance, facet-count parity, image contradiction, typography metrics, WCAG contrast over the live stylesheet.</td></tr>
+      <tr><td class="n">tests/chat.ts</td><td class="n">225</td><td>Scope gate, extraction, ledger, validator, estimator against published figures, tool payloads, cache, region isolation, malformed args, UI payload contracts, payload/ledger parity.</td></tr>
+      <tr><td class="n">tests/chat-engine.ts</td><td class="n">25</td><td>Gates before the model, the happy path, hallucination containment, slot filling, model-failure containment, trim vs repair.</td></tr>
+      <tr><td class="n">tests/chat-live.ts</td><td class="n">14 cases</td><td>Real model turns. A report, not a gate — but ungrounded output and failed refusals are hard failures.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The header of <code class="file">tests/chat.ts</code> names the two classes tested with equal weight:
+  <strong>false negatives</strong> (a hallucination the validator let through — obvious) and
+  <strong>false positives</strong> (a true statement the validator rejected — "less obvious and more
+  dangerous in practice, because a guard that fires on correct answers gets disabled within a week, and
+  then the first class is unprotected too").</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="ship"><span class="num">Part 17</span>How it goes live</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>The site runs on Vercel. Since the whole database is a file, deploying it means shipping that file
+  along with the code.</p>
+  <p>There's a wrinkle: the working database has a companion "journal" file of recent changes, which
+  can't be shipped safely. So before deploying, a command folds the journal into a single clean file —
+  a snapshot — and that snapshot is what goes live. In production the app opens it strictly read-only,
+  so nothing can accidentally write to it.</p>
+  <p><strong>This has one consequence worth stating plainly:</strong> the live site's prices are frozen
+  at the moment the snapshot was taken. Collecting new prices locally does not update the live site.
+  Someone has to take a new snapshot and deploy. Forget that step and the site quietly serves old
+  prices — which happened here: the deployed snapshot was four days behind.</p>
+</div>
+
+<div class="deep">
+  <div class="tag">Under the hood</div>
+  <ol>
+    <li><code>npm run collect</code> — writes <code>data/buildobjects.db</code>.</li>
+    <li><code>npm run db:snapshot</code> — <code>scripts/db-snapshot.mjs</code> folds the WAL and writes
+    <code>data/buildobjects.prod.db</code>, reporting size, integrity and row counts.</li>
+    <li><code>npm test</code> — 436 tests must pass.</li>
+    <li><code>npm run build</code> — Next production build.</li>
+    <li><code>git push origin main</code> — the Vercel GitHub integration builds and promotes to production.</li>
+  </ol>
+  <p><code>.gitignore</code> excludes the working store and its WAL/SHM but <strong>not</strong>
+  <code>data/buildobjects.prod.db</code>. <code>.vercelignore</code> re-excludes them for CLI deploys, since the
+  CLI does not apply <code>.gitignore</code> to a linked project, and additionally drops
+  <code>collector/raw</code>, <code>collector/fixtures</code>, <code>data/snapshots</code> and
+  <code>tests</code> — nothing on the query path reads them.</p>
+  <p><code>lib/db.ts:43</code> opens with <code>{ readonly: true, fileMustExist: true }</code> when
+  <code>READ_ONLY</code>. <code>logSearch</code>'s <code>try/catch</code> is what makes that safe:
+  search logging fails silently rather than 500-ing the request.</p>
+  <p>Secrets are environment variables, never committed — <code>.env*</code> is gitignored, and
+  <code>GEMINI_API_KEY</code> is set in the Vercel project rather than in the repository.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="glossary"><span class="num">Part 18</span>Glossary</h2>
+
+<div class="simple">
+  <div class="tag">Plain definitions</div>
+  <dl class="kv gloss">
+    <dt>Database</dt><dd>An organised file for storing information, so it can be searched quickly. Here it is one file on disk, not a separate server.</dd>
+    <dt>Index</dt><dd>A pre-sorted lookup, exactly like the index at the back of a book — so you don't have to read everything to find one thing.</dd>
+    <dt>Query</dt><dd>A question asked of the database.</dd>
+    <dt>API endpoint</dt><dd>A specific address the browser can ask for data, e.g. <code>/api/search</code>. The page asks, the server answers.</dd>
+    <dt>Cache</dt><dd>Keeping a previous answer so it doesn't have to be worked out again. Fast, but only safe if you know exactly when to throw it away.</dd>
+    <dt>Debounce</dt><dd>Waiting for a short pause before reacting, so a burst of typing produces one request instead of six.</dd>
+    <dt>Facet</dt><dd>A filter with counts — the checkboxes in the left-hand rail.</dd>
+    <dt>Offer</dt><dd>One seller's listing of one product at their price.</dd>
+    <dt>Product</dt><dd>The item itself, with many sellers' offers attached.</dd>
+    <dt>Vendor</dt><dd>A seller.</dd>
+    <dt>Landed price</dt><dd>What it costs delivered to your address, tax and freight included — not the shop's shelf price.</dd>
+    <dt>Normalised price</dt><dd>The landed price expressed per standard unit, so different sellers can be compared.</dd>
+    <dt>Paise</dt><dd>1/100th of a rupee. All money is stored as whole paise so rounding cannot drift.</dd>
+    <dt>Canonical unit</dt><dd>The one unit a category is always priced in — bag for cement, kg for steel, metre for pipe, piece for brick.</dd>
+    <dt>GST / HSN</dt><dd>India's sales tax, and the classification code that determines its rate.</dd>
+    <dt>MOQ</dt><dd>Minimum order quantity — the least a seller will sell.</dd>
+    <dt>BIS / ISI / QCO</dt><dd>India's standards body, its certification mark, and the orders that make certification mandatory for some goods.</dd>
+    <dt>SOR</dt><dd>Schedule of Rates — official government rates for materials, useful as a sanity anchor.</dd>
+    <dt>Freshness / stale</dt><dd>How long ago a price was verified, and whether that is too long for this category.</dd>
+    <dt>Grounding</dt><dd>Requiring every fact in an AI answer to be traceable to a real lookup, and checking it mechanically.</dd>
+    <dt>Hallucination</dt><dd>An AI stating something plausible and false. The reason for all of the above.</dd>
+  </dl>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="gaps"><span class="num">Part 19</span>What is still missing</h2>
+
+<div class="simple">
+  <div class="tag">In plain words</div>
+  <p>Stated here rather than left to be discovered.</p>
+  <ul>
+    <li><strong>"Trending here" never appears</strong> in the search dropdown. Recent searches do work.</li>
+    <li><strong>"Most bought" is not real.</strong> There is no order history, so the factor is reported
+    as zero and its weight given to other factors — rather than faked.</li>
+    <li><strong>No GI pipe in stock.</strong> Searching for it relaxes the requirement and says so.</li>
+    <li><strong>Five product cards in five hundred show no photograph</strong>, because their only photo
+    named a different product. That is the intended trade — no picture beats a wrong picture.</li>
+    <li><strong>The assistant's cache and rate limit are per-instance</strong> on Vercel, so they reset on
+    a cold start. Answers are unaffected; only how often a repeat question is free.</li>
+    <li><strong>The government cement rate is a scanned PDF with no text layer.</strong> The figure is not
+    machine-extracted, and the interface says so rather than printing a number nobody verified.</li>
+    <li><strong>Sand and aggregate have quantities but no prices.</strong> The assistant will compute how
+    much you need and tell you plainly that it cannot price it.</li>
+  </ul>
+</div>
+
+<footer>
+  Build Objects Price Intelligence · Hyderabad and Vijayawada · cement, TMT steel, water pipes, bricks &amp; blocks.<br>
+  Written from the source: <code class="file">lib/search.ts</code>, <code class="file">lib/query/parse.ts</code>,
+  <code class="file">lib/query/vocab.ts</code>, <code class="file">lib/rank.ts</code>,
+  <code class="file">lib/rebuild.ts</code>, <code class="file">lib/price.ts</code>,
+  <code class="file">lib/freight.ts</code>, <code class="file">lib/schema.sql</code>,
+  <code class="file">lib/chat/*</code>, <code class="file">collector/run.ts</code>,
+  <code class="file">collector/normalize.ts</code>, <code class="file">components/*</code>,
+  <code class="file">app/api/*</code> and <code class="file">tests/*</code>.
+</footer>
+
+</div>
+
+<script>
+  function setMode(m){
+    document.body.classList.toggle('only-simple', m === 'simple');
+    document.body.classList.toggle('only-deep',   m === 'deep');
+    for (const [id, key] of [['b-both','both'],['b-simple','simple'],['b-deep','deep']]) {
+      document.getElementById(id).setAttribute('aria-pressed', String(key === m));
+    }
+    try { localStorage.setItem('buildobjects-doc-mode', m); } catch (e) { /* private mode */ }
+  }
+  try {
+    const saved = localStorage.getItem('buildobjects-doc-mode');
+    if (saved) setMode(saved);
+  } catch (e) { /* private mode */ }
+</script>
+</body>
+</html>

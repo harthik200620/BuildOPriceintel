@@ -95,7 +95,7 @@ async function download(url: string): Promise<{ file: string; bytes: number } | 
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'BuildOPriceIntel/0.1 (local research demo; contact harthikvarma0@gmail.com)',
+        'User-Agent': 'BuildObjectsPriceIntel/0.1 (local research demo; contact harthikvarma0@gmail.com)',
         Accept: 'image/avif,image/webp,image/jpeg,image/png,*/*',
       },
       signal: AbortSignal.timeout(25_000),

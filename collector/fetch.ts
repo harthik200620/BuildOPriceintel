@@ -9,7 +9,7 @@
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-  'Chrome/140.0.0.0 Safari/537.36 BuildO-PriceIntel/0.1 (local research build)';
+  'Chrome/140.0.0.0 Safari/537.36 BuildObjects-PriceIntel/0.1 (local research build)';
 
 /**
  * Politeness, tuned against a real 429 rather than guessed.

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presenter's Guide — Sovereign by 2031</title>
+<style>
+  :root{
+    --bg:#0A1220; --panel:#152238; --panel2:#111C30; --line:#24344F;
+    --ink:#F2F6FC; --muted:#93A7C4; --faint:#5B7291;
+    --cyan:#38BDF8; --cyanb:#67E8F9; --amber:#F5B83D; --green:#34D399; --red:#F87171;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:Calibri,'Segoe UI',Arial,sans-serif;line-height:1.5}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 28px 80px}
+  h1,h2,.serif{font-family:Cambria,Georgia,serif}
+  .kicker{color:var(--cyan);font-size:12px;letter-spacing:4px;font-weight:bold;text-transform:uppercase}
+  h1{font-size:42px;margin:10px 0 6px}
+  .sub{color:var(--muted);font-size:16px;max-width:640px}
+  .meta{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .chip{border:1px solid var(--cyan);color:var(--cyan);border-radius:999px;padding:5px 14px;font-size:12px;font-weight:bold}
+  .chip.amber{border-color:var(--amber);color:var(--amber)}
+  .chip.green{border-color:var(--green);color:var(--green)}
+  h2{font-size:24px;margin:52px 0 6px}
+  .h2sub{color:var(--faint);font-size:13px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px}
+  .story{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-top:26px;
+         font-family:Cambria,Georgia,serif;font-size:19px;font-style:italic;color:var(--ink)}
+  .story b{color:var(--cyan);font-style:normal}
+  /* acts */
+  .act{display:flex;gap:16px;align-items:baseline;border-bottom:1px solid var(--line);padding:14px 4px}
+  .act:last-child{border-bottom:none}
+  .act .n{color:var(--cyan);font-family:Cambria,serif;font-size:20px;font-weight:bold;min-width:92px}
+  .act .t{font-weight:bold;min-width:210px}
+  .act .d{color:var(--muted);font-size:14px}
+  .act .time{margin-left:auto;color:var(--amber);font-size:13px;font-weight:bold;white-space:nowrap}
+  /* slide table */
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{color:var(--faint);text-transform:uppercase;font-size:11px;letter-spacing:2px;text-align:left;
+     padding:10px 10px;border-bottom:1px solid var(--line)}
+  td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.no{color:var(--cyan);font-weight:bold;font-family:Cambria,serif;white-space:nowrap}
+  td.say{color:var(--muted)}
+  td.num{color:var(--amber);font-weight:bold;white-space:nowrap}
+  .sect td.no{color:var(--faint)}
+  tr.sect td{background:var(--panel2);color:var(--faint);font-size:11px;letter-spacing:2px;
+             text-transform:uppercase;font-weight:bold;padding:7px 10px}
+  /* memorize grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+  .stat .v{font-family:Cambria,serif;font-size:26px;font-weight:bold;color:var(--cyan)}
+  .stat .v.amber{color:var(--amber)} .stat .v.green{color:var(--green)}
+  .stat .l{color:var(--muted);font-size:12px;margin-top:4px}
+  /* Q&A */
+  .qa .q{font-weight:bold;color:var(--ink)}
+  .qa .a{color:var(--muted);font-size:14px;margin:6px 0 0}
+  .qa .a b{color:var(--green)}
+  /* tips */
+  .tip{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  .tip:last-child{border-bottom:none}
+  .tip .dot{color:var(--cyan);font-weight:bold}
+  .tip .warn{color:var(--red);font-weight:bold}
+  .foot{margin-top:56px;color:var(--faint);font-size:12px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Build Objects · Presenter's Guide</div>
+  <h1>How to present "Sovereign by 2031"</h1>
+  <p class="sub">A brief for delivering the 20-slide indigenous cloud + miniature satellites blueprint. Target: <b>15 minutes</b> of talk, 10 for questions.</p>
+  <div class="meta">
+    <span class="chip">20 SLIDES</span>
+    <span class="chip amber">~45 SEC / SLIDE</span>
+    <span class="chip green">END ON THE ₹210 Cr ASK</span>
+  </div>
+
+  <div class="story">
+    The one-sentence story — memorize it, open with it, close with it:<br><br>
+    "We already own the design spine of every home we build — this is the plan to own the
+    <b>compute</b>, the <b>network</b> and a small piece of the <b>sky</b> underneath it,
+    for ₹210 crore over five years, with every big cheque locked behind a proof gate."
+  </div>
+
+  <h2>The arc — five acts</h2>
+  <div class="h2sub">If you remember nothing else, walk these five beats in order.</div>
+  <div class="card">
+    <div class="act"><span class="n">1–4</span><span class="t">Why & how big</span><span class="d">What Build Objects is, why rented rails are a risk, the load we carry, the end-state stack</span><span class="time">3 min</span></div>
+    <div class="act"><span class="n">5–6</span><span class="t">The cloud</span><span class="d">Private cloud design, then the rent / partner / own money chart</span><span class="time">2.5 min</span></div>
+    <div class="act"><span class="n">7–10</span><span class="t">Land · Sea · Sky</span><span class="d">One data center verdict per slide, then the comparison: build land, study sea, rent sky</span><span class="time">3.5 min</span></div>
+    <div class="act"><span class="n">11–15</span><span class="t">Network & satellites</span><span class="d">3-path connectivity, lease-first strategy, what smallsats honestly do, our 12-sat plan, its cost</span><span class="time">3.5 min</span></div>
+    <div class="act"><span class="n">16–20</span><span class="t">Rules & the bill</span><span class="d">Licences to file now, rules to change, security, partners, roadmap + ₹130/210/405 Cr choice</span><span class="time">2.5 min</span></div>
+  </div>
+
+  <h2>Slide-by-slide — one line to say, one number to land</h2>
+  <div class="h2sub">Say the line, point at the number, move on. Never read the slide.</div>
+  <div class="card" style="padding:8px 10px">
+  <table>
+    <tr><th style="width:52px">#</th><th>Slide</th><th>The line to say</th><th style="width:130px">Land this</th></tr>
+    <tr class="sect"><td colspan="4">Act 1 — Why & how big</td></tr>
+    <tr><td class="no">01</td><td>Sovereign by 2031</td><td class="say">"Five years. Our cloud, our data centers, our satellites — only for us, never for sale."</td><td class="num">FY27–31</td></tr>
+    <tr><td class="no">02</td><td>Zero rented rails</td><td class="say">"Whoever owns the design owns the transaction; whoever owns the rails owns the margin."</td><td class="num">15,000+ SKUs</td></tr>
+    <tr><td class="no">03</td><td>The load</td><td class="say">"This is what must never break — spikes are the enemy, so everything has 5–10× headroom."</td><td class="num">10,000 concurrent</td></tr>
+    <tr><td class="no">04</td><td>The stack</td><td class="say">"Three layers, one control plane — sky, core, cloud."</td><td class="num">2026 → 2031</td></tr>
+    <tr class="sect"><td colspan="4">Act 2 — The cloud</td></tr>
+    <tr><td class="no">05</td><td>Private cloud</td><td class="say">"All open-source, keys in our HSMs — any workload can leave any vendor in 90 days."</td><td class="num">2 regions</td></tr>
+    <tr><td class="no">06</td><td>Rent / partner / own</td><td class="say">"Own the GPUs immediately, rent the building for now, burst to cloud forever."</td><td class="num">&lt;2 yr GPU payback</td></tr>
+    <tr class="sect"><td colspan="4">Act 3 — Land · Sea · Sky</td></tr>
+    <tr><td class="no">07</td><td>Land: 1 MW core</td><td class="say">"One megawatt in Hyderabad is enough — with headroom."</td><td class="num">₹50–70 Cr/MW</td></tr>
+    <tr><td class="no">08</td><td>Sea</td><td class="say">"China just made this commercial; India has no rulebook — we study, we don't spend."</td><td class="num">~90% cooling cut</td></tr>
+    <tr><td class="no">09</td><td>Sky</td><td class="say">"A HAPS lifts kilowatts, not megawatts — it's a flying cell tower, not a data center."</td><td class="num">67-day flight</td></tr>
+    <tr><td class="no">10</td><td>The comparison</td><td class="say">"Land wins this decade. Sea may reach coastal parity by the 2030s. Sky never pencils for compute."</td><td class="num">Land = 100 index</td></tr>
+    <tr class="sect"><td colspan="4">Act 4 — Network & satellites</td></tr>
+    <tr><td class="no">11</td><td>Private network</td><td class="say">"Every site gets three ways down: fibre, 5G, satellite — failover in seconds."</td><td class="num">200+ sites</td></tr>
+    <tr><td class="no">12</td><td>Buy the sky first</td><td class="say">"Broadband is a competitive market — we buy it. We build only what we can't buy."</td><td class="num">~₹3k /site /mo</td></tr>
+    <tr><td class="no">13</td><td>Smallsat reality</td><td class="say">"Honest slide: miniature satellites do telemetry and messaging brilliantly — not broadband."</td><td class="num">₹8,000+ Cr = no</td></tr>
+    <tr><td class="no">14</td><td>Our constellation</td><td class="say">"Two demo birds, then twelve — indigenous buses, our payload, ISRO-ecosystem launch."</td><td class="num">12 sats · FY31</td></tr>
+    <tr><td class="no">15</td><td>What the sky costs</td><td class="say">"Owning never beats leasing on ₹ per bit — we're buying certainty, and it's gated."</td><td class="num">₹180–260 Cr</td></tr>
+    <tr class="sect"><td colspan="4">Act 5 — Rules & the bill</td></tr>
+    <tr><td class="no">16</td><td>Regulatory runway</td><td class="say">"Nothing here is a blocker — Starlink cleared the same wall. The enemy is sequencing: file in FY27."</td><td class="num">ITU: 12–24 mo</td></tr>
+    <tr><td class="no">17</td><td>Rules to change</td><td class="say">"Six asks, all accelerating what government is already doing — we push as builders, not lobbyists."</td><td class="num">120-day window</td></tr>
+    <tr><td class="no">18</td><td>Security</td><td class="say">"Sovereign only counts if we're harder to breach than the hyperscalers we left."</td><td class="num">DPDP · CERT-In</td></tr>
+    <tr><td class="no">19</td><td>Partners</td><td class="say">"India already funded a private 12-sat constellation as a PPP — our path is precedented and priced."</td><td class="num">₹1,150 Cr precedent</td></tr>
+    <tr><td class="no">20</td><td>The plan & the bill</td><td class="say">"Three paths. Partnered rents forever, full-own overpays for pride — hybrid buys sovereignty where it compounds. Every cheque sits behind a gate."</td><td class="num">₹210 Cr ★</td></tr>
+  </table>
+  </div>
+
+  <h2>Seven numbers to memorize</h2>
+  <div class="h2sub">If asked anything, one of these is usually the answer.</div>
+  <div class="grid">
+    <div class="stat"><div class="v amber">₹210 Cr</div><div class="l">recommended hybrid path, 5 years</div></div>
+    <div class="stat"><div class="v">₹130 / 405 Cr</div><div class="l">partnered / full-own alternatives</div></div>
+    <div class="stat"><div class="v">10,000</div><div class="l">concurrent users; servers never break</div></div>
+    <div class="stat"><div class="v">₹50–70 Cr</div><div class="l">per MW to build a data center</div></div>
+    <div class="stat"><div class="v amber">₹180–260 Cr</div><div class="l">12-satellite constellation, all-in</div></div>
+    <div class="stat"><div class="v green">&lt; 2 years</div><div class="l">GPU ownership payback &gt;60% use</div></div>
+    <div class="stat"><div class="v">FY29</div><div class="l">constellation go/no-go gate</div></div>
+  </div>
+
+  <h2>The five questions you'll get</h2>
+  <div class="card qa">
+    <p class="q">1. "Why not just stay on AWS forever?"</p>
+    <p class="a">Cheapest inside 5 years, yes — slide 6 shows it. But GPUs pay back in under 2 years at our utilisation, keys and data sit in someone else's jurisdiction, and after FY31 the rent line never stops climbing. <b>We rent where renting wins, own where owning compounds.</b></p>
+    <p class="q" style="margin-top:16px">2. "If leasing satellites is cheaper, why launch at all?"</p>
+    <p class="a">Slide 15 says it in bold: owning never beats leasing on ₹/bit. We're buying a layer nobody can price-hike, geo-block or switch off — and it's only ~35% of the programme, gated at FY29 after the demo proves itself. <b>It's insurance, priced like insurance.</b></p>
+    <p class="q" style="margin-top:16px">3. "Can 12 small satellites really give us internet?"</p>
+    <p class="a">No — and the deck never claims it. Broadband stays leased (Starlink/OneWeb/Jio-SES). Our 12 birds do telemetry, messaging and store-and-forward for every site, with ~90-minute revisit, continuous via NTN roaming. <b>Honesty here is what makes the rest credible.</b></p>
+    <p class="q" style="margin-top:16px">4. "What if the rules don't change?"</p>
+    <p class="a">The plan works under today's rules — captive VSAT CUG, GMPCS route, administrative spectrum at 4% AGR are all live now; Starlink already cleared this wall. Slide 17's six asks make it faster and cheaper, <b>they are not preconditions.</b></p>
+    <p class="q" style="margin-top:16px">5. "What's the first cheque, tomorrow morning?"</p>
+    <p class="a">Small: file IN-SPACe + ITU paperwork (lakhs, not crores), stand up the private cloud on rented iron, pilot leased LEO at 10 sites. The first big cheque — the GPU fleet — <b>waits for the FY28 utilisation gate.</b></p>
+  </div>
+
+  <h2>Delivery rules</h2>
+  <div class="card">
+    <div class="tip"><span class="dot">→</span><span><b>Never read a slide.</b> Each has ≤30 words of message; your job is the line, the number, next.</span></div>
+    <div class="tip"><span class="dot">→</span><span><b>Land every verdict chip.</b> Slides 5–15 each end in a coloured verdict bar — say it verbatim, it's the takeaway.</span></div>
+    <div class="tip"><span class="dot">→</span><span><b>Slow down twice:</b> slide 6 (the money chart) and slide 20 (the bill). Everything else moves at 45 seconds.</span></div>
+    <div class="tip"><span class="dot">→</span><span><b>Own the honesty.</b> "No broadband from our sats" and "owning costs ₹49 Cr more" are features — they prove the numbers aren't sales numbers.</span></div>
+    <div class="tip"><span class="dot">→</span><span><b>Say "est." out loud</b> when quoting cost bands — every figure is an order-of-magnitude planning estimate, and the footnotes carry sources.</span></div>
+    <div class="tip"><span class="warn">✕</span><span><b>Don't defend full-own.</b> If pushed to ₹405 Cr, agree it's the destination — then point at the gates: reality unlocks spend, not ambition.</span></div>
+    <div class="tip"><span class="warn">✕</span><span><b>Don't promise dates for rules.</b> Policy asks are advocacy; the plan survives without them.</span></div>
+  </div>
+
+  <div class="foot">
+    Companion to <b>BuildObjects_Sovereign_Cloud_Satellites_Blueprint.pptx</b> · August 2026 · Confidential —
+    all cost figures are internal planning estimates (sources footnoted per slide).
+  </div>
+
+</div>
+</body>
+</html>

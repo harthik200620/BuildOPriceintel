@@ -60,6 +60,6 @@ export async function GET(req: NextRequest) {
 
   res.timings.route = performance.now() - t0;
   return NextResponse.json(res, {
-    headers: { 'x-buildo-query-ms': res.timings.total.toFixed(2), 'cache-control': 'no-store' },
+    headers: { 'x-buildobjects-query-ms': res.timings.total.toFixed(2), 'cache-control': 'no-store' },
   });
 }

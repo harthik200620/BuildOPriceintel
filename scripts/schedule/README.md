@@ -7,27 +7,27 @@ A local scheduled job. No cloud scheduler, no hosted anything.
 From the repo root, one line:
 
 ```bash
-schtasks /Create /TN "BuildO PriceIntel Daily Refresh" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%CD%\scripts\schedule\buildo-refresh.ps1\"" /SC DAILY /ST 06:30 /F
+schtasks /Create /TN "Build Objects PriceIntel Daily Refresh" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%CD%\scripts\schedule\buildobjects-refresh.ps1\"" /SC DAILY /ST 06:30 /F
 ```
 
 Check it, run it on demand, or remove it:
 
 ```bash
-schtasks /Query /TN "BuildO PriceIntel Daily Refresh" /V /FO LIST
+schtasks /Query /TN "Build Objects PriceIntel Daily Refresh" /V /FO LIST
 ```
 
 ```bash
-schtasks /Run /TN "BuildO PriceIntel Daily Refresh"
+schtasks /Run /TN "Build Objects PriceIntel Daily Refresh"
 ```
 
 ```bash
-schtasks /Delete /TN "BuildO PriceIntel Daily Refresh" /F
+schtasks /Delete /TN "Build Objects PriceIntel Daily Refresh" /F
 ```
 
 ## macOS / Linux — the cron equivalent
 
 ```bash
-30 6 * * * cd /path/to/BuildO-PriceIntel && /usr/bin/env npm run collect >> data/logs/cron.out 2>&1
+30 6 * * * cd /path/to/BuildObjects-PriceIntel && /usr/bin/env npm run collect >> data/logs/cron.out 2>&1
 ```
 
 ## What a run does

@@ -23,7 +23,7 @@ PROBE_URL=${PROBE_URL:-"https://dir.indiamart.com/hyderabad/cpvc-pipe.html"}
 PROBE_GAP=${PROBE_GAP:-720}      # 12 min between probes
 REST_GAP=${REST_GAP:-600}        # 10 min rest between category sweeps
 MAX_WAIT=${MAX_WAIT:-14400}      # give up after 4 h
-UA="BuildOPriceIntel/0.1 (local research demo; contact harthikvarma0@gmail.com)"
+UA="BuildObjectsPriceIntel/0.1 (local research demo; contact harthikvarma0@gmail.com)"
 LOG="data/logs/collect-missing.out"
 
 mkdir -p data/logs

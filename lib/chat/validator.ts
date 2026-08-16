@@ -73,7 +73,7 @@ const DOMAIN_VOCAB = new Set([
   'slab', 'slabs', 'column', 'columns', 'beam', 'beams', 'footing', 'footings', 'raft', 'lintel',
   'staircase', 'wall', 'walls', 'partition', 'foundation', 'plinth', 'roof', 'floor', 'ceiling',
   // the assistant's own frame
-  'buildo', 'i', 'you', 'your', 'we', 'the', 'a', 'an',
+  'buildobjects', 'i', 'you', 'your', 'we', 'the', 'a', 'an',
 ]);
 
 /**
@@ -276,7 +276,7 @@ const INJECTION_PATTERNS: RegExp[] = [
   /forget\s+(?:everything|all|your\s+(?:instruction|prompt|rule|training))/i,
   /(?:reveal|show|print|repeat|output|display|dump|leak)\s+(?:me\s+)?(?:your|the)\s+(?:system\s+)?(?:prompt|instruction|rule|configuration|source\s+code|api\s+key)/i,
   /what\s+(?:are|were)\s+your\s+(?:exact\s+)?(?:system\s+)?(?:instruction|prompt|rule)s?\b/i,
-  /\b(?:you\s+are\s+now|from\s+now\s+on\s+you(?:'re| are)|act\s+as|pretend\s+(?:to\s+be|you(?:'re| are)))\s+(?:a\s+|an\s+|the\s+)?(?!buildo)/i,
+  /\b(?:you\s+are\s+now|from\s+now\s+on\s+you(?:'re| are)|act\s+as|pretend\s+(?:to\s+be|you(?:'re| are)))\s+(?:a\s+|an\s+|the\s+)?(?!buildobjects)/i,
   /\b(?:DAN|jailbreak|developer\s+mode|god\s+mode|unrestricted\s+mode)\b/i,
   /\bsudo\b|\broot\s+access\b/i,
   /repeat\s+(?:the\s+)?(?:words?|text)\s+above/i,
@@ -306,7 +306,7 @@ const DOMAIN_SIGNALS = [
   /\b(?:build|construct|site|contractor|material|spec|grade|bis|isi|gst|hsn)\b/i,
   // Meta-questions about the assistant itself. Deliberately narrow: a bare
   // "can you" let "Can you help me with my resume" through as in-scope.
-  /\b(?:buildo|catalogue|catalog)\b/i,
+  /\b(?:buildobjects|catalogue|catalog)\b/i,
   /\b(?:what|which|how)\b.{0,24}\b(?:you (?:cover|have|do|stock|sell|help)|can you (?:do|help))\b/i,
   /\b(?:do|can) you (?:cover|have|stock|sell|deliver|carry|know)\b/i,
 ];

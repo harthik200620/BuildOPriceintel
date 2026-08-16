@@ -9,7 +9,7 @@ const nextConfig = {
   // see it. Without this the deployed functions ship without a database and
   // every query 500s on a missing file.
   outputFileTracingIncludes: {
-    '/**': ['./data/buildo.prod.db'],
+    '/**': ['./data/buildobjects.prod.db'],
   },
   // Product thumbnails come from source CDNs and are rendered with a plain
   // <img>, so no remote loader configuration is needed. Nothing here is

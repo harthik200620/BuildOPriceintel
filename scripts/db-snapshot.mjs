@@ -1,9 +1,9 @@
 /**
  * Fold the WAL into one self-contained file that can be committed and served.
  *
- * The working store keeps `journal_mode = WAL`, so `data/buildo.db` on its own
+ * The working store keeps `journal_mode = WAL`, so `data/buildobjects.db` on its own
  * is behind whatever the collector last wrote — the committed-but-unfolded
- * pages live in `data/buildo.db-wal`, which is both enormous and meaningless
+ * pages live in `data/buildobjects.db-wal`, which is both enormous and meaningless
  * without the process that produced it. Shipping the bare file would serve a
  * stale catalogue; shipping the pair would push a ~130 MB artefact.
  *
@@ -17,8 +17,8 @@ import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const SRC = path.join(process.cwd(), 'data', 'buildo.db');
-const OUT = path.join(process.cwd(), 'data', 'buildo.prod.db');
+const SRC = path.join(process.cwd(), 'data', 'buildobjects.db');
+const OUT = path.join(process.cwd(), 'data', 'buildobjects.prod.db');
 
 if (!fs.existsSync(SRC)) {
   console.error(`No working store at ${SRC}. Run \`npm run db:init\` first.`);
@@ -66,7 +66,7 @@ if (rows.offer === 0 || rows.product === 0) {
 }
 
 const mb = (fs.statSync(OUT).size / 1048576).toFixed(1);
-console.log(`data/buildo.prod.db  ${mb} MB  integrity ok`);
+console.log(`data/buildobjects.prod.db  ${mb} MB  integrity ok`);
 console.log(
   `  ${rows.product} products · ${rows.offer} offers · ${rows.vendor} vendors · ${rows.facet_definition} facets`,
 );
