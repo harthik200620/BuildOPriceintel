@@ -1,0 +1,132 @@
+{
+  "display": {
+    "family": "Build Objects Display 2",
+    "hasRupee": false,
+    "xWidthAvg": 0.6303,
+    "lineBox": 1.2749,
+    "weights": [
+      400
+    ],
+    "cuts": [
+      {
+        "file": "BuildObjectsDisplay2-Regular.woff2",
+        "family": "Build Objects Display 2",
+        "weight": 400,
+        "hasRupee": false,
+        "xWidthAvg": 0.6303,
+        "lineBox": 1.2749,
+        "glyphs": 369
+      }
+    ]
+  },
+  "ui": {
+    "family": "Build Objects Sans 3",
+    "hasRupee": true,
+    "xWidthAvg": 0.4895,
+    "lineBox": 1.1499,
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ],
+    "cuts": [
+      {
+        "file": "BuildObjectsSans3-Regular.woff2",
+        "family": "Build Objects Sans 3",
+        "weight": 400,
+        "hasRupee": true,
+        "xWidthAvg": 0.4895,
+        "lineBox": 1.1499,
+        "glyphs": 3301
+      },
+      {
+        "file": "BuildObjectsSans3-Medium.woff2",
+        "family": "Build Objects Sans 3 Medium",
+        "weight": 500,
+        "hasRupee": true,
+        "xWidthAvg": 0.5058,
+        "lineBox": 1.1499,
+        "glyphs": 3301
+      },
+      {
+        "file": "BuildObjectsSans3-SemiBold.woff2",
+        "family": "Build Objects Sans 3 SemiBold",
+        "weight": 600,
+        "hasRupee": true,
+        "xWidthAvg": 0.5223,
+        "lineBox": 1.1499,
+        "glyphs": 3301
+      },
+      {
+        "file": "BuildObjectsSans3-Bold.woff2",
+        "family": "Build Objects Sans 3",
+        "weight": 700,
+        "hasRupee": true,
+        "xWidthAvg": 0.5386,
+        "lineBox": 1.1499,
+        "glyphs": 3301
+      }
+    ]
+  },
+  "figure": {
+    "family": "Build Objects Sans 5 Light",
+    "hasRupee": true,
+    "xWidthAvg": 0.4881,
+    "lineBox": 1.25,
+    "weights": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "cuts": [
+      {
+        "file": "BuildObjectsSans5-Light.woff2",
+        "family": "Build Objects Sans 5 Light",
+        "weight": 300,
+        "hasRupee": true,
+        "xWidthAvg": 0.4881,
+        "lineBox": 1.25,
+        "glyphs": 1214
+      },
+      {
+        "file": "BuildObjectsSans5-Regular.woff2",
+        "family": "Build Objects Sans 5",
+        "weight": 400,
+        "hasRupee": true,
+        "xWidthAvg": 0.5008,
+        "lineBox": 1.25,
+        "glyphs": 1214
+      },
+      {
+        "file": "BuildObjectsSans5-Medium.woff2",
+        "family": "Build Objects Sans 5 Medium",
+        "weight": 500,
+        "hasRupee": true,
+        "xWidthAvg": 0.5157,
+        "lineBox": 1.25,
+        "glyphs": 1214
+      },
+      {
+        "file": "BuildObjectsSans5-SemiBold.woff2",
+        "family": "Build Objects Sans 5 SemiBold",
+        "weight": 600,
+        "hasRupee": true,
+        "xWidthAvg": 0.5322,
+        "lineBox": 1.25,
+        "glyphs": 1214
+      },
+      {
+        "file": "BuildObjectsSans5-Bold.woff2",
+        "family": "Build Objects Sans 5",
+        "weight": 700,
+        "hasRupee": true,
+        "xWidthAvg": 0.5493,
+        "lineBox": 1.25,
+        "glyphs": 1214
+      }
+    ]
+  }
+}

@@ -495,62 +495,87 @@ console.log('\nTYPE — the metrics contract');
   const layout = fs.readFileSync(path.join(process.cwd(), 'app', 'layout.tsx'), 'utf8');
   const css = fs.readFileSync(path.join(process.cwd(), 'app', 'globals.css'), 'utf8');
 
-  // next ships the capsize metrics for every Google family it can serve, so the
-  // shape of a face is knowable offline, before anything is rendered.
-  const METRICS = path.join(process.cwd(), 'node_modules', 'next', 'dist', 'server', 'capsize-font-metrics.json');
-  ok('the font metrics database is where we expect it', fs.existsSync(METRICS),
-    'next moved it — fix this path rather than deleting the guard, or the checks below silently stop running');
+  // The fonts are local now — the Build Objects type program, served from
+  // public/fonts. Their metrics are MEASURED from the shipped files by
+  // scripts/font-metrics.py (fontTools) into public/fonts/metrics.json, so
+  // this holds the contract against what is actually served, not against a
+  // lookup table for fonts we no longer use.
+  const METRICS = path.join(process.cwd(), 'public', 'fonts', 'metrics.json');
+  ok('the shipped-font metrics file exists', fs.existsSync(METRICS),
+    'run `python scripts/font-metrics.py` — do not delete this guard, or the checks below silently stop running');
 
   if (fs.existsSync(METRICS)) {
-    const raw = JSON.parse(fs.readFileSync(METRICS, 'utf8')) as Record<string, any>;
-    const byName: Record<string, any> = {};
-    for (const v of Object.values(raw)) if (v?.familyName) byName[v.familyName] = v;
+    const m = JSON.parse(fs.readFileSync(METRICS, 'utf8')) as Record<string, any>;
 
-    const imported = (layout.match(/import\s*\{([^}]+)\}\s*from\s*'next\/font\/google'/)?.[1] ?? '')
-      .split(',').map((s) => s.trim()).filter(Boolean);
-    eq('three families are loaded', imported.length, 3);
-
-    const metricOf = (ident: string) => byName[ident.replace(/_/g, ' ')];
-    for (const ident of imported) {
-      ok(`${ident} resolves in the metrics database`, !!metricOf(ident));
+    // Three roles, each bound to a family in layout.tsx via next/font/local.
+    const localFaces = (layout.match(/const (display|ui|figure) = localFont\(/g) ?? []).length;
+    eq('three roles are loaded from local files', localFaces, 3);
+    for (const role of ['display', 'ui', 'figure']) {
+      ok(`${role} face was measured — ${m[role]?.family}`, !!m[role]?.family);
     }
 
-    // Role is decided by which const the family is assigned to, so the guard
-    // follows a rename.
-    const roleOf = (role: string) =>
-      layout.match(new RegExp(`const ${role} = (\\w+)\\(`))?.[1] ?? '';
-    const box = (m: any) => (m.ascent - m.descent + (m.lineGap ?? 0)) / m.unitsPerEm;
-    const adv = (m: any) => m.xWidthAvg / m.unitsPerEm;
+    // ₹ is U+20B9. The figure face sets every price and the UI face sets every
+    // label beside one; both must carry it or the leading glyph of every price
+    // falls back to a system font at an unrelated advance width, inside
+    // right-aligned columns that exist to align.
+    ok(`the figure face carries ₹ — ${m.figure?.family}`, m.figure?.hasRupee === true,
+      'a face without U+20B9 must never set a price');
+    ok(`the UI face carries ₹ — ${m.ui?.family}`, m.ui?.hasRupee === true);
 
-    const fig = metricOf(roleOf('figure'));
-    if (fig) {
-      // The binding constraint is the unit-price column: w 126 less px-2.5 both
-      // sides leaves 106px, and the worst real string is ~90px at 0.60em. Guard
-      // at 0.65 and it stays inside with margin; past that it overflows a cell
-      // that has no clip and paints over its neighbour.
-      ok(`the figure face is monospace — ${roleOf('figure')}`, fig.category === 'monospace');
-      ok(`its advance fits the money columns — ${adv(fig).toFixed(4)}em ≤ 0.65`, adv(fig) <= 0.65,
-        `${adv(fig).toFixed(4)}em would overflow the 106px unit-price budget`);
-    }
-    const uiM = metricOf(roleOf('ui'));
-    if (uiM) {
-      // Nothing sets line-height on body, so every table cell resolves to
-      // `normal` — which is this number. ±8% of Inter Tight's 1.2100, because
-      // 8% of a 12px line compounds to about one spec row over the detail
-      // sheet, which is where a fixed scroll fraction stops landing right.
-      const b = box(uiM);
-      ok(`the UI face's line box is within 8% of 1.2100 — ${b.toFixed(4)}`, b >= 1.113 && b <= 1.307,
-        `${b.toFixed(4)} shifts every unpinned line box in the app`);
-    }
+    // The DISPLAY face is allowed to lack ₹ — Audiowide ships basic Latin only —
+    // precisely because the CSS never lets it set a figure. Assert THAT: the
+    // .display rule must not be reachable from .fig or .hero-figure.
+    const cssNoC = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const heroRule = cssNoC.match(/\.hero-figure\s*\{[^}]*\}/)?.[0] ?? '';
+    const figRule = cssNoC.match(/\.fig\s+?\{[^}]*\}/)?.[0] ?? '';
+    ok('the display face never sets a price (.hero-figure)', !/--font-display/.test(heroRule),
+      'Audiowide has no ₹ — the hero price must use --font-figure or --font-ui');
+    ok('the display face never sets a figure (.fig)', !/--font-display/.test(figRule));
+
+    // The binding constraint is the unit-price column: w 126 less px-2.5 both
+    // sides leaves 106px, and the worst real string is ~90px at 0.60em. Guard
+    // at 0.65 and it stays inside with margin; past that it overflows a cell
+    // that has no clip and paints over its neighbour. Encode Sans measures
+    // 0.4881em — narrower than the mono it replaces — so the budget is safe.
+    const adv = m.figure?.xWidthAvg as number;
+    ok(`the figure face's advance fits the money columns — ${adv?.toFixed(4)}em ≤ 0.65`, adv <= 0.65,
+      `${adv}em would overflow the 106px unit-price budget`);
+
+    // Nothing sets line-height on body, so every table cell resolves to
+    // `normal` — which is this number. ±8% of 1.2100, because 8% of a 12px
+    // line compounds to about one spec row over the detail sheet, which is
+    // where a fixed scroll fraction stops landing right. Arimo measures 1.1499.
+    const b = m.ui?.lineBox as number;
+    ok(`the UI face's line box is within 8% of 1.2100 — ${b?.toFixed(4)}`, b >= 1.113 && b <= 1.307,
+      `${b} shifts every unpinned line box in the app`);
+
+    // .hero-figure asks for a real cut. Encode ships static weights; a value
+    // the family lacks is silently rounded by the browser, so the requested
+    // weight must be one that exists.
+    const heroW = Number(heroRule.match(/font-weight:\s*(\d+)/)?.[1] ?? 0);
+    ok(`.hero-figure weight ${heroW} is a shipped cut of ${m.figure?.family}`,
+      (m.figure?.weights as number[] ?? []).includes(heroW),
+      `shipped: ${(m.figure?.weights ?? []).join('/')}`);
   }
 
-  // ₹ is U+20B9, which Google serves from latin-ext, not latin. Without it the
-  // leading glyph of every price falls back to a system font at an unrelated
-  // advance width, inside right-aligned columns that exist to align.
-  const subsets = layout.match(/subsets:\s*\[[^\]]*\]/g) ?? [];
-  eq('every face declares its subsets', subsets.length, 3);
-  ok('and every one includes latin-ext, which is where ₹ lives',
-    subsets.every((s) => s.includes('latin-ext')), subsets.join(' | '));
+  // next/font writes `fallback:` into the CSS variable UNQUOTED. A multi-word
+  // family there is invalid CSS, and an invalid font-family value is discarded
+  // WHOLE — the primary face is never even considered and the element inherits
+  // the body face. The wordmark shipped in Arimo instead of Audiowide this way,
+  // with every layer of the chain individually correct. Bisected with CDP
+  // getPlatformFontsForNode; the browser reports the winning rule as `.display`
+  // and paints Sans 3, and only an unquoted fallback explains that.
+  for (const m of layout.matchAll(/fallback:\s*\[([^\]]*)\]/g)) {
+    const names = [...m[1].matchAll(/'([^']*)'/g)].map((x) => x[1]);
+    const multi = names.filter((n) => /\s/.test(n));
+    ok(`no multi-word family in a next/font fallback list — [${names.join(', ')}]`, multi.length === 0,
+      `${multi.join(', ')} would be written unquoted and invalidate the whole declaration`);
+  }
+
+  // The licences must travel with the fonts — the SIL OFL and GUST licences
+  // both require it, and the type program's README says to keep the folder.
+  ok('font licences ship alongside the fonts',
+    fs.existsSync(path.join(process.cwd(), 'public', 'fonts', 'LICENSES')));
 
   // .hero-figure and .fig are different families. A call site that picks
   // between them on data puts two faces in one column, which is what
@@ -567,7 +592,9 @@ console.log('\nTYPE — the metrics contract');
 
   // A half-finished rename leaves a variable named after a face it no longer is.
   const stale = ['Inter_Tight', 'JetBrains_Mono', 'Instrument_Serif',
-    'font-inter-tight', 'font-jetbrains-mono', 'font-instrument-serif'];
+    'font-inter-tight', 'font-jetbrains-mono', 'font-instrument-serif',
+    // The Google-served generation, replaced by the Build Objects type program.
+    'Fraunces', 'Geist_Mono', 'next/font/google'];
   const found = stale.filter((s) => layout.includes(s) || css.includes(s));
   ok('no outgoing family name survives the rename', found.length === 0, found.join(', '));
 

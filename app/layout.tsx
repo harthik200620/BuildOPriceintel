@@ -1,60 +1,78 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Geist, Geist_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 
 /**
- * Type.
+ * Type — the Build Objects type program.
  *
- * next/font downloads these at BUILD time and serves them from this origin, so
- * the page makes no request to a font CDN at runtime and "nothing here touches
- * the cloud" stays true.
+ * Three families, all served from public/fonts on this origin. The files ship
+ * with their SIL OFL licences in public/fonts/LICENSES, which the licence
+ * requires to travel with the fonts. No request leaves for a font CDN, so
+ * "nothing here touches the cloud" stays true.
  *
- * Geist sets every piece of UI text and Geist Mono every figure — one family
- * for the label and the number under it. Fraunces carries the display voice and
- * the hero price, and nothing else: it was asked to set 13 px table numerals
- * under the old arrangement, which is the one thing a display serif is worst at.
+ *   Display 2 (Audiowide)     — the title voice: the wordmark and headings.
+ *   Sans 5    (Encode Sans)   — the sub-title voice, and every figure.
+ *   Sans 3    (Arimo, Arial-metric) — every piece of body and UI text.
  *
- * These were measured before they were chosen, against next's own bundled
- * capsize metrics. The number that decided it: Geist Mono's average advance is
- * 0.6000 em, identical to the JetBrains Mono it replaces, so every fixed-width
- * money column keeps its budget exactly.
+ * Two constraints decided the mapping, and both come from the type program's
+ * own README rather than taste:
  *
- * `latin-ext` is not decoration. **₹ is U+20B9, which Google serves from the
- * latin-ext partition, not latin.** Naming it here means a face that lacks it
- * fails at build time; leaving it implicit means the leading glyph of every
- * price on the site silently falls back to a system font at an unrelated
- * advance width, inside right-aligned columns that exist to align.
+ *   Audiowide has NO rupee sign. It ships 369 glyphs of basic Latin and stops
+ *   there. Put it on a price and every ₹ falls back to a system font at an
+ *   unrelated advance width, inside right-aligned columns that exist to align.
+ *   So it sets titles — Latin words — and never a number.
  *
- * Weight is omitted on all three, which selects the variable font. The design
- * is single-weight, but eleven <strong> elements resolve through Preflight's
- * `bolder` to a real 700 rather than a synthesised one.
+ *   Arial cannot be shipped. Windows' copy is licensed for Windows use only.
+ *   Sans 3 is Arimo, Google's Arial-metric-compatible font (ChromeOS's Arial):
+ *   identical metrics, so nothing reflows, and it is free to bundle.
+ *
+ * Figures move from a monospace to Encode Sans with tabular-nums. A monospace
+ * earned its constant advance in the money COLUMN, where rows align on the
+ * decimal; tabular figures give the same per-digit alignment in a proportional
+ * face, and Encode Sans carries a full-weight ₹. Verified by
+ * scripts/typography-probe.ts, not assumed.
  */
-const display = Fraunces({
-  subsets: ['latin', 'latin-ext'],
-  // Optical size, 9-144. This is why Fraunces and not a static serif: .display
-  // spans 15-24 px and the hero spans 19-38 px, and an opsz axis draws each of
-  // those properly instead of scaling one cut and correcting it by hand with
-  // negative tracking. SOFT and WONK are left at their 0 defaults — the
-  // restrained end, which is the register this page is in.
-  axes: ['opsz'],
+const display = localFont({
+  src: [{ path: '../public/fonts/BuildObjectsDisplay2-Regular.woff2', weight: '400', style: 'normal' }],
   display: 'swap',
   variable: '--font-display-face',
+  // Single-word fallbacks ONLY. next/font writes this list into the CSS
+  // variable UNQUOTED, and an unquoted multi-word family name ("Build Objects
+  // Sans 5") is invalid CSS — which does not skip that one entry, it discards
+  // the whole font-family declaration, and the element silently inherits the
+  // body face. That is exactly how the wordmark shipped in Arimo instead of
+  // Audiowide once. The ₹-bearing fallback lives in --font-display in
+  // globals.css instead, where it can be quoted.
+  fallback: ['system-ui', 'sans-serif'],
 });
 
-const ui = Geist({
-  subsets: ['latin', 'latin-ext'],
+const ui = localFont({
+  src: [
+    { path: '../public/fonts/BuildObjectsSans3-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../public/fonts/BuildObjectsSans3-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../public/fonts/BuildObjectsSans3-SemiBold.woff2', weight: '600', style: 'normal' },
+    { path: '../public/fonts/BuildObjectsSans3-Bold.woff2', weight: '700', style: 'normal' },
+  ],
   display: 'swap',
   variable: '--font-ui-face',
+  fallback: ['Arial', 'Helvetica', 'system-ui', 'sans-serif'],
 });
 
-const figure = Geist_Mono({
-  subsets: ['latin', 'latin-ext'],
+const figure = localFont({
+  src: [
+    { path: '../public/fonts/BuildObjectsSans5-Light.woff2', weight: '300', style: 'normal' },
+    { path: '../public/fonts/BuildObjectsSans5-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../public/fonts/BuildObjectsSans5-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../public/fonts/BuildObjectsSans5-SemiBold.woff2', weight: '600', style: 'normal' },
+    { path: '../public/fonts/BuildObjectsSans5-Bold.woff2', weight: '700', style: 'normal' },
+  ],
   display: 'swap',
   variable: '--font-figure-face',
+  fallback: ['system-ui', 'sans-serif'],
 });
 
 export const metadata: Metadata = {
-  title: 'BuildO Price Intelligence',
+  title: 'Build Objects Price Intelligence',
   description:
     'Delivered, pincode-resolved, GST-stated, unit-normalised, timestamped prices for construction materials in Hyderabad and Vijayawada.',
 };

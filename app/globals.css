@@ -50,9 +50,13 @@
      properties directly — the .fig figures via var(--font-figure) and one
      ChatPanel span via var(--font-ui) — and `inline` would erase the properties
      and drop them silently to inherited. */
-  --font-display: var(--font-display-face), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --font-ui: var(--font-ui-face), "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-figure: var(--font-figure-face), "SF Mono", "Cascadia Mono", ui-monospace, Menlo, monospace;
+  /* The Build Objects type program. Display 2 is Audiowide, Sans 3 is the
+     Arial-metric Arimo, Sans 5 is Encode Sans — see app/layout.tsx for why
+     each role got the face it did. Fallbacks match each face's genre so a
+     load failure degrades to the same shape, not to a serif. */
+  --font-display: var(--font-display-face), "Audiowide", "Build Objects Sans 5", system-ui, sans-serif;
+  --font-ui: var(--font-ui-face), Arial, "Helvetica Neue", Helvetica, "Segoe UI", system-ui, sans-serif;
+  --font-figure: var(--font-figure-face), "Encode Sans", "Segoe UI Variable Text", system-ui, sans-serif;
 
   --radius-glass: 14px;
 }
@@ -294,18 +298,21 @@ body {
    force lining figures, and a face defaulting to old-style would set ₹1,035.50
    with descending 3/5/7/9 inside a 44 px items-center row — ragged baseline in
    the one column that exists to be read down its decimal. */
-/* 450 rather than 400: at 10-13 px on a dark ground a figure carries less
-   apparent weight than the same figure on paper, and the whole point of these
-   is to be read. Free in layout — a monospace holds its advance across the
-   weight axis, which is why this is a weight change and not a width change. */
-.fig  { font-family: var(--font-figure); font-weight: 450; font-variant-numeric: tabular-nums lining-nums; letter-spacing: -.02em; }
+/* Encode Sans, tabular. The face is proportional, so `tabular-nums` is now
+   doing the alignment work a monospace used to do for free: every digit takes
+   the same advance, so a column of prices still reads down its decimal.
+   500 rather than 400 for the same reason 450 was: at 10-13 px on a dark
+   ground a figure carries less apparent weight than on paper. Tracking is
+   loosened from -.02em to -.01em — Encode's counters are narrower than a mono's
+   and tighten faster. */
+.fig  { font-family: var(--font-figure); font-weight: 500; font-variant-numeric: tabular-nums lining-nums; letter-spacing: -.01em; }
 .tnum { font-variant-numeric: tabular-nums lining-nums; }
 
-/* No letter-spacing here any more. Fraunces carries an optical-size axis, so
-   the 15 px facet heading and the 24 px sheet title each get a drawn cut rather
-   than one design scaled and then corrected by hand. `auto` is the default, but
-   it is stated because the axis is the reason this face was chosen. */
-.display { font-family: var(--font-display); font-weight: 400; font-optical-sizing: auto; }
+/* Audiowide. A single-weight wide geometric — no optical axis, no bold cut, so
+   neither is asked for. It is drawn wide, so it wants LESS tracking than the
+   UI face rather than more; a small negative keeps a long title from reading
+   as spaced-out capitals. It sets titles only, never a figure: it has no ₹. */
+.display { font-family: var(--font-display); font-weight: 400; letter-spacing: -.01em; }
 
 /* ── the hairline ─────────────────────────────────────────────────────────── */
 .rule        { border-color: var(--rule); }
@@ -435,31 +442,31 @@ body {
    flat fill. Runs bright → saturated, never dark: the dimmest stop is text and
    has to clear AA on its own.
 
-   THE FIGURE FACE, not the display face. This was Fraunces at 400 and it was
-   wrong three ways at once: light strokes thin further against a dark ground,
-   a 400-weight serif gives the clipped gradient almost no stroke area to show
-   in, and a warm editorial serif is the wrong register for a page of prices.
-   It also meant the same number rendered in a serif on the card and a mono in
-   the table — the last place two faces still split.
+   THE FIGURE FACE, not the display face. Two reasons, and both are hard:
+   the display face has no ₹, so it can never set a price; and a card price
+   set in one face beside a table price set in another reads as two different
+   numbers even when the digits agree. The hero uses the same figure face as
+   every money column, so it is the same number written twice in one hand.
 
-   The weight is the other half. On a monospace the advance is constant across
-   the weight axis, so 500 costs nothing in layout: no column budget moves and
-   no width needed re-tuning. Verified by scripts/typography-probe.ts, which
-   reported zero wrapped, zero spilled and zero grown across the change.
+   The weight is the other half. Encode Sans ships static cuts, so 600 is a
+   real drawing rather than an interpolation; and because tabular figures hold
+   their advance across the weights we ship, 600 costs nothing in layout: no
+   column budget moves and no width needs re-tuning. Held by
+   scripts/typography-probe.ts, which reports wrapped, spilled and grown
+   money strings across the app after any change to a face.
    ─────────────────────────────────────────────────────────────────────────── */
 .hero-figure {
-  /* The UI face, not the mono — and the reason is function, not taste.
-     A monospace earns its advance in a COLUMN, where every row has to align on
-     the decimal. The hero sits alone in a card and nothing aligns to it, so it
-     paid the cost of the constant advance and got none of the benefit: the
-     period took a full digit width and "₹286 . 20" read as three groups
-     instead of one number. Geist and Geist Mono are one superfamily and share
-     their skeletons, so the card price and the table price still look like the
-     same number written twice.
-     Tabular is kept anyway — a price that changes as you type should not make
-     the line jump. */
-  font-family: var(--font-ui);
-  font-weight: 560;
+  /* The figure face — Encode Sans — same as the money columns, so the card
+     price and the table price are the same number written twice in the same
+     hand. Encode Sans carries a full-weight ₹, which is the one thing that
+     disqualified Audiowide from ever setting a price.
+     600 is a real cut. The previous 560 was a variable-axis value; Encode
+     ships static 300/400/500/600/700, and a weight the family does not have
+     would be silently rounded by the browser — better to name the cut.
+     Tabular is kept — a price that changes as you type should not make the
+     line jump. */
+  font-family: var(--font-figure);
+  font-weight: 600;
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -.022em;
   background: linear-gradient(175deg, var(--accent-lift) 4%, var(--accent) 58%, var(--accent-ink) 100%);

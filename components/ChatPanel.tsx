@@ -192,7 +192,9 @@ export default function ChatPanel({
         <div className="flex items-center gap-2.5 min-w-0">
           <span style={{ color: 'var(--accent)' }}><BotIcon /></span>
           <div className="min-w-0">
-            <div className="text-[13px] font-semibold truncate" style={{ color: 'var(--ink)' }}>
+            {/* The title voice, so the assistant reads as this product and not
+                a widget bolted onto it. */}
+            <div className="display text-[13.5px] truncate" style={{ color: 'var(--ink)' }}>
               Buying assistant
             </div>
             <div className="text-[10.5px] truncate" style={{ color: 'var(--ink-3)' }}>

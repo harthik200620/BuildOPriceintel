@@ -31,16 +31,29 @@ export default function TopBar({
     >
       <div className="mx-auto max-w-[1680px] px-6 lg:px-10">
         <div className="flex items-center gap-6 h-[68px]">
-          {/* Wordmark — the plot square, drawn once */}
-          <a href="/" className="flex items-center gap-2.5 shrink-0 group" aria-label="BuildO Price Intelligence, home">
-            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden className="shrink-0">
-              <rect x="2.5" y="2.5" width="19" height="19" fill="none" stroke="var(--ink)" strokeWidth="1.2" />
-              <path d="M2.5 15.5 L12 8 L21.5 15.5" fill="none" stroke="var(--accent)" strokeWidth="1.2" />
-              <circle cx="12" cy="8" r="1.1" fill="var(--accent)" />
-            </svg>
-            <span className="display text-[19px] tracking-tight" style={{ color: 'var(--ink)' }}>
-              BuildO
-              <span className="ml-1.5 text-[11px] uppercase tracking-[0.14em] align-middle" style={{ color: 'var(--ink-3)' }}>
+          {/* Wordmark. The 'b' monogram, in the accent aqua, beside the name set
+              in Audiowide — the title voice — with "Price Intelligence" as the
+              sub-title in Encode Sans. The mark is a PNG lifted off its scan onto
+              transparency (public/logo-mark.png), served at 2x for the 28 px slot
+              so it stays crisp on a retina display. */}
+          <a href="/" className="flex items-center gap-3 shrink-0 group" aria-label="Build Objects Price Intelligence, home">
+            <img
+              src="/logo-mark-128.png"
+              width={28} height={28}
+              alt=""
+              aria-hidden
+              className="shrink-0 select-none"
+              style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 10px rgba(92,225,230,.28))' }}
+              draggable={false}
+            />
+            <span className="flex items-baseline gap-2.5 leading-none">
+              <span className="display text-[17px]" style={{ color: 'var(--ink)', letterSpacing: '.01em' }}>
+                Build Objects
+              </span>
+              <span
+                className="fig text-[10.5px] uppercase font-medium hidden sm:inline"
+                style={{ color: 'var(--ink-3)', letterSpacing: '.16em' }}
+              >
                 Price Intelligence
               </span>
             </span>

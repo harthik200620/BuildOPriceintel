@@ -2,10 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "buildo",
+      "name": "buildo-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 3000
+      "runtimeArgs": ["run", "dev", "--", "-p", "3001"],
+      "port": 3001
+    },
+    {
+      "name": "typeface-proof",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8737", "--directory", "typeface"],
+      "port": 8737
     }
   ]
 }

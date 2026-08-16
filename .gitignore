@@ -6,12 +6,12 @@ out/
 .env*.local
 .DS_Store
 
-# The working store and its journal. `data/buildo.prod.db` — the snapshot that
+# The working store and its journal. `data/buildobjects.prod.db` — the snapshot that
 # `npm run db:snapshot` folds the WAL into — is committed instead; it is the
 # file a deployment serves.
-data/buildo.db
-data/buildo.db-wal
-data/buildo.db-shm
+data/buildobjects.db
+data/buildobjects.db-wal
+data/buildobjects.db-shm
 data/logs/
 
 # Build artefacts of the local demo, not inputs to it.
@@ -20,3 +20,12 @@ screenshots/
 
 .vercel
 .env*
+
+# The type program source (133 files, 34 MB, plus a zip). The app serves only
+# the ten woff2 files copied into public/fonts; the rest is the design source,
+# kept locally and not in the deploy.
+typeface/
+
+# The raw logo scan. The app serves the lifted, recoloured PNGs in public/.
+*.jpeg
+*.jpg
