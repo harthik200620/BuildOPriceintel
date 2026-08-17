@@ -4,6 +4,7 @@ import React from 'react';
 import { CATALOGUE, unitSuffix, type CatalogueEntry } from '@/lib/catalogue';
 import type { CategoryStat } from '@/lib/meta';
 import { SLA_HOURS, CATEGORY_VOLATILITY, ageHours, humaniseAge } from '@/lib/freshness';
+import { formatIST } from '@/lib/when';
 import { rupees, UNIT_SPOKEN } from '@/components/primitives';
 import {
   CategoryIcon, IconArrowRight, IconPin, IconClockCheck, IconStorefront, IconRankList,
@@ -27,6 +28,17 @@ export default function Home({
 }) {
   const region = meta?.regions?.find((r: any) => r.region_id === regionId);
   const stats: CategoryStat[] = region?.stats ?? [];
+
+  // Relative ages are computed against meta.now — the server's clock at the
+  // request — for both the server render and hydration, so the two agree to
+  // the character. After mount the clock ticks forward once a minute.
+  const [tick, setTick] = React.useState<Date | null>(null);
+  React.useEffect(() => {
+    setTick(new Date());
+    const id = setInterval(() => setTick(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const now = tick ?? (meta?.now ? new Date(meta.now) : new Date(0));
   const statFor = (id: string) => stats.find((s) => s.category === id) ?? null;
   const live = CATALOGUE.filter((c) => c.live).length;
 
@@ -50,7 +62,7 @@ export default function Home({
       <ul className="cat-grid" aria-label="Product categories">
         {CATALOGUE.filter((c) => c.live).map((c, i) => (
           <li key={c.id} className="min-w-0">
-            <LiveCard entry={c} stat={statFor(c.id)} href={hrefFor(c)} onOpen={() => onOpen(c)} eager={i < 4} />
+            <LiveCard entry={c} stat={statFor(c.id)} href={hrefFor(c)} onOpen={() => onOpen(c)} eager={i < 4} now={now} />
           </li>
         ))}
       </ul>
@@ -76,7 +88,7 @@ export default function Home({
           </p>
           <p className="text-[12px] tnum whitespace-nowrap" style={{ color: 'var(--ink-3)' }}>
             {meta?.last_run?.finished_at
-              ? <>Data refreshed {new Date(meta.last_run.finished_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</>
+              ? <>Data refreshed {formatIST(meta.last_run.finished_at)} IST</>
               : <span className="skel inline-block h-3 w-40 align-middle" aria-hidden />}
           </p>
         </div>
@@ -88,8 +100,8 @@ export default function Home({
 /* ── cards ───────────────────────────────────────────────────────────────── */
 
 function LiveCard({
-  entry, stat, href, onOpen, eager,
-}: { entry: CatalogueEntry; stat: CategoryStat | null; href: string; onOpen: () => void; eager: boolean }) {
+  entry, stat, href, onOpen, eager, now,
+}: { entry: CatalogueEntry; stat: CategoryStat | null; href: string; onOpen: () => void; eager: boolean; now: Date }) {
   const suffix = unitSuffix(entry.unit);
   const spoken = entry.unit ? UNIT_SPOKEN[entry.unit] : '';
 
@@ -98,8 +110,8 @@ function LiveCard({
   // week. The listing behind the card carries a dot per seller.
   let ageLabel: string | null = null;
   let ageTone: 'fresh' | 'ageing' | 'stale' = 'stale';
-  if (stat?.seen_at) {
-    const h = ageHours(stat.seen_at);
+  if (stat?.seen_at && now.getTime() > 0) {
+    const h = Math.max(0, ageHours(stat.seen_at, now));
     const sla = SLA_HOURS[CATEGORY_VOLATILITY[entry.id] ?? 'V0'] ?? 24;
     ageLabel = humaniseAge(h);
     ageTone = h <= sla ? 'fresh' : h <= sla * 2 ? 'ageing' : 'stale';

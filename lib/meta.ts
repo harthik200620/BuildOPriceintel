@@ -123,6 +123,10 @@ export function buildMeta() {
   };
 
   return {
+    // The clock the page renders against. Every relative age on the catalogue
+    // is computed from THIS instant on the server and again at hydration, so
+    // the two renders agree to the character; the client then ticks forward.
+    now: new Date().toISOString(),
     regions: regions.map((r) => ({
       ...r,
       categories: counts.filter((c) => c.region_id === r.region_id),
