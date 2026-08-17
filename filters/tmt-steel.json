@@ -3,7 +3,7 @@
   "category_path": "commodity.steel.tmt",
   "canonical_unit": "kg",
   "canonical_unit_note": "₹/kg. Also quoted per tonne and per 12 m rod — the rod↔kg conversion needs unit_weight_kg per diameter (8 mm ≈ 4.74 kg, 10 mm ≈ 7.40, 12 mm ≈ 10.66 per 12 m rod), which is a table, never arithmetic.",
-  "result_count": 298,
+  "result_count": 321,
   "counts_are_illustrative": false,
   "counts_note": "Counts measured from data/buildobjects.db on 2026-08-17 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
   "regions": [
@@ -32,37 +32,37 @@
           "label": "8 mm",
           "sublabel": "0.395 kg/m",
           "unit": "mm",
-          "count": 56
+          "count": 59
         },
         {
           "label": "10 mm",
           "sublabel": "0.617 kg/m",
           "unit": "mm",
-          "count": 33
+          "count": 35
         },
         {
           "label": "12 mm",
           "sublabel": "0.888 kg/m",
           "unit": "mm",
-          "count": 38
+          "count": 39
         },
         {
           "label": "16 mm",
           "sublabel": "1.578 kg/m",
           "unit": "mm",
-          "count": 19
+          "count": 21
         },
         {
           "label": "20 mm",
           "sublabel": "2.466 kg/m",
           "unit": "mm",
-          "count": 15
+          "count": 19
         },
         {
           "label": "25 mm",
           "sublabel": "3.854 kg/m",
           "unit": "mm",
-          "count": 15
+          "count": 21
         }
       ],
       "data_backed": true
@@ -85,27 +85,27 @@
           "label": "Fe 500",
           "sublabel": "general RCC",
           "unit": null,
-          "count": 59,
+          "count": 57,
           "disabled": true
         },
         {
           "label": "Fe 500D",
           "sublabel": "high ductility, seismic zones",
           "unit": null,
-          "count": 59,
+          "count": 57,
           "disabled": true
         },
         {
           "label": "Fe 550",
           "sublabel": "higher strength",
           "unit": null,
-          "count": 86
+          "count": 88
         },
         {
           "label": "Fe 550D",
           "sublabel": "high strength + ductility",
           "unit": null,
-          "count": 86
+          "count": 88
         },
         {
           "label": "Fe 415",
@@ -127,33 +127,33 @@
       "sort_order": 30,
       "source": "product.brand",
       "why": "Like cement, brand legitimately climbs above price in TMT — the primary/secondary producer distinction is real and buyers ask about it by name.",
-      "note": "Ordered by result count. Search-within-facet above 12 brands. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12.",
+      "note": "Ordered by result count. Search-within-facet above 12 brands. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 9 brands present, top 6 shown with search-within-facet for the remaining 3. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 17 brands present, top 6 shown with search-within-facet for the remaining 11.",
       "default_open": true,
       "visibility": "primary",
       "values": [
         {
           "label": "Shree TMT",
-          "count": 15
+          "count": 18
         },
         {
           "label": "Vinayak",
+          "count": 14
+        },
+        {
+          "label": "Radha",
+          "count": 13
+        },
+        {
+          "label": "Dwaraka",
           "count": 12
         },
         {
           "label": "AF Star",
-          "count": 9
+          "count": 10
         },
         {
-          "label": "Vizag",
-          "count": 8
-        },
-        {
-          "label": "Dwaraka",
-          "count": 7
-        },
-        {
-          "label": "Radha",
-          "count": 7
+          "label": "Sugna",
+          "count": 10
         }
       ],
       "data_backed": true
@@ -168,29 +168,29 @@
       "sort_order": 40,
       "source": "price_current.normalised_paise WHERE normalised_unit='kg'",
       "why": "₹/kg is the only basis on which a rod price and a tonne price are the same kind of number. Bands are on the delivered figure.",
-      "note": "Bands derived from the actual in-zone distribution at reconcile time. The observed national spread runs ₹56/kg (Raipur) to ₹74/kg (Mysore). Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "note": "Bands derived from the actual in-zone distribution at reconcile time. The observed national spread runs ₹56/kg (Raipur) to ₹74/kg (Mysore). Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
       "default_open": true,
       "visibility": "primary",
       "values": [
         {
-          "label": "Under ₹57",
+          "label": "Under ₹55",
           "unit": "₹/kg delivered",
-          "count": 75
+          "count": 81
         },
         {
-          "label": "₹57 – ₹65",
+          "label": "₹55 – ₹63",
           "unit": "₹/kg delivered",
-          "count": 75
+          "count": 79
         },
         {
-          "label": "₹65 – ₹71",
+          "label": "₹63 – ₹71",
           "unit": "₹/kg delivered",
-          "count": 71
+          "count": 86
         },
         {
           "label": "Over ₹71",
           "unit": "₹/kg delivered",
-          "count": 77
+          "count": 75
         }
       ],
       "data_backed": true
@@ -211,12 +211,12 @@
         {
           "label": "Primary producer",
           "sublabel": "integrated steel plant",
-          "count": 18
+          "count": 19
         },
         {
           "label": "Secondary producer",
           "sublabel": "induction/re-rolling route",
-          "count": 72
+          "count": 97
         }
       ],
       "data_backed": true
@@ -288,12 +288,12 @@
         {
           "label": "BIS-licensed brand, licence not quoted",
           "sublabel": "mill holds a licence; this listing does not publish it",
-          "count": 90
+          "count": 116
         },
         {
           "label": "Not declared",
           "sublabel": "no evidence either way",
-          "count": 208,
+          "count": 205,
           "disabled": true
         }
       ],
@@ -316,13 +316,13 @@
         {
           "label": "Tomorrow",
           "unit": "days",
-          "count": 61,
+          "count": 54,
           "disabled": true
         },
         {
           "label": "Within 3 days",
           "unit": "days",
-          "count": 220
+          "count": 250
         },
         {
           "label": "Within a week",
@@ -389,7 +389,7 @@
         {
           "label": "12 m standard",
           "unit": "m",
-          "count": 298
+          "count": 321
         },
         {
           "label": "Cut to length",
@@ -415,12 +415,12 @@
       "values": [
         {
           "label": "Inclusive of GST",
-          "count": 32
+          "count": 60
         },
         {
           "label": "Exclusive of GST",
           "sublabel": "18%, HSN 7213/7214",
-          "count": 266,
+          "count": 261,
           "disabled": true
         }
       ],
@@ -443,7 +443,7 @@
         {
           "label": "Verified today",
           "unit": "hours",
-          "count": 233,
+          "count": 288,
           "disabled": true
         },
         {
@@ -482,7 +482,7 @@
         },
         {
           "label": "Not published by seller",
-          "count": 298
+          "count": 321
         }
       ],
       "data_backed": true
@@ -506,6 +506,6 @@
       "reason": "Held back until there is a real ratings corpus."
     }
   ],
-  "reconciled_at": "2026-08-17T07:18:12.677Z",
+  "reconciled_at": "2026-08-17T08:31:41.993Z",
   "reconciled_region": "hyderabad"
 }

@@ -799,6 +799,8 @@ Registered as a Windows scheduled task, `Build Objects PriceIntel Daily Refresh`
 
 The honest limitation is there too: the unattended job can refresh only what answers a scripted client. Browser-assisted captures are loaded from `collector/raw/assisted-*.jsonl` and logged with their capture date, so a stale one appears in the diff log as needing an operator rather than quietly ageing into the background.
 
+**After a refresh, `npm run verify`** re-derives every active offer from its raw capture with the normaliser as it stands, checks the arithmetic on every published price, holds every row against the plausibility rules and its band, tabulates freshness per city, asserts the two cities agree, and (with `--live`) fetches a polite sample of source pages to look for the stored figure. It writes `data/logs/verify-<date>.md` and exits non-zero on any hard failure. Its first run caught 47 pipe prices stored at twice their value (loaded before the length parser read "6 m" from a title) and two bricks rows carrying a GST slab that had since changed — which is why a rule change is followed by `npx tsx scripts/rebuild-from-raw.ts --apply`, the offline replay of the whole archive through today's code, and why the rebuild now re-resolves GST rates against the table on every run.
+
 ---
 
 ## Deployed

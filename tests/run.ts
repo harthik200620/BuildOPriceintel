@@ -1038,8 +1038,12 @@ console.log('\nPLAUSIBILITY — the rules, the store they leave behind, and the 
       category: r.category, title: r.listing_title ?? r.ptitle, cement_type: JSON.parse(r.attrs || '{}').cement_type ?? null,
       pack_size_kg: r.pack_size, quoted_unit: r.base_unit, bore_trusted: false, base_paise_per_canonical: r.base_paise_canonical,
     }) === null));
-  ok('a quarantined offer carries its reason on the row',
-    ((prep(`SELECT COUNT(*) AS n FROM offer WHERE is_active = 0 AND quarantine_reason IS NOT NULL`).get() as any).n as number) > 0);
+  // A row taken out of the surface says why. (After an offline replay of the
+  // archive there may be none at all — refusals then happen at load and live
+  // in the run's ledger — so the invariant is "never inactive without a
+  // reason", not "some are inactive".)
+  ok('an inactive offer is never without its reason',
+    ((prep(`SELECT COUNT(*) AS n FROM offer WHERE is_active = 0 AND quarantine_reason IS NULL`).get() as any).n as number) === 0);
 
   // The two cities describe the same market. Coverage differs (Hyderabad has
   // more sellers); the level should not. Medians and floors within a factor

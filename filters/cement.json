@@ -3,7 +3,7 @@
   "category_path": "commodity.cement",
   "canonical_unit": "bag",
   "canonical_unit_note": "50 kg bag. Also priced per tonne at 20 bags/tonne — the price filter bands on ₹/bag delivered, never on ₹/tonne, or a jumbo bag and a 50 kg bag land in the same band.",
-  "result_count": 740,
+  "result_count": 753,
   "counts_are_illustrative": false,
   "counts_note": "Counts measured from data/buildobjects.db on 2026-08-17 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
   "regions": [
@@ -31,7 +31,7 @@
           "label": "OPC",
           "sublabel": "ordinary portland",
           "unit": null,
-          "count": 318,
+          "count": 323,
           "reveals": [
             "opc_grade"
           ]
@@ -40,7 +40,7 @@
           "label": "PPC",
           "sublabel": "portland pozzolana, fly-ash blended",
           "unit": null,
-          "count": 369
+          "count": 374
         },
         {
           "label": "PSC",
@@ -52,7 +52,7 @@
           "label": "White cement",
           "sublabel": "decorative, IS 8042",
           "unit": null,
-          "count": 14,
+          "count": 17,
           "disabled": true
         },
         {
@@ -87,19 +87,19 @@
           "label": "53 grade",
           "sublabel": "RCC, slabs, columns",
           "unit": "N/mm²",
-          "count": 210
+          "count": 211
         },
         {
           "label": "43 grade",
           "sublabel": "general construction, masonry",
           "unit": "N/mm²",
-          "count": 130
+          "count": 151
         },
         {
           "label": "33 grade",
           "sublabel": "plastering, non-structural",
           "unit": "N/mm²",
-          "count": 26,
+          "count": 9,
           "disabled": true
         }
       ],
@@ -115,21 +115,21 @@
       "sort_order": 30,
       "source": "product.brand",
       "why": "Brand sits above price here, against the usual order. Cement is the most brand-loyal category in Indian construction and a large share of buyers start with the name, not the spec.",
-      "note": "Ordered by result count, not alphabetically. Search-within-facet above 12 brands. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43.",
+      "note": "Ordered by result count, not alphabetically. Search-within-facet above 12 brands. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 15 brands present, top 6 shown with search-within-facet for the remaining 9. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 23 brands present, top 6 shown with search-within-facet for the remaining 17. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43. Roster rewritten from collected data: 49 brands present, top 6 shown with search-within-facet for the remaining 43.",
       "default_open": true,
       "visibility": "primary",
       "values": [
         {
           "label": "UltraTech",
-          "count": 48
+          "count": 50
         },
         {
           "label": "Bangur",
-          "count": 44
+          "count": 48
         },
         {
           "label": "KCP",
-          "count": 42
+          "count": 43
         },
         {
           "label": "JSW",
@@ -156,29 +156,29 @@
       "sort_order": 40,
       "source": "price_current.normalised_paise WHERE normalised_unit='bag'",
       "why": "Bands are on the delivered ₹/bag, not the seller's ex-GST quote — a buyer who filters 'under ₹350' and receives a ₹340 bag with ₹40 of freight never trusts the filter again.",
-      "note": "Bands are derived from the actual in-zone distribution at reconcile time, not from round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "note": "Bands are derived from the actual in-zone distribution at reconcile time, not from round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
       "default_open": true,
       "visibility": "primary",
       "values": [
         {
           "label": "Under ₹350",
           "unit": "₹/bag delivered",
-          "count": 176
+          "count": 178
         },
         {
           "label": "₹350 – ₹380",
           "unit": "₹/bag delivered",
-          "count": 173
+          "count": 168
         },
         {
           "label": "₹380 – ₹420",
           "unit": "₹/bag delivered",
-          "count": 198
+          "count": 210
         },
         {
           "label": "Over ₹420",
           "unit": "₹/bag delivered",
-          "count": 193
+          "count": 197
         }
       ],
       "data_backed": true
@@ -200,12 +200,12 @@
           "label": "50 kg bag",
           "sublabel": "standard",
           "unit": "kg",
-          "count": 722
+          "count": 734
         },
         {
           "label": "25 kg bag",
           "unit": "kg",
-          "count": 17,
+          "count": 18,
           "disabled": true
         },
         {
@@ -291,12 +291,12 @@
         {
           "label": "BIS-licensed brand, licence not quoted",
           "sublabel": "manufacturer holds a licence; this listing does not publish it",
-          "count": 695
+          "count": 707
         },
         {
           "label": "Not declared",
           "sublabel": "no evidence either way",
-          "count": 45
+          "count": 46
         }
       ],
       "data_backed": true
@@ -318,18 +318,18 @@
         {
           "label": "Tomorrow",
           "unit": "days",
-          "count": 158,
+          "count": 126,
           "disabled": true
         },
         {
           "label": "Within 3 days",
           "unit": "days",
-          "count": 500
+          "count": 550
         },
         {
           "label": "Within a week",
           "unit": "days",
-          "count": 82,
+          "count": 77,
           "disabled": true
         },
         {
@@ -381,7 +381,7 @@
         }
       ],
       "data_backed": false,
-      "no_data_reason": "`attrs.application` is populated on 162 of 740 listings in hyderabad, but as uncontrolled seller text (\"Construction Use\", \"Construction, Masonry Work, Plastering\", \"For Asbestos Pipes, RCC Beams And  RCC S\") which matches none of this filter's values. The gap is normalisation, not collection: shipped disabled rather than deleted, and rather than mapped by guess.",
+      "no_data_reason": "`attrs.application` is populated on 146 of 753 listings in hyderabad, but as uncontrolled seller text (\"For Construction Purpose\", \"Construction\", \"Construction Use\") which matches none of this filter's values. The gap is normalisation, not collection: shipped disabled rather than deleted, and rather than mapped by guess.",
       "no_data_kind": "unnormalised"
     },
     {
@@ -400,12 +400,12 @@
         {
           "label": "IS 269",
           "sublabel": "OPC",
-          "count": 319
+          "count": 324
         },
         {
           "label": "IS 1489",
           "sublabel": "PPC, fly-ash based",
-          "count": 369
+          "count": 374
         },
         {
           "label": "IS 455",
@@ -415,7 +415,7 @@
         {
           "label": "IS 8042",
           "sublabel": "white cement",
-          "count": 14,
+          "count": 17,
           "disabled": true
         }
       ],
@@ -441,7 +441,7 @@
         {
           "label": "Exclusive of GST",
           "sublabel": "18%, HSN 2523",
-          "count": 695,
+          "count": 708,
           "disabled": true
         }
       ],
@@ -464,7 +464,7 @@
         {
           "label": "Verified today",
           "unit": "hours",
-          "count": 509,
+          "count": 631,
           "disabled": true
         },
         {
@@ -503,7 +503,7 @@
         },
         {
           "label": "Not published by seller",
-          "count": 740
+          "count": 753
         }
       ],
       "data_backed": true
@@ -527,6 +527,6 @@
       "reason": "Cement strike-through pricing in this market is computed against an inflated reference. A discount facet built on a manufactured number is worse than none."
     }
   ],
-  "reconciled_at": "2026-08-17T07:18:12.578Z",
+  "reconciled_at": "2026-08-17T08:31:41.901Z",
   "reconciled_region": "hyderabad"
 }
