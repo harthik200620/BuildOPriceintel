@@ -31,6 +31,8 @@ import { loadOffers, loadLocalities } from '../collector/run';
 import type { RawOffer } from '../collector/types';
 
 const APPLY = process.argv.includes('--apply');
+const NOTE = process.argv.find((a) => a.startsWith('--note='))?.split('=').slice(1).join('=')
+  ?? 'offline rebuild from collector/raw — the normaliser changed, no network calls';
 const ROOT = process.cwd();
 const RAW = path.join(ROOT, 'collector', 'raw');
 
@@ -104,8 +106,7 @@ function main() {
     `INSERT INTO collection_run (run_id,started_at,mode,status,sources_attempted,sources_ok,sources_blocked,
        offers_captured,offers_new,vendors_new,ladder_quoted,ladder_derived,ladder_typical,ladder_unknown,notes)
      VALUES (?,?,'manual','ok',0,0,0,0,0,0,0,0,0,0,?)`,
-  ).run(runId, new Date().toISOString(),
-    'offline rebuild from collector/raw — entity resolution changed, no network calls');
+  ).run(runId, new Date().toISOString(), NOTE);
 
   // The picture pool is keyed on product_id, and this rebuild re-keys every
   // product — so it is carried across on offer_id, which is
@@ -152,6 +153,11 @@ function main() {
   const pr = rebuildPrices(runId, 'backfill');
   const idx = rebuildSearchIndex();
   console.log(`priced   price_current ${pr.rows} rows · offer_price ${pr.offerRows} rows · index ${idx} products`);
+  if (pr.implausible.length) {
+    const n = pr.implausible.reduce((s, r) => s + r.count, 0);
+    console.log(`  plausibility rules took ${n} offer(s) out of the surface — kept, inactive, reason on the row:`);
+    for (const r of pr.implausible.slice(0, 12)) console.log(`    ${String(r.count).padStart(4)}× ${r.reason}`);
+  }
   if (pr.quarantined.length) {
     console.log(`  absurdity gate quarantined ${pr.quarantined.length} price(s) — never published`);
   }

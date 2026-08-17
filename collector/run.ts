@@ -58,6 +58,12 @@ const MAX_PASSES = Number(process.argv.find((a) => a.startsWith('--passes='))?.s
  * `scripts/collect-missing-when-clear.sh` is what decides that it has.
  */
 const ONLY_REGION = process.argv.find((a) => a.startsWith('--region='))?.split('=')[1];
+/**
+ * `--sources=assisted,exportersindia` scopes a run to named adapters. Its use
+ * is loading a fresh browser-assisted capture — or re-walking one polite host —
+ * without spending IndiaMART's per-host budget on a run that never needed it.
+ */
+const ONLY_SOURCES = process.argv.find((a) => a.startsWith('--sources='))?.split('=')[1]?.split(',').filter(Boolean) ?? null;
 const REGIONS = ONLY_REGION ? ALL_REGIONS.filter((r) => r === ONLY_REGION) : ALL_REGIONS;
 if (ONLY_REGION && !REGIONS.length) {
   console.error(`--region=${ONLY_REGION} is not one of: ${ALL_REGIONS.join(', ')}`);
@@ -340,6 +346,7 @@ async function main() {
     let passNewOffers = 0, passNewVendors = 0;
 
     for (const adapter of ADAPTERS) {
+      if (ONLY_SOURCES && !ONLY_SOURCES.includes(adapter.id)) continue;
       for (const category of categories) {
         for (const region_id of REGIONS) {
           const covered = adapter.covers.some((c) => c.category === category && c.region_id === region_id);

@@ -26,7 +26,8 @@
     "check:a11y": "tsx scripts/a11y-check.ts",
     "shots:theme": "tsx scripts/shots-theme.ts",
     "check:vitals": "tsx scripts/vitals-check.ts",
-    "rebuild": "tsx scripts/rebuild-prices.ts"
+    "rebuild": "tsx scripts/rebuild-prices.ts",
+    "verify": "tsx scripts/verify-prices.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.2",

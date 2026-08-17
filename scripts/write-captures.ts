@@ -8,7 +8,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { toRawOffers as bigbmart, CAPTURED_AT } from '../collector/captures/bigbmart-2026-08-01';
+import { toRawOffers as bigbmart, CAPTURED_AT } from '../collector/captures/bigbmart-2026-08-17';
 
 const RAW = path.join(process.cwd(), 'collector', 'raw');
 

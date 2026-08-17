@@ -13,6 +13,7 @@ import { CATEGORY_LOGISTICS } from './freight';
 import { categoryForms } from './query/vocab';
 import { invalidateSearchCache } from './search';
 import { implausibleReason } from './plausibility';
+import { resolveGstRate, gstKeyFor, GST_RATES } from './gst';
 
 interface OfferRow {
   offer_id: string; product_id: string; vendor_id: string; region_id: string;
@@ -144,6 +145,34 @@ const OFFER_SQL = `
 /** The triggers price_history's CHECK constraint accepts — schema.sql is the authority. */
 export type PriceTrigger = 'schedule' | 'seed' | 'user_verify' | 'backfill';
 
+/**
+ * Re-resolve every active offer's GST rate against the rate table as of `now`.
+ * The table carries effective dates; the loader stamps the rate in force at
+ * load, and this keeps the stored rate equal to the rate in force at rebuild.
+ * Returns how many rows changed.
+ */
+export function refreshGstRates(nowIso: string): number {
+  const rows = prep(`
+    SELECT o.offer_id, o.gst_rate_bp, o.hsn, p.product_id, p.category, p.attrs, p.gst_rate_bp AS p_rate
+      FROM offer o JOIN product p ON p.product_id = o.product_id
+     WHERE o.is_active = 1`).all() as any[];
+  const upOffer = db().prepare(`UPDATE offer SET gst_rate_bp = ?, hsn = ? WHERE offer_id = ?`);
+  const upProduct = db().prepare(`UPDATE product SET gst_rate_bp = ?, hsn = ? WHERE product_id = ?`);
+  let changed = 0;
+  tx(() => {
+    for (const r of rows) {
+      let attrs: any = {};
+      try { attrs = JSON.parse(r.attrs || '{}'); } catch { /* ours */ }
+      const { hsn, key } = gstKeyFor(r.category, attrs);
+      const rate = resolveGstRate(GST_RATES, hsn, key, nowIso);
+      if (!rate) continue;
+      if (rate.rate_bp !== r.gst_rate_bp || hsn !== r.hsn) { upOffer.run(rate.rate_bp, hsn, r.offer_id); changed++; }
+      if (rate.rate_bp !== r.p_rate) upProduct.run(rate.rate_bp, hsn, r.product_id);
+    }
+  });
+  return changed;
+}
+
 export function rebuildPrices(runId: string, trigger: PriceTrigger = 'schedule'): RebuildStats {
   const regions = prep(`SELECT region_id, centroid_lat, centroid_lon, default_pincode FROM region`).all() as Array<{
     region_id: string; centroid_lat: number; centroid_lon: number; default_pincode: string;
@@ -157,9 +186,14 @@ export function rebuildPrices(runId: string, trigger: PriceTrigger = 'schedule')
   // First the plausibility pass, so the rows below are the ones that may
   // become prices at all.
   const implausible = quarantineImplausible();
+  // Then the GST rate in force TODAY for every product's HSN. The loader
+  // resolves it at load; a rate whose effective date has since passed would
+  // otherwise ride on the row until the listing happened to be seen again.
+  // Verification found two 6810 rows at 12% after the 18% slab took effect.
+  const now = new Date().toISOString();
+  refreshGstRates(now);
 
   const offers = prep(OFFER_SQL).all() as OfferRow[];
-  const now = new Date().toISOString();
 
   // (product, region) -> computed rows
   type Computed = {
