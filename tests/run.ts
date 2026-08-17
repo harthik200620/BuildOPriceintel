@@ -872,7 +872,7 @@ console.log('\nCATALOGUE — the home page and the listing agree, and nothing is
     LIVE_CATALOGUE.every((c) => c.unit === CATEGORY_CANONICAL_UNIT[c.id]));
   ok('a coming-soon card has no unit and no route',
     CATALOGUE.filter((c) => !c.live).every((c) => c.unit === null && catalogueBySlug(c.slug) === null));
-  const missingImg = CATALOGUE.filter((c) => !fs.existsSync(path.join(process.cwd(), 'public', c.image)));
+  const missingImg = CATALOGUE.filter((c) => c.image && !fs.existsSync(path.join(process.cwd(), 'public', c.image)));
   ok('every card\'s photograph exists on disk', missingImg.length === 0, missingImg.map((c) => c.image).join(', '));
 
   // The card's figures come from the same rows the listing ranks.

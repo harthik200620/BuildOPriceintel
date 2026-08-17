@@ -99,6 +99,45 @@ export function categoryStats(now: Date = new Date()): CategoryStat[] {
   });
 }
 
+export interface BrandStat {
+  brand: string;
+  region_id: string;
+  /** Distinct sellers carrying the brand — what "trusted" can actually mean here. */
+  sellers: number;
+  products: number;
+}
+
+/**
+ * The brands the catalogue actually holds, ranked by how many sellers carry
+ * them. The home page shows a "top brands" row, and the only honest way to
+ * populate it is to count: a hand-written list of the brands one would expect
+ * to see would be a claim about the market rather than a report of the store.
+ *
+ * Ranked on sellers rather than offers so a single seller with two hundred
+ * listings of one brand cannot make it the region's leading name.
+ */
+export function brandStats(): BrandStat[] {
+  const rows = prep(
+    `SELECT p.brand, op.region_id, op.vendor_id, op.product_id
+       FROM offer_price op
+       JOIN offer   o ON o.offer_id   = op.offer_id
+       JOIN product p ON p.product_id = op.product_id
+      WHERE o.is_active = 1 AND p.brand IS NOT NULL AND TRIM(p.brand) <> ''`,
+  ).all() as Array<{ brand: string; region_id: string; vendor_id: string; product_id: string }>;
+
+  const acc = new Map<string, { brand: string; region_id: string; sellers: Set<string>; products: Set<string> }>();
+  for (const r of rows) {
+    const k = `${r.brand}|${r.region_id}`;
+    let a = acc.get(k);
+    if (!a) { a = { brand: r.brand, region_id: r.region_id, sellers: new Set(), products: new Set() }; acc.set(k, a); }
+    a.sellers.add(r.vendor_id);
+    a.products.add(r.product_id);
+  }
+  return [...acc.values()]
+    .map((a) => ({ brand: a.brand, region_id: a.region_id, sellers: a.sellers.size, products: a.products.size }))
+    .sort((x, y) => y.sellers - x.sellers || y.products - x.products || x.brand.localeCompare(y.brand));
+}
+
 export function buildMeta() {
   const regions = prep(
     `SELECT region_id, name, state_code, district, pincode_from, pincode_to, default_pincode,
@@ -113,6 +152,7 @@ export function buildMeta() {
   ).all() as any[];
 
   const stats = categoryStats();
+  const brands = brandStats();
 
   const run = lastSuccessfulRun();
   const runDetail = run
@@ -146,6 +186,10 @@ export function buildMeta() {
       categories: counts.filter((c) => c.region_id === r.region_id),
       // Per-category card figures, measured over the search candidate set.
       stats: stats.filter((s) => s.region_id === r.region_id),
+      // The brands this region actually carries, most-stocked first. Capped at
+      // twelve: the home row shows eight and the rest is headroom, not a list
+      // anyone scrolls.
+      brands: brands.filter((b) => b.region_id === r.region_id).slice(0, 12),
       // The government reference line per category, so a listing can print
       // it on first paint. The same function the search API calls.
       sor: Object.fromEntries(CATEGORIES.map((c) => [c, sorAnchorFor(r.region_id, c)])),

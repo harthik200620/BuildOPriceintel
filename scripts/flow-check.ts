@@ -8,6 +8,11 @@
  *   BUILDOBJECTS_URL=http://localhost:3001 npx tsx scripts/flow-check.ts
  */
 import { chromium, type Page } from 'playwright';
+import { CATALOGUE } from '../lib/catalogue';
+
+const N_ALL = CATALOGUE.length;
+const N_LIVE = CATALOGUE.filter((c) => c.live).length;
+const N_SOON = N_ALL - N_LIVE;
 
 const BASE = process.env.BUILDOBJECTS_URL ?? 'http://localhost:3000';
 let failures = 0;
@@ -34,8 +39,12 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
     await page.goto(BASE + '/', { waitUntil: 'networkidle' });
     await hydrated(page);
     ok('home renders the catalogue heading', (await page.textContent('h1'))?.replace(/\s+/g, ' ').trim() === 'Product categories');
-    ok('eight category cards', await page.locator('.cat-card').count() === 8);
-    ok('four are links, four are not', await page.locator('a.cat-card').count() === 4 && await page.locator('.cat-card--soon').count() === 4);
+    // Counted from the catalogue, not written down: these were three separate
+    // assertions of the literal 8, and adding a ninth category broke all three
+    // at once without anything being wrong with the page.
+    ok(`${N_ALL} category cards`, await page.locator('.cat-card').count() === N_ALL);
+    ok(`${N_LIVE} are links, ${N_SOON} are not`,
+      await page.locator('a.cat-card').count() === N_LIVE && await page.locator('.cat-card--soon').count() === N_SOON);
     ok('a live card prints a from-price and counts', await page.locator('a.cat-card .cat-from .fig').first().textContent().then((t) => /₹/.test(t ?? '')));
     ok('a coming-soon card prints no rupee figure', !(await page.locator('.cat-card--soon').first().textContent())?.includes('₹'));
 
@@ -110,7 +119,7 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
     await page.waitForURL(BASE + '/');
     ok('back again returns home', path(page) === '/');
     await page.waitForSelector('.cat-grid');
-    ok('home view re-rendered after back', await page.locator('.cat-card').count() === 8);
+    ok('home view re-rendered after back', await page.locator('.cat-card').count() === N_ALL);
 
     // Typing on home moves into search and keeps focus.
     const input = page.locator('input[type="search"], input[role="combobox"], header input').first();

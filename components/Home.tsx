@@ -18,13 +18,23 @@ import {
  * coming-soon card prints no figure at all.
  */
 export default function Home({
-  meta, regionId, regionName, hrefFor, onOpen,
+  meta, regionId, regionName, hrefFor, onOpen, onAllCategories, onSearch, phoneSearch,
 }: {
   meta: any | null;
   regionId: string;
   regionName: string;
   hrefFor: (c: CatalogueEntry) => string;
   onOpen: (c: CatalogueEntry) => void;
+  onAllCategories: () => void;
+  /** Runs a query — used by the banner's call to action and the brand row. */
+  onSearch: (q: string) => void;
+  /**
+   * The search field, rendered into the body on a phone. The top bar drops it
+   * below 768 px: at 390 px it had 43 px of usable width, which is narrower
+   * than the word "Search", so the hint was cut on every phone. Here it gets
+   * the full column.
+   */
+  phoneSearch?: React.ReactNode;
 }) {
   const region = meta?.regions?.find((r: any) => r.region_id === regionId);
   const stats: CategoryStat[] = region?.stats ?? [];
@@ -42,10 +52,35 @@ export default function Home({
   const statFor = (id: string) => stats.find((s) => s.category === id) ?? null;
   const live = CATALOGUE.filter((c) => c.live).length;
 
+  const brands: Array<{ brand: string; sellers: number }> = region?.brands ?? [];
+
   return (
     <div className="home fade-up">
+      {/* The search field, phone only — see `phoneSearch`. */}
+      {phoneSearch && <div className="md:hidden pt-4 pb-1">{phoneSearch}</div>}
+
+      {/* ── the banner ───────────────────────────────────────────────────── */}
+      <section className="banner mt-4 md:mt-6" aria-labelledby="banner-h">
+        <div className="banner-art">
+          <img src="/categories/tmt-steel.webp" alt="" aria-hidden loading="eager" />
+        </div>
+        <div className="banner-in">
+          <h2 id="banner-h" className="display leading-[1.1]" style={{ fontSize: 'clamp(19px, 5vw, 27px)', color: 'var(--ink)' }}>
+            Build better,<br />build for less
+          </h2>
+          <p className="text-[12.5px] leading-[1.45] mt-2 max-w-[34ch]" style={{ color: 'var(--ink-2)' }}>
+            {meta?.totals
+              ? <>{meta.totals.offers.toLocaleString('en-IN')} live offers from {meta.totals.sellers.toLocaleString('en-IN')} sellers, landed at your pincode.</>
+              : 'Every price landed at your pincode, GST stated, per unit.'}
+          </p>
+          <button onClick={onAllCategories} className="btn-ghost h-9 px-4 text-[12.5px] mt-3.5">
+            Explore now
+          </button>
+        </div>
+      </section>
+
       {/* ── the heading ──────────────────────────────────────────────────── */}
-      <header className="text-center pt-6 sm:pt-8 lg:pt-9 pb-6 sm:pb-7">
+      <header className="text-center pt-7 sm:pt-9 lg:pt-10 pb-6 sm:pb-7">
         <p className="eyebrow">Explore</p>
         <h1 className="display home-title mt-2.5" style={{ textWrap: 'balance' }}>
           Product <span style={{ color: 'var(--accent-ink)' }}>categories</span>
@@ -54,9 +89,23 @@ export default function Home({
           Landed prices for every step of your build — delivered to your pincode, GST stated, per unit.
         </p>
         <p className="mt-1.5 text-[12.5px] tnum" style={{ color: 'var(--ink-3)' }}>
-          {live} categories tracked in {regionName} today · four more on the way
+          {live} categories tracked in {regionName} today · {CATALOGUE.length - live} more on the way
         </p>
       </header>
+
+      <div className="sec-head">
+        <h2 className="sec-title">Shop by category</h2>
+        <a
+          href="/categories"
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            e.preventDefault(); onAllCategories();
+          }}
+          className="sec-more anim"
+        >
+          View all
+        </a>
+      </div>
 
       {/* ── the catalogue ────────────────────────────────────────────────── */}
       <ul className="cat-grid" aria-label="Product categories">
@@ -75,6 +124,26 @@ export default function Home({
           <li key={c.id} className="min-w-0"><SoonCard entry={c} /></li>
         ))}
       </ul>
+
+      {/* ── top brands ───────────────────────────────────────────────────── */}
+      {brands.length > 0 && (
+        <section className="mt-8" aria-labelledby="brands-h">
+          <div className="sec-head">
+            <h2 id="brands-h" className="sec-title">Top brands</h2>
+            <span className="text-[11.5px]" style={{ color: 'var(--ink-3)' }}>by sellers carrying them</span>
+          </div>
+          {/* Ranked by how many sellers stock each name, from lib/meta
+              brandStats — not a hand-written list of brands one would expect. */}
+          <div className="rail">
+            {brands.slice(0, 8).map((b) => (
+              <button key={b.brand} onClick={() => onSearch(b.brand)} className="brand-tile anim lift">
+                <span className="text-[12.5px] leading-tight">{b.brand}</span>
+                <span className="brand-tile-n tnum">{b.sellers} sellers</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── the trust bar ────────────────────────────────────────────────── */}
       <TrustBar meta={meta} />
@@ -141,11 +210,20 @@ function LiveCard({
       }
     >
       <div className="cat-photo">
-        <img
-          src={entry.image} alt="" aria-hidden draggable={false}
-          loading={eager ? 'eager' : 'lazy'} decoding="async"
-          fetchPriority={eager ? 'high' : 'auto'}
-        />
+        {/* Every live category has a photograph — the suite asserts each one
+            exists on disk — but the field is nullable for the coming-soon
+            entries that have none, so the glyph stands in either way. */}
+        {entry.image ? (
+          <img
+            src={entry.image} alt="" aria-hidden draggable={false}
+            loading={eager ? 'eager' : 'lazy'} decoding="async"
+            fetchPriority={eager ? 'high' : 'auto'}
+          />
+        ) : (
+          <span className="grid place-items-center w-full h-full" aria-hidden style={{ color: 'var(--ink-3)', opacity: .5 }}>
+            <CategoryIcon name={entry.icon} size={44} />
+          </span>
+        )}
         <span className="cat-photo-fade" aria-hidden />
 
         {ageLabel && (
@@ -201,7 +279,16 @@ function SoonCard({ entry }: { entry: CatalogueEntry }) {
       title={`${entry.tagline}. Not tracked yet — we never show a price we have not seen.`}
     >
       <div className="cat-photo">
-        <img src={entry.image} alt="" aria-hidden draggable={false} loading="lazy" decoding="async" />
+        {/* A category with no photograph shows its glyph. The alternative —
+            borrowing another category's picture — would put a photograph of
+            steel behind the word "equipment". */}
+        {entry.image
+          ? <img src={entry.image} alt="" aria-hidden draggable={false} loading="lazy" decoding="async" />
+          : (
+            <span className="grid place-items-center w-full h-full" aria-hidden style={{ color: 'var(--ink-3)', opacity: .5 }}>
+              <CategoryIcon name={entry.icon} size={44} />
+            </span>
+          )}
         <span className="cat-photo-fade" aria-hidden />
         <span className="cat-soon">Coming soon</span>
       </div>

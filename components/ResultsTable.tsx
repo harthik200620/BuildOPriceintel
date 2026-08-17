@@ -222,9 +222,9 @@ export default function ResultsTable({
               {applicable.filter((c) => c.label).map((c) => {
                 const cov = coverage.get(c.id) ?? 0;
                 return (
-                  <label key={c.id} className="flex items-center gap-2 py-1 text-[12px] cursor-pointer">
+                  <label key={c.id} className="check-row anim py-1">
                     <input
-                      type="checkbox" checked={visible.has(c.id)}
+                      type="checkbox" className="check" checked={visible.has(c.id)}
                       onChange={() => setVisible((s) => {
                         const n = new Set(s);
                         n.has(c.id) ? n.delete(c.id) : n.add(c.id);

@@ -15,8 +15,17 @@ import {
 } from '@/components/States';
 import { rupees, UNIT_SPOKEN } from '@/components/primitives';
 import { LIVE_CATALOGUE, catalogueById, unitSuffix, type CatalogueEntry } from '@/lib/catalogue';
-import { parseLoc, buildUrl, viewKey, underlay, LOGO_PATH, type Loc } from '@/lib/route';
+import { parseLoc, buildUrl, viewKey, underlay, tabOf, LOGO_PATH, type Loc, type Tab } from '@/lib/route';
 import { readWhere, writeWhere } from '@/lib/prefs';
+import { readCart, writeCart, lineOf, totals, clampQty, type CartLine } from '@/lib/cart';
+import TabBar from '@/components/TabBar';
+import AppBar from '@/components/AppBar';
+import Welcome from '@/components/Welcome';
+import CategoriesList from '@/components/CategoriesList';
+import ProductPage from '@/components/ProductPage';
+import ListPage from '@/components/ListPage';
+import SearchField from '@/components/SearchField';
+import { CATALOGUE } from '@/lib/catalogue';
 import LogoStitchOverlay, { preloadStitchCanvas } from '@/components/LogoStitchOverlay';
 import { CategoryIcon, IconChevronRight, IconFilter } from '@/components/icons';
 
@@ -130,6 +139,25 @@ export default function Explorer({
       the URL can be sent. Closing from the sheet's own control walks back over
       that entry when it exists, and otherwise just drops the parameter. */
   const openSheet = React.useCallback((productId: string) => {
+    /*
+     * On a phone a product is a PLACE, not a layer.
+     *
+     * The sheet is the right shape on a wide screen: it keeps the listing and
+     * its filters visible behind, so comparing is a matter of opening and
+     * closing. At 390 px there is nothing behind it to preserve — it covers the
+     * whole viewport anyway — and a full-height sheet with its own scroll is
+     * exactly the pattern a phone's back gesture handles worst. So below the
+     * rail's breakpoint the same tap navigates to /p/<id> instead, which is a
+     * real entry in history and a link that can be shared.
+     */
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      setVendorFilter(null); setColSort(null); setSheetOpen(false);
+      navigate(
+        { view: { kind: 'product', productId }, q: '', sort: 'recommended', selections: {}, sku: null },
+        'push',
+      );
+      return;
+    }
     if (loc.sku === productId) return;
     sheetPushed.current = true;
     navigate({ ...loc, sku: productId }, 'push', false);
@@ -194,6 +222,67 @@ export default function Explorer({
     leaveListing();
     navigate({ view: { kind: 'search' }, q, sort: 'recommended', selections: {}, sku: null }, 'push');
   }, [navigate, leaveListing]);
+
+  /* ── the app flow: categories, product, estimate ───────────────────────── */
+
+  const goView = React.useCallback((v: Loc['view']) => {
+    leaveListing();
+    navigate({ view: v, q: '', sort: 'recommended', selections: {}, sku: null }, 'push');
+  }, [navigate, leaveListing]);
+
+  const openProduct = React.useCallback((productId: string) => {
+    goView({ kind: 'product', productId });
+  }, [goView]);
+
+  /** The five tabs. Search lands on the field rather than an empty result set. */
+  const goTab = React.useCallback((t: Tab) => {
+    if (t === 'home') return goHome();
+    if (t === 'search') { goView({ kind: 'search' }); window.setTimeout(() => searchRef.current?.focus(), 60); return; }
+    if (t === 'profile') { goView({ kind: 'welcome' }); return; }
+    goView({ kind: t === 'list' ? 'list' : 'categories' });
+  }, [goHome, goView]);
+
+  /* ── the estimate ──────────────────────────────────────────────────────── */
+
+  const [cart, setCart] = React.useState<CartLine[]>([]);
+  // Read after mount, never during render: localStorage does not exist on the
+  // server and a first render that differed from the server's would hydrate
+  // with a mismatched badge.
+  React.useEffect(() => { setCart(readCart()); }, []);
+  const cartDirty = React.useRef(false);
+  React.useEffect(() => {
+    if (!cartDirty.current) return;
+    writeCart(cart);
+  }, [cart]);
+
+  const mutateCart = React.useCallback((fn: (c: CartLine[]) => CartLine[]) => {
+    cartDirty.current = true;
+    setCart(fn);
+  }, []);
+
+  const addToCart = React.useCallback((line: CartLine) => {
+    mutateCart((c) => {
+      const at = c.findIndex((x) => x.offer_id === line.offer_id);
+      if (at < 0) return [...c, line];
+      const next = [...c];
+      next[at] = { ...next[at], qty: line.qty, unit_paise: line.unit_paise };
+      return next;
+    });
+  }, [mutateCart]);
+
+  const setCartQty = React.useCallback((offerId: string, qty: number) => {
+    mutateCart((c) => c.map((l) => (l.offer_id === offerId ? { ...l, qty: clampQty(qty, l.moq_qty) } : l)));
+  }, [mutateCart]);
+
+  const removeFromCart = React.useCallback((offerId: string) => {
+    mutateCart((c) => c.filter((l) => l.offer_id !== offerId));
+  }, [mutateCart]);
+
+  const cartSums = React.useMemo(() => totals(cart), [cart]);
+  const inCart = React.useCallback((offerId: string) => cart.some((l) => l.offer_id === offerId), [cart]);
+
+  /** Bumped by the top bar's assistant button — the only way in on a phone. */
+  const [askSignal, setAskSignal] = React.useState(0);
 
   /** Typing. The first character on the catalogue is a navigation into search;
       after that the field edits the URL in place. Inside a category the query
@@ -363,23 +452,109 @@ export default function Explorer({
       {offline && <OfflineBanner />}
       {meta?.degraded && !noData && <DegradedBanner lastRun={meta?.last_run?.finished_at ?? null} />}
 
-      <TopBar
-        regions={regions} regionId={regionId} pincode={pincode}
-        onRegion={setRegionId} onPincode={setPincode}
-        query={query} onQuery={setQuery} onSubmit={setQuery}
-        searchRef={searchRef} pincodeError={pincodeError}
-        onHome={goHome}
-        atHome={view.kind === 'home'}
-        onLogo={openLogo} onLogoHover={preloadStitchCanvas} logoRef={logoRef}
-      />
+      {/* Welcome is the whole screen — no bar above it and no tabs below it.
+          It is the one view that is not part of the app's navigation. */}
+      {view.kind !== 'welcome' && (
+        <TopBar
+          regions={regions} regionId={regionId} pincode={pincode}
+          onRegion={setRegionId} onPincode={setPincode}
+          query={query} onQuery={setQuery} onSubmit={setQuery}
+          searchRef={searchRef} pincodeError={pincodeError}
+          onHome={goHome}
+          atHome={view.kind === 'home'}
+          onLogo={openLogo} onLogoHover={preloadStitchCanvas} logoRef={logoRef}
+          listCount={cart.length}
+          onList={() => goView({ kind: 'list' })}
+          onAsk={() => setAskSignal((n) => n + 1)}
+          phoneHidden={view.kind === 'categories' || view.kind === 'product' || view.kind === 'list'}
+        />
+      )}
 
-      <main className="mx-auto w-full max-w-[1680px] px-5 sm:px-6 lg:px-10 pt-5 sm:pt-6 pb-32 flex-1">
+      {/* A second bar, phone only, on the screens you arrive at from somewhere:
+          it names where you are and gives back a real target. */}
+      {(view.kind === 'categories' || view.kind === 'product' || view.kind === 'list') && (
+        <AppBar
+          title={view.kind === 'categories' ? 'Categories' : view.kind === 'list' ? 'My estimate' : 'Product details'}
+          onBack={() => (window.history.length > 1 ? window.history.back() : goHome())}
+          fallbackLabel="the catalogue"
+          listCount={cart.length}
+          onList={() => goView({ kind: 'list' })}
+          share={view.kind === 'product' ? { title: 'Build Objects', url: buildUrl(loc) } : undefined}
+        />
+      )}
+
+      <main
+        className={
+          view.kind === 'welcome'
+            ? 'flex-1'
+            : 'mx-auto w-full max-w-[1680px] px-5 sm:px-6 lg:px-10 pt-5 sm:pt-6 flex-1 has-tabbar'
+        }
+      >
+        {view.kind === 'welcome' && (
+          <Welcome
+            regions={regions} regionId={regionId} pincode={pincode}
+            onRegion={setRegionId} onPincode={setPincode} pincodeError={pincodeError}
+            onStart={goHome}
+          />
+        )}
+
         {view.kind === 'home' && (
           <Home
             meta={meta} regionId={regionId} regionName={regionName}
             hrefFor={(c) => `/c/${c.slug}`}
             onOpen={(c) => openCategory(c)}
+            onAllCategories={() => goView({ kind: 'categories' })}
+            onSearch={searchEverywhere}
+            phoneSearch={
+              <SearchField
+                value={query} onChange={setQuery} onSubmit={setQuery}
+                pincode={pincode} inputRef={searchRef}
+              />
+            }
           />
+        )}
+
+        {view.kind === 'categories' && (
+          <div className="mx-auto max-w-[720px] pb-4">
+            <h1 className="display text-[22px] mt-1 mb-1 hidden md:block">Categories</h1>
+            <p className="text-[12.5px] mb-4" style={{ color: 'var(--ink-3)' }}>
+              {CATALOGUE.filter((c) => c.live).length} tracked in {regionName} ·{' '}
+              {CATALOGUE.filter((c) => !c.live).length} on the way
+            </p>
+            <CategoriesList
+              onOpen={(c) => openCategory(c)}
+              counts={Object.fromEntries(
+                (meta?.regions?.find((r: any) => r.region_id === regionId)?.stats ?? [])
+                  .map((s: any) => [s.category, { sellers: s.sellers }]),
+              )}
+            />
+          </div>
+        )}
+
+        {view.kind === 'product' && (
+          <div className="mx-auto max-w-[560px] pb-4">
+            <ProductPage
+              productId={view.productId}
+              pincode={pincode}
+              onBack={goHome}
+              onAdd={(l) => addToCart(l as CartLine)}
+              inList={inCart}
+              onOpenList={() => goView({ kind: 'list' })}
+              onAllSellers={() => { const q = view.productId; searchEverywhere(''); void q; }}
+            />
+          </div>
+        )}
+
+        {view.kind === 'list' && (
+          <div className="mx-auto max-w-[640px] pb-4">
+            <h1 className="display text-[22px] mt-1 mb-4 hidden md:block">My estimate</h1>
+            <ListPage
+              lines={cart} sums={cartSums}
+              onQty={setCartQty} onRemove={removeFromCart}
+              onBrowse={() => goView({ kind: 'categories' })}
+              pincode={pincode} regionName={regionName}
+            />
+          </div>
         )}
 
         {view.kind === 'missing' && (
@@ -554,9 +729,9 @@ export default function Explorer({
                       Filters{activeFacets ? <span className="tnum" style={{ color: 'var(--accent)' }}>{activeFacets}</span> : null}
                     </button>
                   )}
-                  <label className="flex items-center gap-1.5 text-[12px] cursor-pointer" style={{ color: 'var(--ink-2)' }}>
-                    <input type="checkbox" checked={inStockOnly} onChange={() => setInStockOnly((v) => !v)}
-                      className="accent-[var(--accent)]" style={{ width: 12, height: 12 }} />
+                  <label className="check-row anim">
+                    <input type="checkbox" className="check" checked={inStockOnly}
+                      onChange={() => setInStockOnly((v) => !v)} />
                     quotable only
                   </label>
                   <span className="flex-1" />
@@ -573,7 +748,7 @@ export default function Explorer({
                       <option key={k} value={k}>{v.label}</option>
                     ))}
                   </select>
-                  <div className="seg flex h-8 text-[12.5px]" role="group" aria-label="Result layout">
+                  <div className="seg flex h-9 text-[12.5px]" role="group" aria-label="Result layout">
                     <button className="anim px-3 h-full" aria-pressed={layout === 'cards'} onClick={() => setLayout('cards')}>Cards</button>
                     <button className="anim px-3 h-full" aria-pressed={layout === 'table'} onClick={() => setLayout('table')}>Table</button>
                   </div>
@@ -771,7 +946,14 @@ export default function Explorer({
         pincode={pincode}
         regionName={regionName}
         onApplySearch={(q) => searchEverywhere(q)}
+        openSignal={askSignal}
       />
+
+      {/* The five places, phone only. Not on welcome: that screen is the way
+          in, and it has nothing to navigate between yet. */}
+      {view.kind !== 'welcome' && (
+        <TabBar active={tabOf(view)} count={cart.length} onGo={goTab} />
+      )}
     </div>
 
     {/* The mark — a sibling of the inert root, never inside it. */}

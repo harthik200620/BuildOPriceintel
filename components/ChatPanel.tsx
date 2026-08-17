@@ -39,14 +39,26 @@ interface Welcome {
 }
 
 export default function ChatPanel({
-  pincode, regionName, onApplySearch,
+  pincode, regionName, onApplySearch, openSignal,
 }: {
+  /**
+   * Bumped by the top bar's assistant button, which is the only way in below
+   * 768 px — the floating button is desktop-only now. A counter rather than a
+   * boolean, so asking twice after closing it once still opens it.
+   */
+  openSignal?: number;
   pincode: string;
   regionName: string;
   /** Lets an answer push a query into the main grid behind the panel. */
   onApplySearch?: (q: string, category?: string | null) => void;
 }) {
   const [open, setOpen] = React.useState(false);
+  // Skips the first run so a mounted panel does not open itself.
+  const firstSignal = React.useRef(true);
+  React.useEffect(() => {
+    if (firstSignal.current) { firstSignal.current = false; return; }
+    if (openSignal != null) setOpen(true);
+  }, [openSignal]);
   const [welcome, setWelcome] = React.useState<Welcome | null>(null);
   const [msgs, setMsgs] = React.useState<Msg[]>([]);
   const [input, setInput] = React.useState('');
@@ -159,9 +171,18 @@ export default function ChatPanel({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="anim lift fixed z-40 flex items-center gap-2 px-4 py-3"
+        /* Desktop only, and clear of the bottom chrome.
+           Measured, this button sat on top of a product card on every listing
+           and a category card on the home page, at all three widths. On a phone
+           the fix is not to move it: the tab bar owns that corner now, and two
+           floating things at the bottom of a 390 px screen is one too many — so
+           below 768 px the assistant opens from the top bar instead. Above it,
+           the button clears the same reserved band the tab bar would occupy. */
+        className="anim lift fixed z-40 hidden md:flex items-center gap-2 px-4 py-3"
         style={{
-          right: 20, bottom: 20, borderRadius: 'var(--radius-pill)',
+          right: 16,
+          bottom: 'calc(var(--tab-h) + var(--safe-b) + 12px)',
+          borderRadius: 'var(--radius-pill)',
           background: 'var(--accent)', color: 'var(--on-bright)',
           boxShadow: 'var(--glass-shadow-lift)', border: 'none', cursor: 'pointer',
           fontSize: 13, fontWeight: 600, letterSpacing: '.01em',

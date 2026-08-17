@@ -35,6 +35,16 @@ export function resolveRoute(slug: string[] | undefined) {
   // The mark. Same tree: the explorer renders the catalogue underneath and
   // the stitched "b" over it, so × and back land on a live page.
   if (s.length === 1 && s[0] === 'logo') return { kind: 'logo' as const };
+  // The app flow. These name no listing of their own — the client resolves
+  // what they show — so they are admitted by name and their content is the
+  // explorer's business, exactly as /search is.
+  if (s.length === 1 && s[0] === 'welcome') return { kind: 'welcome' as const };
+  if (s.length === 1 && s[0] === 'categories') return { kind: 'categories' as const };
+  if (s.length === 1 && s[0] === 'list') return { kind: 'list' as const };
+  // A product id is not validated here: doing so would mean a DB read on every
+  // crawl of a URL the client fetches anyway, and ProductPage already renders
+  // "not in the catalogue" for an id that resolves to nothing.
+  if (s.length === 2 && s[0] === 'p' && s[1]) return { kind: 'product' as const, productId: s[1] };
   if (s.length === 2 && s[0] === 'c') {
     const entry = catalogueBySlug(s[1]);
     if (entry) return { kind: 'category' as const, entry };
@@ -54,6 +64,21 @@ export function metadataFor(slug: string[] | undefined): Metadata {
     };
   }
   if (route.kind === 'search') return { title: 'Search — Build Objects' };
+  if (route.kind === 'welcome') return { title: 'Welcome — Build Objects', robots: { index: false, follow: true } };
+  if (route.kind === 'categories') {
+    return {
+      title: 'Categories — Build Objects',
+      description: 'Every construction material category we track in Hyderabad and Vijayawada, and the ones on the way.',
+    };
+  }
+  // The estimate is one browser's own list; there is nothing here to index.
+  if (route.kind === 'list') return { title: 'My estimate — Build Objects', robots: { index: false, follow: false } };
+  if (route.kind === 'product') {
+    return {
+      title: 'Product details — Build Objects',
+      description: 'Landed price, seller, certification and freshness for one product, delivered to your pincode.',
+    };
+  }
   return {
     title: 'Build Objects Price Intelligence',
     description:

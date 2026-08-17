@@ -31,18 +31,28 @@ export default function SearchField({
   const [active, setActive] = React.useState(-1);
   const boxRef = React.useRef<HTMLDivElement>(null);
   const seq = React.useRef(0);
-  // The long placeholder is a tour of what the grammar understands; on a
-  // 200 px field it is three characters and a cut. Short there.
-  const [narrow, setNarrow] = React.useState(false);
+  /**
+   * The hint has three widths, because the field has three.
+   *
+   * The long form is a tour of what the query grammar understands, and it is
+   * 497 px of type. Measured, the field is 600 px at 1440, 184 px at 1024 and
+   * absent below 768 — so one breakpoint was never enough: a tablet was being
+   * shown a hint two and a half times the width of the box holding it, and cut
+   * it mid-word. Each tier below is a string that fits the field it appears in.
+   */
+  const [tier, setTier] = React.useState<'phone' | 'mid' | 'wide'>('wide');
 
   React.useEffect(() => {
     try { setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]')); } catch { /* first run */ }
-    const mq = window.matchMedia('(max-width: 767px)');
-    const apply = () => setNarrow(mq.matches);
+    const phone = window.matchMedia('(max-width: 767px)');
+    const wide = window.matchMedia('(min-width: 1180px)');
+    const apply = () => setTier(phone.matches ? 'phone' : wide.matches ? 'wide' : 'mid');
     apply();
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
+    phone.addEventListener('change', apply);
+    wide.addEventListener('change', apply);
+    return () => { phone.removeEventListener('change', apply); wide.removeEventListener('change', apply); };
   }, []);
+  const narrow = tier === 'phone';
 
   /* ⌘K / Ctrl+K focuses the field from anywhere. */
   React.useEffect(() => {
@@ -131,7 +141,11 @@ export default function SearchField({
           aria-controls="buildobjects-suggest"
           aria-autocomplete="list"
           aria-label="Search construction materials"
-          placeholder={narrow ? 'Search…' : 'Try “53 grade cement”, “8mm tmt”, “4 inch cpvc”, “sariya rate”, “ఇటుక”'}
+          placeholder={
+            tier === 'phone' ? 'Search…'
+            : tier === 'mid' ? 'Search materials…'
+            : 'Try “53 grade cement”, “8mm tmt”, “4 inch cpvc”, “sariya rate”, “ఇటుక”'
+          }
           className="field w-full h-9 pl-9 pr-3 md:pr-16 text-[14px]"
         />
         {/* A keyboard hint has no reader on a phone; it goes with the width. */}

@@ -728,7 +728,7 @@ a.cat-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px
 
 /* ── a listing's head ─────────────────────────────────────────────────────── */
 .crumbs { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); }
-.crumbs a { color: var(--ink-2); text-decoration: none; }
+.crumbs a { min-height: 32px; display: inline-flex; align-items: center; color: var(--ink-2); text-decoration: none; }
 .crumbs a:hover { color: var(--accent); }
 .crumbs [aria-current="page"] { color: var(--ink); }
 
@@ -778,3 +778,305 @@ a.cat-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px
   @keyframes sheet-up { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
   .sheet-up { animation: sheet-up .22s cubic-bezier(.2, .7, .3, 1) both; }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   THE APP FLOW
+   ─────────────────────────────────────────────────────────────────────────────
+   Welcome → home → categories → product → estimate. The reference for this part
+   is a phone app, so the phone is the primary width and the desktop rules are
+   the same information architecture given more room — not a second design.
+   Three consequences, each of which was a defect before it was a rule:
+
+   1. ONE SPACING SCALE. This page used to space by eye — 16, 24, 12, 16, 24
+      down a single column with nothing behind the choices. Everything below
+      steps through --s-*, so vertical rhythm is decided once.
+   2. NATIVE CONTROLS ARE SKINNED, NOT REPLACED. A <select> and a checkbox beat
+      anything hand-rolled on a phone: they get the OS picker, the OS a11y tree
+      and the OS keyboard. What they must not do is render in the OS's own
+      light chrome on a dark page — so appearance:none and a drawn indicator,
+      with the element underneath left exactly what it was.
+   3. THE TAB BAR OWNS THE BOTTOM OF THE PHONE. Nothing else may sit there.
+      --tab-h is reserved by .has-tabbar and the assistant docks above it; the
+      floating button used to land on top of a product card on every page.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+  --radius-lg: 18px;
+
+  /* Reserved bottom chrome on a phone: the tab bar plus the home indicator. */
+  --tab-h: 62px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── native controls, skinned ─────────────────────────────────────────────── */
+select.field {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink-3) 50%),
+    linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+  background-position: right 14px center, right 9px center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  color: var(--ink);
+}
+select.field option { background: var(--card-face); color: var(--ink); }
+
+/* The box is drawn rather than inherited: a UA checkbox on this ground is a
+   white square with the OS accent tick — the one element on the page that
+   ignores the palette completely. */
+.check {
+  appearance: none; -webkit-appearance: none;
+  width: 16px; height: 16px; flex-shrink: 0; margin: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 5px;
+  background: var(--wash);
+  display: inline-grid; place-content: center;
+  cursor: pointer;
+}
+.check::before {
+  content: ""; width: 9px; height: 9px;
+  transform: scale(0); transition: transform .12s cubic-bezier(.2,.7,.3,1);
+  background: var(--on-bright);
+  clip-path: polygon(14% 46%, 0 60%, 39% 100%, 100% 22%, 86% 8%, 38% 71%);
+}
+.check:checked { background: var(--accent); border-color: var(--accent); }
+.check:checked::before { transform: scale(1); }
+.check:hover:not(:checked) { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+@media (prefers-reduced-motion: reduce) { .check::before { transition: none; } }
+
+/* A checkbox and its word, hit as one 32 px target. */
+.check-row {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  min-height: 32px; padding-right: var(--s-2);
+  font-size: 12.5px; color: var(--ink-2); cursor: pointer;
+  border-radius: 8px;
+}
+.check-row:hover { color: var(--ink); }
+
+/* ── the app bar: back, title, actions ────────────────────────────────────── */
+.appbar {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--chrome);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  backdrop-filter: blur(20px) saturate(1.15);
+  border-bottom: 1px solid var(--glass-hair);
+  box-shadow: inset 0 1px 0 var(--glass-border);
+}
+.appbar-in {
+  height: 56px; display: flex; align-items: center; gap: var(--s-2);
+  padding: 0 var(--s-2);
+}
+.appbar-title {
+  flex: 1; min-width: 0; text-align: center;
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Every icon action is a 40 px target around a 20 px glyph. */
+.icon-btn {
+  position: relative;
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 12px; color: var(--ink-2);
+  background: transparent; border: 1px solid transparent;
+}
+.icon-btn:hover { color: var(--ink); background: var(--wash); border-color: var(--glass-hair); }
+.icon-btn[data-on="true"] { color: var(--accent); }
+
+/* The count on the list icon. Sits on the corner; never resizes the button. */
+.badge {
+  position: absolute; top: 1px; right: 1px;
+  min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent); color: var(--on-bright);
+  font-size: 10px; font-weight: 700; line-height: 17px; text-align: center;
+  box-shadow: 0 0 0 2px var(--chrome);
+}
+
+/* ── the tab bar ──────────────────────────────────────────────────────────── */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding-bottom: var(--safe-b);
+  background: var(--chrome);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  backdrop-filter: blur(20px) saturate(1.15);
+  border-top: 1px solid var(--glass-hair);
+}
+.tab {
+  position: relative;
+  height: var(--tab-h);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font-size: 10px; letter-spacing: .02em;
+  color: var(--ink-3); text-decoration: none;
+}
+.tab[aria-current="page"] { color: var(--accent); }
+.tab[aria-current="page"]::before {
+  content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent);
+}
+/* Reserved, so the last row of any list clears the bar. */
+.has-tabbar { padding-bottom: calc(var(--tab-h) + var(--safe-b) + var(--s-4)); }
+/* Above the tab bar breakpoint the assistant button takes that corner
+   instead, and it is fixed — so the column reserves the band it occupies
+   (74 px offset + its own height) and no card ends underneath it. */
+@media (min-width: 768px) {
+  .tabbar { display: none; }
+  .has-tabbar { padding-bottom: 132px; }
+}
+
+/* ── welcome ──────────────────────────────────────────────────────────────── */
+.welcome {
+  min-height: 100dvh; display: flex; flex-direction: column;
+  padding: var(--s-6) var(--s-5) calc(var(--s-5) + var(--safe-b));
+  max-width: 480px; margin: 0 auto;
+}
+.welcome-art {
+  position: relative; flex: 1; min-height: 170px;
+  margin: var(--s-5) calc(var(--s-5) * -1) var(--s-5);
+  overflow: hidden;
+}
+/* Masked rather than covered by a gradient: the ground behind this is the
+   aurora, not a flat colour, so a scrim painted in --abyss left a visible
+   seam at each end of the photograph. A mask fades the image itself to
+   transparent and whatever is behind it shows through. */
+.welcome-art img {
+  width: 100%; height: 100%; object-fit: cover; opacity: .55;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 24%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 24%, #000 70%, transparent 100%);
+}
+/* The photograph fades into the ground rather than ending on a hard edge. */
+@media (min-width: 768px) { .welcome { max-width: 560px; padding-top: var(--s-8); } }
+
+/* ── the category list ────────────────────────────────────────────────────── */
+.cat-row {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-2); padding-right: var(--s-3);
+  border-radius: var(--radius-glass);
+  border: 1px solid var(--card-edge);
+  background: var(--card-face);
+  color: inherit; text-decoration: none;
+  min-height: 76px;
+}
+.cat-row:hover { border-color: color-mix(in srgb, var(--accent) 42%, transparent); }
+.cat-row-thumb {
+  width: 60px; height: 60px; flex-shrink: 0; overflow: hidden;
+  border-radius: 10px; background: var(--card-band);
+}
+.cat-row-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.cat-row--soon { opacity: .62; }
+.cat-row--soon .cat-row-thumb img { filter: grayscale(1); }
+
+/* ── product page ─────────────────────────────────────────────────────────── */
+.pdp-figure {
+  position: relative; aspect-ratio: 1 / 1; width: 100%;
+  border-radius: var(--radius-lg); overflow: hidden;
+  background: var(--card-band); border: 1px solid var(--card-edge);
+}
+.pdp-figure img { width: 100%; height: 100%; object-fit: contain; }
+.pdp-dots { display: flex; gap: 6px; justify-content: center; }
+.pdp-dot {
+  width: 6px; height: 6px; border-radius: 999px;
+  background: var(--glass-border); border: 0; padding: 0;
+  transition: width .16s cubic-bezier(.2,.7,.3,1);
+}
+.pdp-dot[aria-current="true"] { width: 18px; background: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .pdp-dot { transition: none; } }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  border-radius: 10px; font-weight: 600; text-decoration: none;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.btn-ghost:hover { background: var(--accent-bg); }
+.btn-ghost:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ── quantity stepper ─────────────────────────────────────────────────────── */
+.qty {
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--glass-border); border-radius: 10px;
+  background: var(--wash); overflow: hidden;
+}
+.qty button {
+  width: 40px; height: 40px; display: grid; place-items: center;
+  color: var(--ink); background: transparent; border: 0;
+}
+.qty button:hover:not(:disabled) { background: var(--wash-strong); }
+.qty button:disabled { opacity: .35; cursor: not-allowed; }
+/* nowrap and sized off the widest unit word: "1 running_metre" has to sit
+   on one line, and "1 bag" was wrapping to two and clipping inside 40 px. */
+.qty-val {
+  min-width: 84px; height: 40px; display: flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 0 var(--s-2); white-space: nowrap;
+  text-align: center; font-size: 13.5px; color: var(--ink);
+  border-left: 1px solid var(--glass-hair); border-right: 1px solid var(--glass-hair);
+}
+
+/* ── the estimate ─────────────────────────────────────────────────────────── */
+.line-row { display: flex; gap: var(--s-3); padding: var(--s-3) 0; }
+.line-thumb {
+  width: 64px; height: 64px; flex-shrink: 0; overflow: hidden;
+  border-radius: 10px; background: var(--card-band); border: 1px solid var(--card-edge);
+}
+.line-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.sum-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-4);
+  padding: 7px 0; font-size: 13px; color: var(--ink-2);
+}
+.sum-row--total {
+  border-top: 1px dashed var(--rule); margin-top: var(--s-2); padding-top: var(--s-3);
+  font-size: 15px; color: var(--ink);
+}
+
+/* ── section headings ─────────────────────────────────────────────────────── */
+.sec-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-4);
+  margin-bottom: var(--s-3);
+}
+.sec-title { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); }
+/* 32 px tall even though the text is 12: on a phone this is a tap target. */
+.sec-more {
+  font-size: 12px; color: var(--accent); text-decoration: none;
+  display: inline-flex; align-items: center; min-height: 32px; padding-left: var(--s-2);
+}
+.sec-more:hover { color: var(--accent-lift); }
+
+/* ── the hero banner ──────────────────────────────────────────────────────── */
+.banner {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius-lg); border: 1px solid var(--card-edge);
+  background: var(--card-face);
+  min-height: 168px; display: flex; align-items: center;
+}
+.banner-art { position: absolute; inset: 0; }
+.banner-art img { width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+/* Type sits on the left, so the scrim is a horizontal wipe rather than a wash
+   over the whole photograph. */
+.banner-art::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, var(--card-face) 6%, color-mix(in srgb, var(--card-face) 72%, transparent) 46%, transparent 80%);
+}
+.banner-in { position: relative; padding: var(--s-5); max-width: 66%; }
+@media (max-width: 420px) { .banner-in { max-width: 80%; padding: var(--s-4); } }
+
+/* ── brand tiles ──────────────────────────────────────────────────────────── */
+.brand-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-width: 104px; height: 62px; padding: 0 var(--s-3); flex-shrink: 0;
+  border-radius: 12px; border: 1px solid var(--card-edge); background: var(--card-face);
+  color: var(--ink); text-decoration: none; text-align: center;
+}
+.brand-tile:hover { border-color: color-mix(in srgb, var(--accent) 42%, transparent); }
+.brand-tile-n { font-size: 10px; color: var(--ink-3); }
+
+/* ── a row of tiles that scrolls sideways ─────────────────────────────────── */
+.rail {
+  display: flex; gap: var(--s-2); overflow-x: auto; scroll-snap-type: x proximity;
+  margin: 0 calc(var(--s-4) * -1); padding: 0 var(--s-4) var(--s-1);
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar { display: none; }
+.rail > * { scroll-snap-align: start; }

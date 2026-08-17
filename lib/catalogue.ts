@@ -21,7 +21,7 @@ import { CANONICAL_UNITS, UNIT_LABEL, type CanonicalUnit } from './units';
 
 export type CatalogueIcon =
   | 'cement' | 'tmt_steel' | 'bricks_blocks' | 'water_pipes'
-  | 'aggregates' | 'sand' | 'rmc' | 'electricals';
+  | 'aggregates' | 'sand' | 'rmc' | 'electricals' | 'equipment';
 
 export interface CatalogueEntry {
   /** DB category id for live entries; a stable key for coming-soon ones. */
@@ -32,9 +32,22 @@ export interface CatalogueEntry {
   label: string;
   /** One line under the name: what the category holds, in the buyer's terms. */
   tagline: string;
+  /**
+   * The two-line form the categories list uses. `tagline` names every family
+   * and grade, which is right beside a heading and far too long inside a
+   * 56 px row, so the list gets its own shorter phrasing rather than a
+   * truncated copy of the longer one.
+   */
+  blurb: string;
   /** Landed price is quoted per this unit. Null until the category is tracked. */
   unit: CanonicalUnit | null;
-  image: string;
+  /**
+   * The photograph, or null when none was collected. Null is a real state,
+   * not a gap to paper over: pointing a category at some other category's
+   * picture would put a photograph of steel under the word "equipment".
+   * Every consumer falls back to the glyph.
+   */
+  image: string | null;
   icon: CatalogueIcon;
   live: boolean;
 }
@@ -43,42 +56,56 @@ export const CATALOGUE: readonly CatalogueEntry[] = [
   {
     id: 'cement', slug: 'cement', label: 'Cement',
     tagline: 'OPC, PPC, PSC and white — 33, 43 and 53 grade',
+    blurb: 'Explore our range of cement products',
     unit: 'bag', image: '/categories/cement.webp', icon: 'cement', live: true,
   },
   {
     id: 'tmt_steel', slug: 'tmt-steel', label: 'TMT steel',
     tagline: 'Fe 500, 500D, 550 and 550D — 8 to 25 mm',
+    blurb: 'TMT reinforcement bars, 8 to 25 mm',
     unit: 'kg', image: '/categories/tmt-steel.webp', icon: 'tmt_steel', live: true,
   },
   {
     id: 'bricks_blocks', slug: 'bricks-blocks', label: 'Bricks & blocks',
     tagline: 'Red clay, fly ash, AAC, CLC, concrete solid and hollow',
+    blurb: 'Clay, fly ash, AAC and concrete blocks',
     unit: 'piece', image: '/categories/bricks-blocks.webp', icon: 'bricks_blocks', live: true,
   },
   {
     id: 'water_pipes', slug: 'water-pipes', label: 'Water pipes',
     tagline: 'CPVC, uPVC, SWR and HDPE — 15 to 110 mm bore',
+    blurb: 'Pipes and fittings for water and waste',
     unit: 'running_metre', image: '/categories/water-pipes.webp', icon: 'water_pipes', live: true,
   },
   {
     id: 'aggregates', slug: 'aggregates', label: 'Aggregates',
     tagline: 'Crushed stone — 10, 20 and 40 mm metal',
+    blurb: 'Stone, gravel and metal',
     unit: null, image: '/categories/aggregates.webp', icon: 'aggregates', live: false,
   },
   {
     id: 'sand', slug: 'sand', label: 'Sand',
     tagline: 'River sand, M-sand and plastering sand',
+    blurb: 'River sand, M-sand and plastering sand',
     unit: null, image: '/categories/sand.webp', icon: 'sand', live: false,
   },
   {
     id: 'ready_mix_concrete', slug: 'ready-mix-concrete', label: 'Ready mix concrete',
     tagline: 'M20 to M40, delivered by transit mixer',
+    blurb: 'RMC for all your construction needs',
     unit: null, image: '/categories/ready-mix-concrete.webp', icon: 'rmc', live: false,
   },
   {
     id: 'electricals', slug: 'electricals', label: 'Electricals',
     tagline: 'House wires, switches, MCBs and distribution boards',
+    blurb: 'Wires, cables, switches and more',
     unit: null, image: '/categories/electricals.webp', icon: 'electricals', live: false,
+  },
+  {
+    id: 'heavy_equipment', slug: 'heavy-equipment', label: 'Heavy equipment',
+    tagline: 'Excavators, mixers and lifts, on rent and on sale',
+    blurb: 'Construction equipment on rent and sale',
+    unit: null, image: null, icon: 'equipment', live: false,
   },
 ] as const;
 

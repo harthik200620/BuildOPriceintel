@@ -2,7 +2,7 @@
 
 import React from 'react';
 import SearchField from './SearchField';
-import { IconPin } from './icons';
+import { IconPin, IconBag, IconSparkle } from './icons';
 
 export interface Region {
   region_id: string; name: string; state_code: string;
@@ -12,7 +12,7 @@ export interface Region {
 export default function TopBar({
   regions, regionId, pincode, onRegion, onPincode,
   query, onQuery, onSubmit, searchRef, pincodeError, onHome, atHome,
-  onLogo, onLogoHover, logoRef,
+  onLogo, onLogoHover, logoRef, listCount, onList, onAsk, phoneHidden,
 }: {
   regions: Region[]; regionId: string; pincode: string;
   onRegion: (r: string) => void; onPincode: (p: string) => void;
@@ -25,6 +25,13 @@ export default function TopBar({
   onLogo: () => void;
   onLogoHover: () => void;
   logoRef: React.RefObject<HTMLAnchorElement | null>;
+  /** Lines on the estimate. */
+  listCount: number;
+  onList: () => void;
+  /** The assistant. It has no floating button below 768 px — see ChatPanel. */
+  onAsk: () => void;
+  /** True on the views that render their own app bar below 768 px. */
+  phoneHidden?: boolean;
 }) {
   const [whereOpen, setWhereOpen] = React.useState(false);
   const region = regions.find((r) => r.region_id === regionId);
@@ -70,7 +77,10 @@ export default function TopBar({
 
   return (
     <header
-      className="sticky top-0 z-40"
+      /* On the screens that carry an app bar, this one is desktop-only: two
+         stacked bars is 120 px of chrome on an 844 px screen, and the estimate
+         badge appeared three times on the same view. */
+      className={phoneHidden ? 'sticky top-0 z-40 hidden md:block' : 'sticky top-0 z-40'}
       style={{
         background: 'var(--chrome)',
         WebkitBackdropFilter: 'blur(20px) saturate(1.15)',
@@ -80,14 +90,18 @@ export default function TopBar({
       }}
     >
       <div className="mx-auto max-w-[1680px] px-4 sm:px-6 lg:px-10">
-        <div className="flex items-center gap-3 sm:gap-6 h-[64px] sm:h-[68px]">
+        {/* gap-1 below sm, not gap-3: the bar now carries the mark, the
+            wordmark, the assistant, the estimate and the pincode, and at 390 px
+            four 12 px gaps were the 3 px that pushed the row past the
+            viewport. */}
+        <div className="flex items-center gap-1 sm:gap-6 h-[64px] sm:h-[68px]">
           {/* Wordmark, in two links. The 'b' monogram, in the accent aqua, opens
               the mark's own page — the stitched "b" at /logo — and the name set
               in Audiowide (the title voice, with "Price Intelligence" as the
               sub-title in Encode Sans) is the way home. The mark is a PNG lifted
               off its scan onto transparency (public/logo-mark.png), served at
               128 px for the 28 px slot so it stays crisp on any display. */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0">
             <a
               ref={logoRef}
               href="/logo"
@@ -98,7 +112,10 @@ export default function TopBar({
               }}
               onPointerEnter={onLogoHover}
               onFocus={onLogoHover}
-              className="flex shrink-0 rounded-md"
+              /* The glyph is 28 px; the target around it is 40. Measured, this
+                 and the wordmark beside it were the only controls on a phone
+                 under the 32 px floor. */
+              className="grid place-items-center shrink-0 rounded-md w-10 h-10 -ml-1"
               aria-label="The Build Objects mark"
             >
               <img
@@ -118,7 +135,8 @@ export default function TopBar({
                 e.preventDefault();
                 onHome();
               }}
-              className="flex items-baseline gap-2.5 leading-none group"
+              className="flex items-baseline gap-2.5 leading-none group h-10 self-center"
+              style={{ alignItems: 'center' }}
               aria-label="Build Objects Price Intelligence, home"
               aria-current={atHome ? 'page' : undefined}
             >
@@ -134,14 +152,40 @@ export default function TopBar({
             </a>
           </div>
 
-          <SearchField
-            value={query} onChange={onQuery} onSubmit={onSubmit}
-            pincode={pincode} inputRef={searchRef}
-          />
+          {/* The field is desktop-only. At 390 px it was left with 43 px of
+              usable width — narrower than the word "Search", so the hint was
+              cut on every phone. Below 768 px it renders full-width in the body
+              of the home screen and behind the Search tab instead. */}
+          <div className="hidden md:flex flex-1 min-w-0">
+            <SearchField
+              value={query} onChange={onQuery} onSubmit={onSubmit}
+              pincode={pincode} inputRef={searchRef}
+            />
+          </div>
+          <span className="flex-1 md:hidden" />
 
           <div className="hidden md:flex items-center gap-3 shrink-0">
             {regionSeg}
             {pinField}
+          </div>
+
+          {/* The assistant and the estimate, on a phone. The assistant has no
+              floating button at this width — the tab bar owns that corner.
+
+              The `md:hidden` sits on this wrapper rather than on the buttons:
+              `.icon-btn` sets `display: grid` from plain CSS, and Tailwind's
+              utilities live in a cascade layer, so an unlayered rule beats
+              them. The buttons stayed 40 px wide at 1024 px and took 80 px out
+              of the search field, which is what left it 56 px of usable width
+              on a tablet. */}
+          <div className="md:hidden flex items-center gap-1 shrink-0">
+            <button onClick={onAsk} className="icon-btn anim" aria-label="Ask the buying assistant">
+              <IconSparkle size={19} />
+            </button>
+            <button onClick={onList} className="icon-btn anim" aria-label={`The estimate, ${listCount} ${listCount === 1 ? 'line' : 'lines'}`}>
+              <IconBag size={20} />
+              {listCount > 0 && <span className="badge" aria-hidden>{listCount > 99 ? '99+' : listCount}</span>}
+            </button>
           </div>
 
           {/* On a phone the same two controls fold behind one pill that names

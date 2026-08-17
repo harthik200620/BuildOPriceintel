@@ -75,8 +75,11 @@ export function FacetList({ facets, selections, onToggle }: FacetProps) {
               const single = f.control === 'radio';
               return (
                 <li key={v.label}>
+                  {/* min-h-8 rather than py-[3px]: on a phone this row is the
+                      whole filter interaction and a 16 px box inside a 22 px
+                      row was the smallest target on the page. */}
                   <label
-                    className="facet-val flex items-baseline gap-2 py-[3px] cursor-pointer group"
+                    className="facet-val flex items-center gap-2.5 py-[3px] min-h-8 cursor-pointer group"
                     data-disabled={v.disabled && !checked}
                     title={v.disabled && !checked ? 'No offers match this in your area right now' : undefined}
                   >
@@ -86,8 +89,8 @@ export function FacetList({ facets, selections, onToggle }: FacetProps) {
                       checked={checked}
                       disabled={v.disabled && !checked}
                       onChange={() => onToggle(f.facet_id, v.label, single)}
-                      className="mt-[3px] shrink-0 accent-[var(--accent)]"
-                      style={{ width: 12, height: 12 }}
+                      className="check shrink-0"
+                      style={single ? { borderRadius: '999px' } : undefined}
                     />
                     <span className="flex-1 min-w-0 text-[13px] leading-snug" style={{ color: checked ? 'var(--ink)' : 'var(--ink-2)' }}>
                       {v.label}

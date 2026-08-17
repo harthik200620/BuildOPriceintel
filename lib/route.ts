@@ -2,7 +2,16 @@
  * The URL grammar of the explorer. Pure, so it can be tested without a DOM.
  *
  *   /                 the catalogue
+ *   /welcome          the first run: the mark, what this is, and where to
+ *                     deliver. Shown once — `prefs` remembers the pincode, and
+ *                     a buyer who has one goes straight to the catalogue.
+ *   /categories       every category as a list, live and coming-soon
  *   /c/<slug>         one category: every seller in it, with the filter rail
+ *   /p/<product>      one seller's offer in full — the page the sheet used to
+ *                     be. `?sku=` still opens the sheet over a listing; this is
+ *                     the same product as a place of its own, which is what a
+ *                     share, a back button and a deep link all want.
+ *   /list             the estimate: what has been added, at what quantity
  *   /search?q=…       a query across categories
  *   /logo             the mark — the stitched "b" — laid over whatever view
  *                     was showing. It names no listing of its own, so it never
@@ -19,8 +28,12 @@ import { catalogueBySlug, type CatalogueEntry } from './catalogue';
 
 export type View =
   | { kind: 'home' }
+  | { kind: 'welcome' }
+  | { kind: 'categories' }
   | { kind: 'search' }
   | { kind: 'category'; entry: CatalogueEntry }
+  | { kind: 'product'; productId: string }
+  | { kind: 'list' }
   | { kind: 'logo' }
   | { kind: 'missing' };
 
@@ -54,6 +67,10 @@ export function parseLoc(pathname: string, search: string): Loc {
   if (segs.length === 0) view = q ? { kind: 'search' } : { kind: 'home' };
   else if (segs.length === 1 && segs[0] === 'search') view = { kind: 'search' };
   else if (segs.length === 1 && segs[0] === 'logo') view = { kind: 'logo' };
+  else if (segs.length === 1 && segs[0] === 'welcome') view = { kind: 'welcome' };
+  else if (segs.length === 1 && segs[0] === 'categories') view = { kind: 'categories' };
+  else if (segs.length === 1 && segs[0] === 'list') view = { kind: 'list' };
+  else if (segs.length === 2 && segs[0] === 'p' && segs[1]) view = { kind: 'product', productId: decodeURIComponent(segs[1]) };
   else if (segs.length === 2 && segs[0] === 'c') {
     const e = catalogueBySlug(segs[1]);
     view = e ? { kind: 'category', entry: e } : { kind: 'missing' };
@@ -70,6 +87,10 @@ export function buildUrl(loc: Loc): string {
   const path =
     loc.view.kind === 'search' ? '/search'
     : loc.view.kind === 'category' ? `/c/${loc.view.entry.slug}`
+    : loc.view.kind === 'welcome' ? '/welcome'
+    : loc.view.kind === 'categories' ? '/categories'
+    : loc.view.kind === 'list' ? '/list'
+    : loc.view.kind === 'product' ? `/p/${encodeURIComponent(loc.view.productId)}`
     : '/';
   const sp = new URLSearchParams();
   if (loc.q) sp.set('q', loc.q);
@@ -80,4 +101,26 @@ export function buildUrl(loc: Loc): string {
   return s ? `${path}?${s}` : path;
 }
 
-export const viewKey = (v: View) => (v.kind === 'category' ? `category:${v.entry.slug}` : v.kind);
+export const viewKey = (v: View) =>
+  v.kind === 'category' ? `category:${v.entry.slug}`
+  : v.kind === 'product' ? `product:${v.productId}`
+  : v.kind;
+
+/**
+ * Which of the five tabs is lit. A product opened from a listing still belongs
+ * to the shelf it was found on, so it holds "categories" rather than lighting
+ * nothing — a tab bar that goes blank on the deepest screen reads as broken.
+ */
+export type Tab = 'home' | 'categories' | 'search' | 'list' | 'profile';
+
+export function tabOf(v: View): Tab | null {
+  switch (v.kind) {
+    case 'home': return 'home';
+    case 'categories':
+    case 'category':
+    case 'product': return 'categories';
+    case 'search': return 'search';
+    case 'list': return 'list';
+    default: return null;
+  }
+}

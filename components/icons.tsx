@@ -95,6 +95,14 @@ export const IconElectricals = (p: P) => (
   </Svg>
 );
 
+/** A tracked excavator — boom, dipper and the track it sits on. */
+export const IconEquipment = (p: P) => (
+  <Svg {...p}>
+    <path d="M3.5 17.5h17M5 17.5a2 2 0 0 1 0-4h11a2 2 0 0 1 0 4" />
+    <path d="M8 13.5v-3.2h4.6l2.4 3.2M15 10.3l3.5-4.8" />
+  </Svg>
+);
+
 export const CATALOGUE_ICON: Record<CatalogueIcon, (p: P) => React.JSX.Element> = {
   cement: IconCement,
   tmt_steel: IconTmt,
@@ -104,6 +112,7 @@ export const CATALOGUE_ICON: Record<CatalogueIcon, (p: P) => React.JSX.Element> 
   sand: IconSand,
   rmc: IconRmc,
   electricals: IconElectricals,
+  equipment: IconEquipment,
 };
 
 export function CategoryIcon({ name, ...p }: P & { name: CatalogueIcon }) {
@@ -179,3 +188,98 @@ export const IconGrid = (p: P) => (
     <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
   </Svg>
 );
+
+/* ── the app flow: tab bar, app bar, stepper ────────────────────────────────
+   Same 24-unit grid and 1.6 stroke as the catalogue set above, so the tab bar
+   reads as the same hand as the category cards it sits under. */
+
+export const IconHome = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19v-8.5Z" />
+    <path d="M9.5 20.5v-6h5v6" />
+  </Svg>
+);
+
+export const IconSearch = (p: P) => (
+  <Svg {...p}>
+    <circle cx="10.8" cy="10.8" r="6.3" /><path d="m15.5 15.5 4 4" />
+  </Svg>
+);
+
+/** The estimate. A tote, not a trolley — nothing here is checked out. */
+export const IconBag = (p: P) => (
+  <Svg {...p}>
+    <path d="M5.5 7.5h13l-1 12a1.5 1.5 0 0 1-1.5 1.4H8a1.5 1.5 0 0 1-1.5-1.4l-1-12Z" />
+    <path d="M9 9.5v-3a3 3 0 0 1 6 0v3" />
+  </Svg>
+);
+
+export const IconUser = (p: P) => (
+  <Svg {...p}>
+    <circle cx="12" cy="8.5" r="3.8" /><path d="M4.8 20.5a7.2 7.2 0 0 1 14.4 0" />
+  </Svg>
+);
+
+export const IconChevronLeft = (p: P) => (
+  <Svg {...p}><path d="M15 6 9 12l6 6" /></Svg>
+);
+
+export const IconShare = (p: P) => (
+  <Svg {...p}>
+    <circle cx="17.5" cy="6" r="2.6" /><circle cx="6.5" cy="12" r="2.6" /><circle cx="17.5" cy="18" r="2.6" />
+    <path d="m8.9 10.7 6.2-3.4M8.9 13.3l6.2 3.4" />
+  </Svg>
+);
+
+export const IconMenu = (p: P) => (
+  <Svg {...p}><path d="M4 7h16M4 12h16M4 17h16" /></Svg>
+);
+
+export const IconPlus = (p: P) => (
+  <Svg {...p}><path d="M12 5.5v13M5.5 12h13" /></Svg>
+);
+
+export const IconMinus = (p: P) => (
+  <Svg {...p}><path d="M5.5 12h13" /></Svg>
+);
+
+export const IconTrash = (p: P) => (
+  <Svg {...p}>
+    <path d="M4.5 6.5h15M9.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v1.5" />
+    <path d="M6.5 6.5 7.4 19a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-12.5" />
+  </Svg>
+);
+
+export const IconCheck = (p: P) => (
+  <Svg {...p}><path d="m5 12.5 4.5 4.5L19 7.5" /></Svg>
+);
+
+/** The assistant: a four-point star, with a smaller one trailing it. */
+export const IconSparkle = (p: P) => (
+  <Svg {...p}>
+    <path d="M10 3.5c.9 3.6 1.9 4.6 5.5 5.5-3.6.9-4.6 1.9-5.5 5.5-.9-3.6-1.9-4.6-5.5-5.5C8.1 8.1 9.1 7.1 10 3.5Z" />
+    <path d="M17 14c.45 1.8.95 2.3 2.75 2.75C17.95 17.2 17.45 17.7 17 19.5c-.45-1.8-.95-2.3-2.75-2.75C16.05 16.3 16.55 15.8 17 14Z" />
+  </Svg>
+);
+
+/**
+ * A rating, when a source published one. `fill` is the fraction of the star
+ * that is lit, so a 4.7 draws four solid and one 70% — a half-star rounds the
+ * only number on the page that is not ours.
+ */
+export function IconStar({ lit = 1, size = 14, ...rest }: Omit<P, 'fill'> & { lit?: number }) {
+  const id = React.useId();
+  const d = 'M12 3.6l2.6 5.3 5.8.85-4.2 4.1 1 5.8L12 16.9l-5.2 2.75 1-5.8-4.2-4.1 5.8-.85Z';
+  const pct = Math.max(0, Math.min(1, lit)) * 100;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden focusable="false" {...rest}>
+      <defs>
+        <linearGradient id={id}>
+          <stop offset={`${pct}%`} stopColor="currentColor" />
+          <stop offset={`${pct}%`} stopColor="transparent" />
+        </linearGradient>
+      </defs>
+      <path d={d} fill={`url(#${id})`} stroke="currentColor" strokeWidth={1.4} strokeLinejoin="round" />
+    </svg>
+  );
+}
