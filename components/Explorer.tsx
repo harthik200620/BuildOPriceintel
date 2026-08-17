@@ -101,6 +101,13 @@ export default function Explorer({
       setLoc(next);
     };
     window.addEventListener('popstate', onPop);
+    // The URL can move before this listener exists — a back press during a
+    // slow hydration, say. The server rendered the URL it was asked for; if
+    // the address bar now says something else, the address bar is right.
+    const here = parseLoc(window.location.pathname, window.location.search);
+    setLoc((cur) => (buildUrl(cur) === buildUrl(here) ? cur : here));
+    // A marker for tests and tooling: the tree is live from here on.
+    document.documentElement.dataset.hydrated = '1';
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 

@@ -16,6 +16,9 @@ function ok(name: string, cond: unknown, detail = '') {
   if (!cond) failures++;
 }
 const path = (p: Page) => new URL(p.url()).pathname + new URL(p.url()).search;
+/** A full load is done when the explorer says so — not after a fixed sleep,
+    which a cold production origin will beat. */
+const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.dataset.hydrated === '1', null, { timeout: 30000 });
 
 (async () => {
   const browser = await chromium.launch();
@@ -29,6 +32,7 @@ const path = (p: Page) => new URL(p.url()).pathname + new URL(p.url()).search;
     page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 
     await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await hydrated(page);
     ok('home renders the catalogue heading', (await page.textContent('h1'))?.replace(/\s+/g, ' ').trim() === 'Product categories');
     ok('eight category cards', await page.locator('.cat-card').count() === 8);
     ok('four are links, four are not', await page.locator('a.cat-card').count() === 4 && await page.locator('.cat-card--soon').count() === 4);
@@ -70,6 +74,7 @@ const path = (p: Page) => new URL(p.url()).pathname + new URL(p.url()).search;
     ok('active facet shows as a removable chip', await page.locator('button[aria-label^="Remove filter"]').count() >= 1);
     const urlWithFacet = page.url();
     await page.reload({ waitUntil: 'networkidle' });
+    await hydrated(page);
     ok('reload keeps the facet selection', await page.locator(`aside .facet-val:has-text("${label.split(/\s/)[0]}") input`).first().isChecked(), label);
     ok('reload keeps the URL', page.url() === urlWithFacet);
 
@@ -82,7 +87,7 @@ const path = (p: Page) => new URL(p.url()).pathname + new URL(p.url()).search;
     await page.waitForSelector('[role="dialog"], aside[aria-modal], .sheet-in', { timeout: 10000 });
     const skuUrl = page.url();
     await page.reload({ waitUntil: 'networkidle' });
-    await page.waitForTimeout(500);
+    await hydrated(page);
     ok('reload with ?sku= reopens the sheet', await page.locator('.sheet-in').count() > 0 || await page.locator('[role="dialog"]').count() > 0);
     await page.goBack();
     await page.waitForFunction(() => !location.search.includes('sku='));
@@ -137,6 +142,7 @@ const path = (p: Page) => new URL(p.url()).pathname + new URL(p.url()).search;
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     const page = await ctx.newPage();
     await page.goto(BASE + '/c/bricks-blocks', { waitUntil: 'networkidle' });
+    await hydrated(page);
     ok('phone: rail is hidden', !(await page.locator('aside').first().isVisible().catch(() => false)));
     const filters = page.locator('button[aria-haspopup="dialog"]:has-text("Filters")');
     await filters.waitFor();
