@@ -4,9 +4,9 @@
   "canonical_unit": "running_metre",
   "canonical_unit_note": "₹/running metre. A 3 m CPVC length and a 6 m GI length cannot share a price band — length_m is a SKU attribute and the conversion is length → running_metre, never a guess.",
   "scope_note": "Plumbing branch only. Electrical conduit (rigid PVC, flexible, FRLS, casing-capping, HDPE DWC, MS/GI conduit) is a separate L1 branch under Electrical › Conduit & raceway with its own tree — it shares the word 'pipe' and almost none of the filters.",
-  "result_count": 249,
+  "result_count": 367,
   "counts_are_illustrative": false,
-  "counts_note": "Counts measured from data/buildobjects.db on 2026-08-05 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
+  "counts_note": "Counts measured from data/buildobjects.db on 2026-08-17 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
   "regions": [
     "hyderabad",
     "vijayawada"
@@ -31,7 +31,7 @@
         {
           "label": "CPVC",
           "sublabel": "hot & cold potable — IS 15778",
-          "count": 59,
+          "count": 100,
           "reveals": [
             "cpvc_sdr"
           ],
@@ -40,7 +40,7 @@
         {
           "label": "UPVC / PVC",
           "sublabel": "cold water, low pressure — IS 4985",
-          "count": 68,
+          "count": 88,
           "reveals": [
             "upvc_class"
           ],
@@ -49,7 +49,7 @@
         {
           "label": "SWR",
           "sublabel": "soil, waste & drainage — IS 13592",
-          "count": 49,
+          "count": 66,
           "reveals": [
             "swr_type"
           ],
@@ -67,7 +67,7 @@
         {
           "label": "HDPE",
           "sublabel": "underground mains, borewell — IS 4984",
-          "count": 56,
+          "count": 87,
           "reveals": [
             "hdpe_grade"
           ],
@@ -95,42 +95,42 @@
           "label": "15 mm",
           "sublabel": "½\"",
           "unit": "mm",
-          "count": 17,
+          "count": 23,
           "disabled": true
         },
         {
           "label": "20 mm",
           "sublabel": "¾\"",
           "unit": "mm",
-          "count": 19,
+          "count": 32,
           "disabled": true
         },
         {
           "label": "25 mm",
           "sublabel": "1\"",
           "unit": "mm",
-          "count": 23,
+          "count": 39,
           "disabled": true
         },
         {
           "label": "32 mm",
           "sublabel": "1¼\"",
           "unit": "mm",
-          "count": 5,
+          "count": 8,
           "disabled": true
         },
         {
           "label": "63 mm",
           "sublabel": "2\"",
           "unit": "mm",
-          "count": 9,
+          "count": 18,
           "disabled": true
         },
         {
           "label": "110 mm",
           "sublabel": "4\"",
           "unit": "mm",
-          "count": 25,
+          "count": 31,
           "disabled": true
         }
       ],
@@ -157,13 +157,13 @@
         {
           "label": "SDR-11",
           "sublabel": "hot & cold",
-          "count": 8,
+          "count": 16,
           "disabled": true
         },
         {
           "label": "SDR-13.5",
           "sublabel": "cold only",
-          "count": 4,
+          "count": 5,
           "disabled": true
         }
       ],
@@ -253,7 +253,7 @@
         {
           "label": "Type B",
           "sublabel": "soil & waste",
-          "count": 1,
+          "count": 2,
           "disabled": true
         }
       ],
@@ -320,12 +320,12 @@
         {
           "label": "PE 100",
           "sublabel": "current standard",
-          "count": 9,
+          "count": 12,
           "disabled": true
         },
         {
           "label": "PE 80",
-          "count": 4,
+          "count": 8,
           "disabled": true
         },
         {
@@ -352,33 +352,33 @@
       "visibility": "primary",
       "values": [
         {
-          "label": "Ashirvad",
-          "count": 8
+          "label": "Truflo",
+          "count": 11
         },
         {
-          "label": "Austro",
-          "count": 6
+          "label": "Ashirvad",
+          "count": 10
         },
         {
           "label": "Astral",
+          "count": 9
+        },
+        {
+          "label": "Austro",
+          "count": 8
+        },
+        {
+          "label": "Fitwin",
           "count": 5
         },
         {
-          "label": "Truflo",
+          "label": "Supreme",
           "count": 5
-        },
-        {
-          "label": "BRP",
-          "count": 4
-        },
-        {
-          "label": "Prince",
-          "count": 4
         }
       ],
       "data_backed": true,
       "no_data_reason": "No brand was resolvable on any collected listing for this category and city.",
-      "note": "Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21."
+      "note": "Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 27 brands present, top 6 shown with search-within-facet for the remaining 21. Roster rewritten from collected data: 28 brands present, top 6 shown with search-within-facet for the remaining 22. Roster rewritten from collected data: 28 brands present, top 6 shown with search-within-facet for the remaining 22. Roster rewritten from collected data: 28 brands present, top 6 shown with search-within-facet for the remaining 22."
     },
     {
       "id": "price_per_metre",
@@ -390,29 +390,29 @@
       "sort_order": 40,
       "source": "price_current.normalised_paise WHERE normalised_unit='running_metre'",
       "why": "₹/metre, never ₹/length. A 3 m pipe and a 6 m pipe in one price band is the single most common failure in this market.",
-      "note": "Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "note": "Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
       "default_open": true,
       "visibility": "primary",
       "values": [
         {
-          "label": "Under ₹54",
+          "label": "Under ₹51",
           "unit": "₹/m delivered",
-          "count": 63
+          "count": 90
         },
         {
-          "label": "₹54 – ₹98",
+          "label": "₹51 – ₹98",
           "unit": "₹/m delivered",
-          "count": 62
+          "count": 93
         },
         {
           "label": "₹98 – ₹170",
           "unit": "₹/m delivered",
-          "count": 60
+          "count": 91
         },
         {
           "label": "Over ₹170",
           "unit": "₹/m delivered",
-          "count": 64
+          "count": 93
         }
       ],
       "data_backed": true,
@@ -435,7 +435,7 @@
           "label": "3 m",
           "sublabel": "standard",
           "unit": "m",
-          "count": 248,
+          "count": 365,
           "disabled": true
         },
         {
@@ -448,7 +448,7 @@
           "label": "6 m",
           "sublabel": "GI standard",
           "unit": "m",
-          "count": 1,
+          "count": 2,
           "disabled": true
         },
         {
@@ -486,7 +486,7 @@
         {
           "label": "Not declared",
           "sublabel": "seller has not provided one",
-          "count": 249,
+          "count": 367,
           "disabled": true
         },
         {
@@ -515,13 +515,13 @@
         {
           "label": "Tomorrow",
           "unit": "days",
-          "count": 56,
+          "count": 86,
           "disabled": true
         },
         {
           "label": "Within 3 days",
           "unit": "days",
-          "count": 184,
+          "count": 272,
           "disabled": true
         },
         {
@@ -575,7 +575,7 @@
         }
       ],
       "data_backed": false,
-      "no_data_reason": "`attrs.joint_type` is populated on 2 of 249 listings in hyderabad, but as uncontrolled seller text (\"Solvent Cement / Rubber Ring Joint (as P\") which matches none of this filter's values. The gap is normalisation, not collection: shipped disabled rather than deleted, and rather than mapped by guess.",
+      "no_data_reason": "`attrs.joint_type` is populated on 3 of 367 listings in hyderabad, but as uncontrolled seller text (\"Solvent Cement / Rubber Ring Joint (as P\") which matches none of this filter's values. The gap is normalisation, not collection: shipped disabled rather than deleted, and rather than mapped by guess.",
       "no_data_kind": "unnormalised"
     },
     {
@@ -594,19 +594,19 @@
         {
           "label": "IS 15778",
           "sublabel": "CPVC",
-          "count": 59,
+          "count": 100,
           "disabled": true
         },
         {
           "label": "IS 4985",
           "sublabel": "uPVC",
-          "count": 68,
+          "count": 88,
           "disabled": true
         },
         {
           "label": "IS 13592",
           "sublabel": "SWR",
-          "count": 49,
+          "count": 66,
           "disabled": true
         },
         {
@@ -618,7 +618,7 @@
         {
           "label": "IS 4984",
           "sublabel": "HDPE",
-          "count": 56,
+          "count": 87,
           "disabled": true
         }
       ],
@@ -646,7 +646,7 @@
         {
           "label": "Exclusive of GST",
           "sublabel": "18%, HSN 3917",
-          "count": 249,
+          "count": 367,
           "disabled": true
         }
       ],
@@ -669,7 +669,7 @@
         {
           "label": "Verified today",
           "unit": "hours",
-          "count": 6,
+          "count": 257,
           "disabled": true
         },
         {
@@ -681,7 +681,7 @@
         {
           "label": "Within a week",
           "unit": "hours",
-          "count": 243,
+          "count": 0,
           "disabled": true
         }
       ],
@@ -708,7 +708,7 @@
         },
         {
           "label": "Not published by seller",
-          "count": 249,
+          "count": 367,
           "disabled": true
         }
       ],
@@ -738,6 +738,6 @@
       "reason": "Held back until there is a real ratings corpus."
     }
   ],
-  "reconciled_at": "2026-08-05T06:59:20.482Z",
+  "reconciled_at": "2026-08-17T02:20:01.828Z",
   "reconciled_region": "hyderabad"
 }

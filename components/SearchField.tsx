@@ -31,9 +31,17 @@ export default function SearchField({
   const [active, setActive] = React.useState(-1);
   const boxRef = React.useRef<HTMLDivElement>(null);
   const seq = React.useRef(0);
+  // The long placeholder is a tour of what the grammar understands; on a
+  // 200 px field it is three characters and a cut. Short there.
+  const [narrow, setNarrow] = React.useState(false);
 
   React.useEffect(() => {
     try { setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]')); } catch { /* first run */ }
+    const mq = window.matchMedia('(max-width: 767px)');
+    const apply = () => setNarrow(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
   }, []);
 
   /* ⌘K / Ctrl+K focuses the field from anywhere. */
@@ -123,11 +131,12 @@ export default function SearchField({
           aria-controls="buildobjects-suggest"
           aria-autocomplete="list"
           aria-label="Search construction materials"
-          placeholder="Try “53 grade cement”, “8mm tmt”, “4 inch cpvc”, “sariya rate”, “ఇటుక”"
-          className="field w-full h-9 pl-9 pr-16 text-[14px]"
+          placeholder={narrow ? 'Search materials…' : 'Try “53 grade cement”, “8mm tmt”, “4 inch cpvc”, “sariya rate”, “ఇటుక”'}
+          className="field w-full h-9 pl-9 pr-3 md:pr-16 text-[14px]"
         />
+        {/* A keyboard hint has no reader on a phone; it goes with the width. */}
         <kbd
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] px-1.5 py-0.5 pointer-events-none tnum"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] px-1.5 py-0.5 pointer-events-none tnum hidden md:inline-block"
           style={{ color: 'var(--ink-3)', border: '1px solid var(--rule)', borderRadius: '10px' }}
         >
           ⌘K

@@ -21,7 +21,10 @@
     "test:engine": "tsx tests/chat-engine.ts",
     "test:live": "tsx tests/chat-live.ts",
     "probe:type": "tsx scripts/typography-probe.ts",
-    "test:core": "tsx tests/run.ts"
+    "test:core": "tsx tests/run.ts",
+    "check:flow": "tsx scripts/flow-check.ts",
+    "check:a11y": "tsx scripts/a11y-check.ts",
+    "shots:theme": "tsx scripts/shots-theme.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.2",
@@ -36,6 +39,7 @@
     "@types/node": "^24.7.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "axe-core": "^4.13.0",
     "playwright": "^1.56.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.3.3",

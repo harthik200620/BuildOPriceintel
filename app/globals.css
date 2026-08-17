@@ -123,6 +123,14 @@
      figures travelling beneath a translucent header is unreadable for both. */
   --chrome: rgba(9, 34, 42, .78);
 
+  /* The catalogue cards are the one opaque surface on the page. A photograph
+     needs a floor that does not shift with the aurora behind it, and the band
+     under the photograph is the reference design's own value: a teal a step
+     lighter than the face. Both are solid and both are in the contrast suite. */
+  --card-face: #0d262e;
+  --card-band: #163940;
+  --card-edge: rgba(198, 214, 219, .13);
+
   /* ── the accent, spent once ───────────────────────────────────────────────
      Aqua, drawn from the ground's own hue. The three stops are a gradient for
      .hero-figure, and because that gradient is background-clip:text its
@@ -522,3 +530,251 @@ body {
 .x-scroll { overflow-x: auto; }
 
 ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--ink); }
+
+/* ── the catalogue ────────────────────────────────────────────────────────────
+   The landing view: a heading, eight category cards, and the four things every
+   price on the site carries. The card is the reference design's card — a
+   photograph over an opaque teal face, a lighter band beneath it with the line
+   icon, the name in capitals and an arrow — with one addition: the figures the
+   listing behind it will open on, printed over the foot of the photograph.
+   Every figure comes from lib/meta.ts and none is ever typed here.
+   ─────────────────────────────────────────────────────────────────────────── */
+.home { max-width: 1240px; margin: 0 auto; }
+
+.eyebrow {
+  font-family: var(--font-figure);
+  font-weight: 600; font-size: 11.5px; line-height: 1;
+  letter-spacing: .24em; text-transform: uppercase;
+  color: var(--accent);
+}
+/* Audiowide, capitals. It is drawn wide, so the size is held below what a
+   condensed face would take and the phone size lets it break to two lines
+   rather than shrink to a whisper. */
+.home-title {
+  font-size: clamp(26px, 4.2vw, 44px);
+  line-height: 1.08;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+
+.cat-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+/* Two or four across, never three: eight cards fill both; three leaves a
+   ragged last row. The coming-soon row is a second grid with the same gap so
+   the two read as one; on a phone it alone drops to two across. */
+.cat-grid--soon { margin-top: 20px; }
+@media (max-width: 1119px) {
+  .cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .cat-grid--soon { margin-top: 16px; }
+}
+@media (max-width: 639px) {
+  .cat-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .cat-grid--soon { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+  /* A shorter photograph on the narrow screen: the same crop, less of the
+     page per card. */
+  .cat-photo { aspect-ratio: 2 / 1; }
+  .cat-grid--soon .cat-band { gap: 9px; padding: 10px 11px; min-height: 52px; }
+  .cat-grid--soon .cat-icon { width: 30px; height: 30px; border-radius: 8px; }
+  .cat-grid--soon .cat-icon svg { width: 18px; height: 18px; }
+  .cat-grid--soon .cat-name { font-size: 11px; letter-spacing: .06em; white-space: normal; line-height: 1.15; }
+  .cat-grid--soon .cat-soon-mark { display: none; }
+  .cat-grid--soon .cat-soon { left: 9px; top: 8px; height: 20px; line-height: 20px; font-size: 9.5px; padding: 0 7px; }
+}
+
+.cat-card {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column;
+  height: 100%;
+  border-radius: 16px; overflow: hidden;
+  background: var(--card-face);
+  border: 1px solid var(--card-edge);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-border);
+  color: var(--ink); text-decoration: none;
+}
+a.cat-card { cursor: pointer; }
+a.cat-card:hover { border-color: color-mix(in srgb, var(--accent) 42%, var(--card-edge)); }
+a.cat-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 16px; }
+
+.cat-photo { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #071b21; }
+.cat-photo img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transform: translateZ(0);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cat-photo img { transition: transform .55s cubic-bezier(.2, .7, .2, 1); }
+  a.cat-card:hover .cat-photo img { transform: scale(1.04) translateZ(0); }
+  .cat-arrow { transition: transform .18s cubic-bezier(.2, .7, .3, 1), color .18s ease; }
+  a.cat-card:hover .cat-arrow { transform: translateX(3px); color: var(--accent); }
+}
+/* The photograph settles into the face rather than stopping at a line, and
+   the foot darkens enough that the figures printed there clear AA. */
+.cat-photo-fade {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(4, 20, 26, .10) 0%, rgba(4, 20, 26, 0) 28%, rgba(4, 20, 26, .58) 70%, rgba(6, 24, 30, .94) 100%);
+}
+
+/* The newest price in the category, held against the category's SLA. */
+.cat-age {
+  position: absolute; top: 10px; right: 10px; z-index: 1;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 22px; padding: 0 8px 0 7px; border-radius: 999px;
+  font-family: var(--font-figure); font-weight: 500; font-size: 10.5px; line-height: 1;
+  letter-spacing: .02em; color: var(--ink);
+  background: rgba(6, 24, 30, .80);
+  border: 1px solid rgba(198, 214, 219, .16);
+}
+.cat-age--fresh  .dot { background: var(--fresh); }
+.cat-age--ageing .dot { background: var(--ageing); }
+.cat-age--stale  .dot { background: var(--stale); }
+
+.cat-data {
+  position: absolute; left: 14px; right: 14px; bottom: 11px; z-index: 1;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+}
+.cat-from { color: var(--ink); white-space: nowrap; }
+.cat-from .fig { font-size: 16.5px; font-weight: 600; letter-spacing: -.01em; }
+.cat-from-label { font-size: 11.5px; color: var(--ink-2); }
+.cat-from-unit  { font-size: 11.5px; color: var(--ink-2); margin-left: 1px; }
+.cat-counts { font-size: 11.5px; color: var(--ink-2); white-space: nowrap; }
+
+.cat-band {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--card-band);
+  border-top: 1px solid rgba(198, 214, 219, .08);
+  min-height: 62px;
+}
+.cat-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  color: var(--ink);
+  background: rgba(198, 214, 219, .06);
+  border: 1px solid rgba(198, 214, 219, .10);
+}
+/* Encode Sans in capitals — the sub-title voice of the type program. */
+.cat-name {
+  display: block;
+  font-family: var(--font-figure); font-weight: 600; font-size: 13.5px; line-height: 1.2;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cat-arrow { color: var(--ink-2); flex-shrink: 0; display: inline-flex; }
+
+/* Coming soon: the same card, drained. Not a link, and it prints no figure. */
+.cat-card--soon { cursor: default; }
+.cat-card--soon .cat-photo img { filter: saturate(.45) brightness(.62); }
+.cat-card--soon .cat-name { color: var(--ink-2); }
+.cat-card--soon .cat-icon { color: var(--ink-2); }
+.cat-soon {
+  position: absolute; left: 12px; top: 10px; z-index: 1;
+  height: 22px; padding: 0 9px; border-radius: 999px;
+  font-family: var(--font-figure); font-weight: 600; font-size: 10.5px; line-height: 22px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: rgba(6, 24, 30, .80);
+}
+.cat-soon-mark {
+  font-family: var(--font-figure); font-weight: 500; font-size: 11px; line-height: 1;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+}
+
+/* ── the trust bar ────────────────────────────────────────────────────────── */
+.trust {
+  margin-top: 28px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--card-face) 82%, transparent);
+  border: 1px solid var(--card-edge);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-border);
+}
+.trust-list {
+  list-style: none; margin: 0; padding: 4px 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.trust-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 18px 22px;
+  border-left: 1px solid var(--rule-soft);
+}
+.trust-item:first-child { border-left: 0; }
+.trust-icon { color: var(--accent-ink); flex-shrink: 0; margin-top: 1px; display: inline-flex; }
+.trust-title {
+  display: block;
+  font-family: var(--font-figure); font-weight: 600; font-size: 12px; line-height: 1.2;
+  letter-spacing: .13em; text-transform: uppercase;
+  color: var(--accent);
+}
+.trust-body { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+@media (max-width: 1119px) {
+  .trust-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .trust-item:nth-child(3) { border-left: 0; }
+  .trust-item:nth-child(n + 3) { border-top: 1px solid var(--rule-soft); }
+}
+@media (max-width: 639px) {
+  .trust-list { grid-template-columns: minmax(0, 1fr); }
+  .trust-item { border-left: 0; border-top: 1px solid var(--rule-soft); padding: 15px 18px; }
+  .trust-item:first-child { border-top: 0; }
+}
+
+.home-foot { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule-soft); }
+
+/* ── a listing's head ─────────────────────────────────────────────────────── */
+.crumbs { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); }
+.crumbs a { color: var(--ink-2); text-decoration: none; }
+.crumbs a:hover { color: var(--accent); }
+.crumbs [aria-current="page"] { color: var(--ink); }
+
+.cat-head-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* Sideways between categories: chips, the current one lit. On a narrow
+   screen the row scrolls, and its right edge fades to say so. */
+.cat-strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.cat-strip::-webkit-scrollbar { display: none; }
+@media (max-width: 639px) {
+  .cat-strip {
+    padding-right: 28px;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
+  }
+}
+.cat-strip-item {
+  display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+  height: 34px; padding: 0 12px 0 10px; border-radius: 999px;
+  font-size: 12.5px; color: var(--ink-2); text-decoration: none; white-space: nowrap;
+  border: 1px solid var(--glass-hair);
+  background: var(--glass-strong);
+  box-shadow: inset 0 1px 0 var(--glass-border);
+}
+.cat-strip-item:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 48%, transparent); }
+.cat-strip-item[aria-current="page"] { color: var(--on-bright); background: var(--accent); border-color: var(--accent); }
+
+/* ── the one filled button ────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  background: var(--accent); color: var(--on-bright);
+  border: 1px solid var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.btn-primary:hover { background: var(--accent-lift); border-color: var(--accent-lift); }
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes sheet-up { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+  .sheet-up { animation: sheet-up .22s cubic-bezier(.2, .7, .3, 1) both; }
+}

@@ -1,0 +1,85 @@
+import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import Explorer from '@/components/Explorer';
+import { buildMeta } from '@/lib/meta';
+import { armNetworkGuard } from '@/lib/no-network';
+import { catalogueBySlug } from '@/lib/catalogue';
+
+/**
+ * One tree, three views. The catalogue (/), a category (/c/cement) and a
+ * search (/search?q=…) all render the same client Explorer: moving between
+ * them is a pushState, not a remount, so the search field keeps focus, the
+ * compare tray keeps its items and the assistant keeps its thread. The
+ * server's job is to say which view the URL names, 404 the ones it does not,
+ * and hand over the metadata already computed so the catalogue paints with
+ * its counts in it.
+ *
+ * Two route files share this — app/page.tsx for "/" and app/[...slug]/page.tsx
+ * for everything else — rather than one optional catch-all, because Turbopack
+ * (16.2) panics computing the root endpoint's loader tree from [[...slug]]
+ * and the dev client then reloads in a loop. Same tree either way.
+ */
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+armNetworkGuard();
+
+export type Search = Record<string, string | string[] | undefined>;
+
+export function resolveRoute(slug: string[] | undefined) {
+  const s = slug ?? [];
+  if (s.length === 0) return { kind: 'home' as const };
+  if (s.length === 1 && s[0] === 'search') return { kind: 'search' as const };
+  if (s.length === 2 && s[0] === 'c') {
+    const entry = catalogueBySlug(s[1]);
+    if (entry) return { kind: 'category' as const, entry };
+  }
+  return null;
+}
+
+export function metadataFor(slug: string[] | undefined): Metadata {
+  const route = resolveRoute(slug);
+  if (!route) return { title: 'Not found — Build Objects' };
+  if (route.kind === 'category') {
+    const { label, tagline } = route.entry;
+    return {
+      title: `${label} prices in Hyderabad & Vijayawada — Build Objects`,
+      description: `${label}: ${tagline}. Landed prices per unit, delivered to your pincode, from every seller we track — with the freshness of each price stated.`,
+    };
+  }
+  if (route.kind === 'search') return { title: 'Search — Build Objects' };
+  return {
+    title: 'Build Objects Price Intelligence',
+    description:
+      'Delivered, pincode-resolved, GST-stated, unit-normalised, timestamped prices for construction materials in Hyderabad and Vijayawada.',
+  };
+}
+
+function toQueryString(sp: Search): string {
+  const out = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (v === undefined) continue;
+    for (const x of Array.isArray(v) ? v : [v]) out.append(k, x);
+  }
+  const s = out.toString();
+  return s ? `?${s}` : '';
+}
+
+export function ExplorerRoute({ slug, searchParams }: { slug: string[] | undefined; searchParams: Search }) {
+  const route = resolveRoute(slug);
+  if (!route) notFound();
+
+  const path = '/' + (slug ?? []).join('/');
+  const search = toQueryString(searchParams);
+  // Through JSON once: guarantees the object crossing to the client is plain
+  // data — the same shape /api/meta serves — and never a function or a Date.
+  const meta = JSON.parse(JSON.stringify(buildMeta()));
+
+  return (
+    <Suspense>
+      <Explorer initialMeta={meta} initialPath={path} initialSearch={search} />
+    </Suspense>
+  );
+}

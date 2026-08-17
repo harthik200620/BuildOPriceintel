@@ -20,6 +20,11 @@ import {
   contrast, stack, parseRootTokens, resolveToken, AA_TEXT,
   type RGB, type RGBA,
 } from '../lib/contrast';
+import { CATALOGUE, LIVE_CATALOGUE, catalogueBySlug } from '../lib/catalogue';
+import { CATEGORIES } from '../lib/types';
+import { CATEGORY_CANONICAL_UNIT } from '../lib/units';
+import { parseLoc, buildUrl } from '../lib/route';
+import { categoryStats } from '../lib/meta';
 
 let pass = 0, fail = 0;
 const failures: string[] = [];
@@ -836,6 +841,86 @@ console.log('\nQUERY — a stated constraint is a filter, not a hint');
       wrong.length === 0, wrong.slice(0, 3).join(' · '));
   }
 }
+
+
+// ── THE CATALOGUE: what the home page promises, checked ─────────────────────
+// The landing view is eight cards. Four are real listings and print measured
+// figures; four are coming soon and print none. The number on a card and the
+// number at the top of the listing it opens are the same number.
+console.log('\nCATALOGUE — the home page and the listing agree, and nothing is invented');
+{
+  // Registry integrity.
+  const liveIds = LIVE_CATALOGUE.map((c) => c.id);
+  ok('every tracked category has exactly one live card',
+    CATEGORIES.every((id) => liveIds.filter((x) => x === id).length === 1) && liveIds.length === CATEGORIES.length,
+    `${liveIds.join(',')} vs ${CATEGORIES.join(',')}`);
+  ok('slugs are unique', new Set(CATALOGUE.map((c) => c.slug)).size === CATALOGUE.length);
+  ok('a live card quotes the category\'s canonical unit',
+    LIVE_CATALOGUE.every((c) => c.unit === CATEGORY_CANONICAL_UNIT[c.id]));
+  ok('a coming-soon card has no unit and no route',
+    CATALOGUE.filter((c) => !c.live).every((c) => c.unit === null && catalogueBySlug(c.slug) === null));
+  const missingImg = CATALOGUE.filter((c) => !fs.existsSync(path.join(process.cwd(), 'public', c.image)));
+  ok('every card\'s photograph exists on disk', missingImg.length === 0, missingImg.map((c) => c.image).join(', '));
+
+  // The card's figures come from the same rows the listing ranks.
+  const stats = categoryStats();
+  for (const c of LIVE_CATALOGUE) {
+    for (const region_id of ['hyderabad', 'vijayawada']) {
+      const st = stats.find((s) => s.category === c.id && s.region_id === region_id);
+      const pincode = region_id === 'hyderabad' ? '500001' : '520001';
+      const r = search({ q: '', pincode, region_id, category: c.id });
+      ok(`${c.label} / ${region_id}: card sellers == listing sellers (${st?.sellers} vs ${r.total})`,
+        !!st && st.sellers === r.total);
+      ok(`${c.label} / ${region_id}: card offers is the candidate count and ≥ sellers`,
+        !!st && st.offers >= st.sellers && st.products > 0);
+      ok(`${c.label} / ${region_id}: from-price is a real landed figure`,
+        !!st && Number.isFinite(st.lo_paise) && st.lo_paise > 0 && st.lo_paise <= st.hi_paise);
+    }
+  }
+
+  // The coming-soon card cannot print a rupee — checked in the source, since
+  // no data path can put one there and the test should fail if one is added.
+  const home = fs.readFileSync(path.join(process.cwd(), 'components', 'Home.tsx'), 'utf8');
+  const soonAt = home.indexOf('function SoonCard');
+  const soon = home.slice(soonAt, home.indexOf('/* ── the trust bar', soonAt));
+  ok('SoonCard prints no price and no count', soon.length > 100 && !/rupees\(|₹|offers|sellers/.test(soon));
+
+  // The URL grammar round-trips.
+  const l = parseLoc('/c/cement', '?q=53%20grade&sort=price_low&f.brand=UltraTech&f.brand=JSW&f.cement_type=OPC');
+  ok('a category URL parses to its entry', l.view.kind === 'category' && l.view.entry.id === 'cement');
+  ok('query, sort and facets parse', l.q === '53 grade' && l.sort === 'price_low'
+    && l.selections.brand?.join('|') === 'UltraTech|JSW' && l.selections.cement_type?.[0] === 'OPC');
+  ok('and build back to a canonical string',
+    buildUrl(l) === '/c/cement?q=53+grade&sort=price_low&f.brand=UltraTech&f.brand=JSW&f.cement_type=OPC', buildUrl(l));
+  ok('/ is the catalogue, /?q= is a search, /search is a search',
+    parseLoc('/', '').view.kind === 'home' && parseLoc('/', '?q=x').view.kind === 'search' && parseLoc('/search', '').view.kind === 'search');
+  ok('a coming-soon slug and a junk path are missing', parseLoc('/c/aggregates', '').view.kind === 'missing' && parseLoc('/x/y/z', '').view.kind === 'missing');
+  ok('the default sort is not written into the URL', buildUrl(parseLoc('/c/tmt-steel', '')) === '/c/tmt-steel');
+
+  // The two opaque surfaces the cards add, in the contrast suite.
+  const css = fs.readFileSync(path.join(process.cwd(), 'app', 'globals.css'), 'utf8');
+  const t = parseRootTokens(css);
+  const rgb = (n: string) => resolveToken(t, n)!.slice(0, 3) as unknown as RGB;
+  for (const pane of ['--card-face', '--card-band']) {
+    for (const ink of ['--ink', '--ink-2', '--ink-3', '--accent', '--accent-ink']) {
+      const r = contrast(rgb(ink), rgb(pane));
+      ok(`${ink} clears AA on ${pane} — ${r.toFixed(2)}`, r >= AA_TEXT, r.toFixed(3));
+    }
+  }
+  // The figures printed over the foot of a photograph sit on the fade at its
+  // densest — worst case, a white photograph behind it.
+  const foot = stack([255, 255, 255] as unknown as RGB, [6, 24, 30, 0.94] as unknown as RGBA);
+  for (const ink of ['--ink', '--ink-2']) {
+    const r = contrast(rgb(ink), foot);
+    ok(`${ink} clears AA over the photo fade on a white photograph — ${r.toFixed(2)}`, r >= AA_TEXT, r.toFixed(3));
+  }
+  const pill = stack([255, 255, 255] as unknown as RGB, [6, 24, 30, 0.80] as unknown as RGBA);
+  ok(`--ink clears AA on the freshness pill over a white photograph — ${contrast(rgb('--ink'), pill).toFixed(2)}`,
+    contrast(rgb('--ink'), pill) >= AA_TEXT);
+  ok(`--accent clears AA on the coming-soon pill over a white photograph — ${contrast(rgb('--accent'), pill).toFixed(2)}`,
+    contrast(rgb('--accent'), pill) >= AA_TEXT);
+}
+
 
 console.log(`\n${fail === 0 ? 'PASS' : 'FAIL'} — ${pass} passed, ${fail} failed`);
 if (failures.length) { console.log('\nFailures:'); for (const f of failures) console.log(`  · ${f}`); }

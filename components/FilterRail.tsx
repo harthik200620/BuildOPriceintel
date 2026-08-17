@@ -2,18 +2,20 @@
 
 import React from 'react';
 import type { FacetView } from '@/lib/types';
+import { IconClose, IconFilter } from '@/components/icons';
 
-export default function FilterRail({
-  facets, selections, onToggle, onClear, collapsed, onCollapse, total,
-}: {
+interface FacetProps {
   facets: FacetView[];
   selections: Record<string, string[]>;
   onToggle: (facetId: string, value: string, single: boolean) => void;
-  onClear: () => void;
-  collapsed: boolean;
-  onCollapse: (v: boolean) => void;
-  total: number;
-}) {
+}
+
+/**
+ * The facets themselves — shared by the desktop rail and the phone sheet, so a
+ * filter behaves identically whichever surface it is on. The rail and the
+ * sheet only differ in where they sit and how they close.
+ */
+export function FacetList({ facets, selections, onToggle }: FacetProps) {
   const [openMore, setOpenMore] = React.useState(false);
   const [open, setOpen] = React.useState<Record<string, boolean>>({});
 
@@ -23,22 +25,6 @@ export default function FilterRail({
   // requirement, and the panel let them.
   const conditional = facets.filter((f) => f.visibility === 'conditional' && f.active);
   const more = facets.filter((f) => f.visibility === 'more');
-  const activeCount = Object.values(selections).flat().length;
-
-  if (collapsed) {
-    return (
-      <button
-        onClick={() => onCollapse(false)}
-        className="chip anim sticky top-[84px] h-9 px-3 text-[12px] flex items-center gap-2 self-start"
-        aria-label="Show filters"
-      >
-        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 5h18M6 12h12M10 19h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        </svg>
-        Filters{activeCount ? ` (${activeCount})` : ''}
-      </button>
-    );
-  }
 
   const renderFacet = (f: FacetView, isConditional = false) => {
     const isOpen = open[f.facet_id] ?? f.default_open;
@@ -127,6 +113,52 @@ export default function FilterRail({
   };
 
   return (
+    <>
+      {conditional.map((f) => renderFacet(f, true))}
+      {primary.map((f) => renderFacet(f))}
+
+      {more.length > 0 && (
+        <div className="pt-2">
+          <button
+            onClick={() => setOpenMore((v) => !v)}
+            className="w-full text-left text-[11px] uppercase tracking-[0.11em] py-2 anim hover:opacity-70"
+            style={{ color: 'var(--ink-3)' }}
+            aria-expanded={openMore}
+          >
+            {openMore ? '− ' : '+ '}More filters ({more.length})
+          </button>
+          {openMore && <div>{more.map((f) => renderFacet(f))}</div>}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** The desktop rail. Sticky beside the results; a chip when collapsed. */
+export default function FilterRail({
+  facets, selections, onToggle, onClear, collapsed, onCollapse, total,
+}: FacetProps & {
+  onClear: () => void;
+  collapsed: boolean;
+  onCollapse: (v: boolean) => void;
+  total: number;
+}) {
+  const activeCount = Object.values(selections).flat().length;
+
+  if (collapsed) {
+    return (
+      <button
+        onClick={() => onCollapse(false)}
+        className="chip anim sticky top-[84px] h-9 px-3 text-[12px] hidden lg:flex items-center gap-2 self-start"
+        aria-label="Show filters"
+      >
+        <IconFilter size={13} />
+        Filters{activeCount ? ` (${activeCount})` : ''}
+      </button>
+    );
+  }
+
+  return (
     <aside className="w-[280px] shrink-0 hidden lg:block">
       <div className="sticky top-[84px] max-h-[calc(100vh-104px)] overflow-y-auto scroll-thin glass-card px-4 py-3">
         <div className="flex items-baseline justify-between pb-2 rule-b">
@@ -151,23 +183,78 @@ export default function FilterRail({
             units on one screen, none of which agreed. */}
         <p className="pt-1.5 pb-1 text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} sellers</p>
 
-        {conditional.map((f) => renderFacet(f, true))}
-        {primary.map((f) => renderFacet(f))}
-
-        {more.length > 0 && (
-          <div className="pt-2">
-            <button
-              onClick={() => setOpenMore((v) => !v)}
-              className="w-full text-left text-[11px] uppercase tracking-[0.11em] py-2 anim hover:opacity-70"
-              style={{ color: 'var(--ink-3)' }}
-              aria-expanded={openMore}
-            >
-              {openMore ? '− ' : '+ '}More filters ({more.length})
-            </button>
-            {openMore && <div>{more.map((f) => renderFacet(f))}</div>}
-          </div>
-        )}
+        <FacetList facets={facets} selections={selections} onToggle={onToggle} />
       </div>
     </aside>
+  );
+}
+
+/**
+ * The same facets on a phone, as a bottom sheet. Below `lg` the rail does not
+ * render at all, which left a phone with no way to narrow 232 sellers — the
+ * one screen where narrowing matters most.
+ */
+export function FilterSheet({
+  open, onClose, facets, selections, onToggle, onClear, total, loading,
+}: FacetProps & {
+  open: boolean;
+  onClose: () => void;
+  onClear: () => void;
+  total: number;
+  loading: boolean;
+}) {
+  const activeCount = Object.values(selections).flat().length;
+  const panel = React.useRef<HTMLDivElement>(null);
+
+  // Escape closes; the page behind does not scroll while the sheet is up.
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    // Move focus into the sheet so a keyboard user is not left behind it.
+    const t = setTimeout(() => panel.current?.querySelector<HTMLElement>('button, input')?.focus(), 30);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+      clearTimeout(t);
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Filters">
+      <button className="absolute inset-0 w-full h-full" style={{ background: 'var(--scrim)' }}
+        onClick={onClose} aria-label="Close filters" tabIndex={-1} />
+      <div ref={panel} className="sheet-up absolute inset-x-0 bottom-0 max-h-[86vh] flex flex-col glass-strong"
+        style={{ borderRadius: '18px 18px 0 0', borderBottom: 0 }}>
+        <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5 rule-b">
+          <div className="flex items-baseline gap-2">
+            <h2 className="display text-[15px]">Narrow by</h2>
+            <span className="text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} sellers</span>
+          </div>
+          <div className="flex items-center gap-3">
+            {activeCount > 0 && (
+              <button onClick={onClear} className="text-[12px] anim hover:opacity-70" style={{ color: 'var(--accent)' }}>
+                clear {activeCount}
+              </button>
+            )}
+            <button onClick={onClose} aria-label="Close filters" className="anim hover:opacity-70 -mr-1 p-1" style={{ color: 'var(--ink-2)' }}>
+              <IconClose size={18} />
+            </button>
+          </div>
+        </div>
+        <div className="overflow-y-auto scroll-thin px-4 flex-1 min-h-0">
+          <FacetList facets={facets} selections={selections} onToggle={onToggle} />
+        </div>
+        <div className="px-4 py-3 rule-t" style={{ background: 'var(--wash-strong)' }}>
+          <button onClick={onClose} className="btn-primary w-full h-11 text-[14px]" disabled={loading}>
+            {loading ? 'Updating…' : `Show ${total.toLocaleString('en-IN')} ${total === 1 ? 'seller' : 'sellers'}`}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
