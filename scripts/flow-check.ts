@@ -89,10 +89,12 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
     await page.reload({ waitUntil: 'networkidle' });
     await hydrated(page);
     ok('reload with ?sku= reopens the sheet', await page.locator('.sheet-in').count() > 0 || await page.locator('[role="dialog"]').count() > 0);
+    const tBack = Date.now();
     await page.goBack();
     await page.waitForFunction(() => !location.search.includes('sku='));
-    await page.waitForTimeout(300);
-    ok('back closes the sheet and drops ?sku=', !/sku=/.test(page.url()) && (await page.locator('.sheet-in').count()) === 0);
+    const closed = await page.waitForFunction(() => document.querySelectorAll('.sheet-in').length === 0, null, { timeout: 5000 }).then(() => true).catch(() => false);
+    ok(`back closes the sheet and drops ?sku= (${Date.now() - tBack} ms)`, !/sku=/.test(page.url()) && closed,
+      `url ${path(page)} · sheets ${await page.locator('.sheet-in').count()} · hydrated ${await page.evaluate(() => document.documentElement.dataset.hydrated ?? '-')}`);
     ok('…and the facet is still applied', page.url().includes('f.'), page.url());
     void skuUrl;
 
