@@ -131,7 +131,7 @@ export default function SearchField({
           aria-controls="buildobjects-suggest"
           aria-autocomplete="list"
           aria-label="Search construction materials"
-          placeholder={narrow ? 'Search materials…' : 'Try “53 grade cement”, “8mm tmt”, “4 inch cpvc”, “sariya rate”, “ఇటుక”'}
+          placeholder={narrow ? 'Search…' : 'Try “53 grade cement”, “8mm tmt”, “4 inch cpvc”, “sariya rate”, “ఇటుక”'}
           className="field w-full h-9 pl-9 pr-3 md:pr-16 text-[14px]"
         />
         {/* A keyboard hint has no reader on a phone; it goes with the width. */}
