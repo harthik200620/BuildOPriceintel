@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { Tab } from '@/lib/route';
-import { IconHome, IconGrid, IconSearch, IconBag, IconUser } from './icons';
+import { IconHome, IconGrid, IconSearch, IconBag, IconPin } from './icons';
 
 /**
  * The five places, on a phone.
@@ -30,7 +30,10 @@ export default function TabBar({
     { id: 'categories', href: '/categories', label: 'Categories', Icon: IconGrid },
     { id: 'search', href: '/search', label: 'Search', Icon: IconSearch },
     { id: 'list', href: '/list', label: 'List', Icon: IconBag },
-    { id: 'profile', href: '/profile', label: 'Profile', Icon: IconUser },
+    // Not "Profile": there are no accounts here, and a tab onto a sign-in that
+    // does not exist is the same door-onto-a-wall the welcome screen refuses.
+    // What a buyer actually needs to change is where the prices land.
+    { id: 'where', href: '/welcome', label: 'Delivery', Icon: IconPin },
   ];
 
   return (

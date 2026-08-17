@@ -238,7 +238,7 @@ export default function Explorer({
   const goTab = React.useCallback((t: Tab) => {
     if (t === 'home') return goHome();
     if (t === 'search') { goView({ kind: 'search' }); window.setTimeout(() => searchRef.current?.focus(), 60); return; }
-    if (t === 'profile') { goView({ kind: 'welcome' }); return; }
+    if (t === 'where') { goView({ kind: 'welcome' }); return; }
     goView({ kind: t === 'list' ? 'list' : 'categories' });
   }, [goHome, goView]);
 
@@ -540,7 +540,6 @@ export default function Explorer({
               onAdd={(l) => addToCart(l as CartLine)}
               inList={inCart}
               onOpenList={() => goView({ kind: 'list' })}
-              onAllSellers={() => { const q = view.productId; searchEverywhere(''); void q; }}
             />
           </div>
         )}

@@ -29,15 +29,14 @@ interface Props {
   }) => void;
   inList: (offerId: string) => boolean;
   onOpenList: () => void;
-  /** Every seller of this product, as a listing. */
-  onAllSellers: () => void;
 }
 
-export default function ProductPage({ productId, pincode, onBack, onAdd, inList, onOpenList, onAllSellers }: Props) {
+export default function ProductPage({ productId, pincode, onBack, onAdd, inList, onOpenList }: Props) {
   const [data, setData] = React.useState<any>(null);
   const [err, setErr] = React.useState<string | null>(null);
   const [shot, setShot] = React.useState(0);
   const [qty, setQty] = React.useState(1);
+  const [sellersOpen, setSellersOpen] = React.useState(false);
 
   React.useEffect(() => {
     let live = true;
@@ -221,9 +220,43 @@ export default function ProductPage({ productId, pincode, onBack, onAdd, inList,
               {[best.vendor?.locality, best.platform].filter(Boolean).join(' · ')}
             </p>
           )}
-          <button onClick={onAllSellers} className="anim mt-2.5 inline-flex items-center gap-1 text-[12.5px]" style={{ color: 'var(--accent)' }}>
-            See all {data.total_vendors} sellers <IconChevronRight size={13} />
-          </button>
+
+          {/* Every other seller of this product, at their own price. The API
+              already returned them rolled up by vendor, so this opens what is
+              in hand rather than sending the buyer to a search that would have
+              to find its way back to the same rows. */}
+          {offers.length > 1 && (
+            <>
+              <button
+                onClick={() => setSellersOpen((v) => !v)}
+                aria-expanded={sellersOpen}
+                className="anim mt-2.5 inline-flex items-center gap-1 text-[12.5px] min-h-8"
+                style={{ color: 'var(--accent)' }}
+              >
+                {sellersOpen ? 'Hide the other sellers' : `See all ${data.total_vendors} sellers`}
+                <IconChevronRight size={13} style={{ transform: sellersOpen ? 'rotate(90deg)' : undefined }} />
+              </button>
+              {sellersOpen && (
+                <ul className="mt-2 fade-up">
+                  {offers.map((o: any, i: number) => (
+                    <li key={o.offer_id ?? i} className={`flex items-baseline justify-between gap-3 py-2 ${i > 0 ? 'rule-t' : ''}`}>
+                      <span className="min-w-0">
+                        <span className="text-[12.5px] block truncate" style={{ color: 'var(--ink)' }}>
+                          {o.vendor?.name ?? o.vendor_name ?? 'Seller'}
+                        </span>
+                        {o.vendor?.locality && (
+                          <span className="text-[10.5px]" style={{ color: 'var(--ink-3)' }}>{o.vendor.locality}</span>
+                        )}
+                      </span>
+                      <span className="fig text-[13px] shrink-0" style={{ color: i === 0 ? 'var(--accent)' : 'var(--ink-2)' }}>
+                        {rupees(o.normalised_paise, o.normalised_paise < 10_000)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
         </section>
       )}
 

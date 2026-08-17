@@ -111,7 +111,7 @@ export const viewKey = (v: View) =>
  * to the shelf it was found on, so it holds "categories" rather than lighting
  * nothing — a tab bar that goes blank on the deepest screen reads as broken.
  */
-export type Tab = 'home' | 'categories' | 'search' | 'list' | 'profile';
+export type Tab = 'home' | 'categories' | 'search' | 'list' | 'where';
 
 export function tabOf(v: View): Tab | null {
   switch (v.kind) {
