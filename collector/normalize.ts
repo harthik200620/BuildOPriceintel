@@ -13,6 +13,7 @@ import crypto from 'node:crypto';
 import type { RawOffer } from './types';
 import { Ladder } from './ladder';
 import { TMT_KG_PER_M, TYPICAL_UNIT_KG, inchToBoreMm, cementCanonicalPaise, CEMENT_STANDARD_BAG_KG } from '../lib/units';
+import { offTopicReason, basisReason, bandReason } from '../lib/plausibility';
 
 // ── unit normalisation ───────────────────────────────────────────────────────
 
@@ -481,7 +482,16 @@ function pipeAttrs(raw: RawOffer, L: Ladder, fi: (f: string, l: string, u?: stri
   const sizeRaw = specGet(s, 'Size', 'Nominal Size', 'Diameter', 'Pipe Size', 'Outer Diameter');
   let bore: number | null = null;
   let boreHow = '';
-  const mmMatch = `${sizeRaw ?? ''} ${raw.title}`.match(/(\d+(?:\.\d+)?)\s*mm/i);
+  // Every "N mm" in the size field and the title, minus the ones that are a
+  // wall thickness ("4mm 12 Inch UPVC SWR Pipe" is a 12-inch pipe with a 4 mm
+  // wall, not a 4 mm pipe). A remaining mm figure under 10 beside an inch
+  // figure is a thickness the seller did not label; the inch figure wins.
+  const sizeText = `${sizeRaw ?? ''} ${raw.title}`;
+  const mmAll = [...sizeText.matchAll(/(\d+(?:\.\d+)?)\s*mm/gi)]
+    .filter((m) => !/(?:thick|thk|wall|micron|gauge)\w*\s*[:\-]?\s*$/i.test(sizeText.slice(Math.max(0, m.index! - 14), m.index!)))
+    .filter((m) => !/^\s*(?:thick|thk|wall)/i.test(sizeText.slice(m.index! + m[0].length, m.index! + m[0].length + 8)));
+  const inchAny = /(\d+(?:\s*\/\s*\d+)?(?:\.\d+)?)\s*(?:inch|in\b|")/i.test(sizeText);
+  const mmMatch = mmAll.find((m) => !(Number(m[1]) < 10 && inchAny)) ?? null;
   if (mmMatch) { bore = Number(mmMatch[1]); boreHow = 'stated in mm by the seller'; }
   if (!bore) {
     const inMatch = `${sizeRaw ?? ''} ${raw.title}`.match(/(\d+(?:\s*\/\s*\d+)?(?:\.\d+)?)\s*(?:inch|in\b|")/i);
@@ -521,9 +531,19 @@ function pipeAttrs(raw: RawOffer, L: Ladder, fi: (f: string, l: string, u?: stri
   const lenRaw = specGet(s, 'Length', 'Pipe Length', 'Single Piece Length');
   let len = numOf(lenRaw);
   if (lenRaw && /f(ee)?t/i.test(lenRaw) && len) len = +(len * 0.3048).toFixed(2);
+  // The title states it too — "6 m", "20feet", "50 Meter Roll", "3 Metre".
+  // A per-piece quote read against the 3 m typical when the seller wrote
+  // "50 Meter Roll" was ₹633 a metre for a ₹38 pipe.
+  if (!len) {
+    const tm = raw.title.match(/(\d+(?:\.\d+)?)\s*(m|mtr|mtrs|meter|metre|meters|metres|feet|ft)\b(?!\s*m\b)/i);
+    if (tm) {
+      const v = Number(tm[1]);
+      len = /f(ee)?t/i.test(tm[2]) ? +(v * 0.3048).toFixed(2) : v;
+    }
+  }
   const defaultLen = system === 'GI' ? 6 : 3;
   L.resolve(fi('length_m', 'Length', 'm'), {
-    quoted: () => (len && len >= 0.5 && len <= 20 ? len : null),
+    quoted: () => (len && len >= 0.5 && len <= 200 ? len : null),
     typical: () => ({
       value: defaultLen,
       basis: system === 'GI'
@@ -629,21 +649,15 @@ const CANONICAL: Record<string, string> = {
  * refusal is counted, rather than being coerced into the category it was
  * filed under.
  */
-const NOT_THIS_CATEGORY: Record<string, RegExp> = {
-  cement: /waterproof|water proof|wp\+|putty|grout|adhesive|admixture|compound|bond|primer|sealant|plaster|mortar|tile\s?fix|repair|paint|sand\b|aggregate/i,
-  tmt_steel: /scrap|wire\s?mesh|binding\s?wire|nail|welding|almirah|furniture|utensil|pipe|tube|sheet|angle|channel/i,
-  water_pipes: /conduit|electric|cable|casing|column\s?pipe|duct|machine|scrap|adhesive|solvent|cement\b/i,
-  bricks_blocks: /sand\b|aggregate|machine|mould|adhesive|mortar|plaster|paver\s?machine|putty/i,
-};
+// The guard itself lives in lib/plausibility.ts, shared with lib/rebuild.ts so
+// a rule tightened here is applied to rows already stored on the next rebuild.
 
 export function normalise(raw: RawOffer): Normalised | { ok: false; reason: string } {
   if (raw.price_paise == null || raw.price_paise <= 0) {
     return { ok: false, reason: 'no published price' };
   }
-  const guard = NOT_THIS_CATEGORY[raw.category];
-  if (guard && guard.test(raw.title)) {
-    return { ok: false, reason: `listed under ${raw.category} but the title names a different product class` };
-  }
+  const offTopic = offTopicReason(raw.category, raw.title);
+  if (offTopic) return { ok: false, reason: offTopic };
   const u = normaliseUnit(raw.price_unit);
   if (!u) return { ok: false, reason: `unmappable unit "${raw.price_unit ?? '(none)'}"` };
 
@@ -705,7 +719,13 @@ export function normalise(raw: RawOffer): Normalised | { ok: false; reason: stri
     if (quotedUnit === 'piece' || quotedUnit === 'length') {
       basePerCanonical = Math.round(quotedPaise / len);
       conversionNote = `₹/length ÷ ${len} m — the competitor failure this removes: a 3 m pipe and a 6 m pipe cannot share a price band`;
-    } else if (quotedUnit === 'coil') { basePerCanonical = Math.round(quotedPaise / 100); conversionNote = '₹/coil ÷ 100 m'; }
+    } else if (quotedUnit === 'coil') {
+      // Only with the coil length stated somewhere the seller wrote it. The old
+      // "÷ 100 m" was an invented attribute — a 30 m garden coil at ₹150 became
+      // ₹1.50 a metre.
+      const cl = `${raw.title} ${JSON.stringify(raw.specs)}`.match(/(\d+(?:\.\d+)?)\s*(m|mtr|mtrs|meter|metre|meters|metres)\b/i);
+      if (cl && Number(cl[1]) >= 5) { basePerCanonical = Math.round(quotedPaise / Number(cl[1])); conversionNote = `₹/coil ÷ ${cl[1]} m stated coil length`; }
+    }
   } else if (category === 'bricks_blocks') {
     if (quotedUnit === 'per_1000') { basePerCanonical = Math.round(quotedPaise / 1000); conversionNote = '₹/1000 ÷ 1000'; }
     else if (quotedUnit === 'cum' && attrs.unit_volume_m3) {
@@ -719,6 +739,14 @@ export function normalise(raw: RawOffer): Normalised | { ok: false; reason: stri
   if (basePerCanonical == null || basePerCanonical <= 0) {
     return { ok: false, reason: `cannot convert ₹/${quotedUnit} to ₹/${canonical} without inventing an attribute` };
   }
+
+  // Plausibility, on the seller's own figure per canonical unit. Refused here
+  // rather than quarantined later so the ledger says why at the point of load.
+  const implausible =
+    basisReason({ category, title: raw.title, cement_type: attrs.cement_type ?? null, pack_size_kg: attrs.pack_size_kg ?? null,
+      nominal_bore_mm: attrs.nominal_bore_mm ?? null, quoted_unit: quotedUnit, bore_trusted: true }) ??
+    bandReason({ category, title: raw.title, cement_type: attrs.cement_type ?? null, base_paise_per_canonical: basePerCanonical });
+  if (implausible) return { ok: false, reason: implausible };
 
   L.derived(fi('normalised_base', `Seller price per ${canonical}`, canonical),
     (basePerCanonical / 100).toFixed(2), `${raw.price_text} → ${conversionNote}`);

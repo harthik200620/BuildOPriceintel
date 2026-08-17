@@ -15,6 +15,7 @@ import { SORTS, COLUMN_SORTS } from './rank';
 import { CATEGORY_LABEL, CATEGORIES } from './types';
 import { sorAnchorFor } from './search';
 import { assess, countsTowardHeadline } from './freshness';
+import { median } from './money';
 
 /**
  * What a category card states, per region. Every figure here is measured over
@@ -36,6 +37,8 @@ export interface CategoryStat {
   /** Lowest landed price per canonical unit, in paise. */
   lo_paise: number;
   hi_paise: number;
+  /** The middle offer — the figure to compare two cities on; a minimum is one seller. */
+  median_paise: number;
   /** Offers whose price is FRESH or AGEING, i.e. still counts toward a headline. */
   fresh: number;
   /** Most recent priced_as_of across the offers, ISO. */
@@ -57,18 +60,19 @@ export function categoryStats(now: Date = new Date()): CategoryStat[] {
 
   const acc = new Map<string, {
     products: Set<string>; sellers: Set<string>; offers: number;
-    lo: number; hi: number; fresh: number; seen: string | null;
+    lo: number; hi: number; fresh: number; seen: string | null; prices: number[];
   }>();
   for (const r of rows) {
     const k = `${r.category}|${r.region_id}`;
     let a = acc.get(k);
     if (!a) {
-      a = { products: new Set(), sellers: new Set(), offers: 0, lo: Infinity, hi: -Infinity, fresh: 0, seen: null };
+      a = { products: new Set(), sellers: new Set(), offers: 0, lo: Infinity, hi: -Infinity, fresh: 0, seen: null, prices: [] };
       acc.set(k, a);
     }
     a.products.add(r.product_id);
     a.sellers.add(r.vendor_id);
     a.offers += 1;
+    a.prices.push(r.normalised_paise);
     if (r.normalised_paise < a.lo) a.lo = r.normalised_paise;
     if (r.normalised_paise > a.hi) a.hi = r.normalised_paise;
     if (countsTowardHeadline(assess(r.priced_as_of, r.sla_hours, now))) a.fresh += 1;
@@ -80,7 +84,7 @@ export function categoryStats(now: Date = new Date()): CategoryStat[] {
     return {
       category, region_id,
       products: a.products.size, offers: a.offers, sellers: a.sellers.size,
-      lo_paise: a.lo, hi_paise: a.hi, fresh: a.fresh, seen_at: a.seen,
+      lo_paise: a.lo, hi_paise: a.hi, median_paise: median(a.prices), fresh: a.fresh, seen_at: a.seen,
     };
   });
 }

@@ -658,6 +658,29 @@ work — only turns that genuinely need the model fail, and they say so.
 
 This is the part worth reading.
 
+**Nothing becomes a price until it passes `lib/plausibility.ts`, and the two cities are asserted to
+agree.** The store, read cold, opened cement in Vijayawada at ₹47.84 a bag and in Hyderabad at ₹286 — the
+₹47.84 was a solvent-cement glue and a 1 kg pouch of white cement filed under Cement; TMT opened at ₹30 a
+kg (an FRP bar); pipes at ₹1 a metre (a coupler priced per piece and read as a 3 m length); a ₹7 red brick
+landed at ₹149.85 because a seller's "MOQ: 1" put a whole parcel trip on one brick. Every one of those
+passed the relative absurdity gate. Three kinds of rule now run first, shared by the collector at load and by
+the rebuild over rows already stored, and every refusal is written on the row (`offer.quarantine_reason`)
+rather than deleted: **off-topic** — the title names a different product class (fittings under pipes,
+refractory and cover blocks under bricks, solvent and alumina cements, FRP and MS rounds under TMT; brands
+like SS Gold and Foamcore and use-phrases like "for structural integrity" are deliberately not matched);
+**basis** — a retail pouch is not a 50 kg bag, a coil with no stated length has no ₹/metre, a bore under
+15 mm or over 315 mm is not plumbing; **band** — the seller's own figure per canonical unit sits outside
+what the product sells for by a margin no honest quote crosses (₹200–800 a bag of grey cement, ₹35–110 a
+kg of TMT, ₹4–3,000 a metre, ₹2–400 a piece), which is what a decimal shift or a per-bag figure typed as
+per-kg looks like. Freight is amortised over the category's reference order for every seller (a larger MOQ
+spreads it further, honestly), never over a lone unit. On the first pass 301 of 2,604 offers (11.6%) went
+inactive with a reason. `tests/run.ts` asserts the rules, that no active offer would be refused, that every
+published price sits inside its band with GST and logistics on top, and that **Hyderabad and Vijayawada
+agree within a factor of two on every category's median and floor** — after the pass: cement ₹383 vs ₹387
+typical, TMT ₹65 vs ₹58, pipes ₹113 vs ₹90, bricks ₹28 vs ₹16. `npm run rebuild` re-applies all of it and
+prints what moved. The catalogue card and the listing header carry the median as well as the floor, because
+the middle of a market compares between cities and one seller's teaser does not.
+
 **Collection ran against real sources and recorded every refusal.** `data/logs/collection-<date>.md` lists every source hit, what it returned, and an estimate of the volume behind each block. Nothing was capped silently and no offer was ever invented.
 
 **IndiaMART blocked this machine mid-build, then cleared, and cement is now deep.** It is where the long-tail dealers for both cities actually list. It rate-limited every network path for hours during the build; the limit later lifted and the sweep ran. Cement now carries **627 offers across 131 named Hyderabad vendors and 49 brands**, with localities, MOQs and spec tables, plus 74 offers / 12 vendors in Vijayawada.

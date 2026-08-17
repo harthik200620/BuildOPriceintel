@@ -88,6 +88,10 @@ export function checkpoint(mode: 'PASSIVE' | 'FULL' | 'TRUNCATE' = 'TRUNCATE'):
  */
 const ADDED_COLUMNS: Array<[table: string, column: string, ddl: string]> = [
   ['offer', 'listing_title', 'TEXT'],
+  // Why an offer is inactive when it was not delisted: the plausibility rules
+  // (lib/plausibility.ts) refused it on a rebuild. NULL on every live row and
+  // on a row that simply disappeared from its source.
+  ['offer', 'quarantine_reason', 'TEXT'],
 ];
 
 export function initSchema(target?: Database.Database): void {

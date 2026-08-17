@@ -3,7 +3,7 @@
   "category_path": "commodity.masonry",
   "canonical_unit": "piece",
   "canonical_unit_note": "₹/piece. Also quoted per 1,000 and, for AAC, per cubic metre — a ₹/piece band and a ₹/cum band differ by roughly the number of blocks in a cubic metre, so the conversion needs piece volume from the size attribute.",
-  "result_count": 625,
+  "result_count": 563,
   "counts_are_illustrative": false,
   "counts_note": "Counts measured from data/buildobjects.db on 2026-08-17 for hyderabad. Each count is a number of OFFERS, not products: the results list shows one card per vendor, so the rail counts sellers' listings and these numbers match it exactly. A facet marked data_backed:false has no field behind it in the collected data and ships disabled with a reason.",
   "regions": [
@@ -39,7 +39,7 @@
         {
           "label": "Red clay brick",
           "sublabel": "traditional burnt clay",
-          "count": 293,
+          "count": 265,
           "reveals": [
             "size_clay",
             "finish_clay"
@@ -57,7 +57,7 @@
         {
           "label": "Concrete solid block",
           "sublabel": "IS 2185 Part 1",
-          "count": 83,
+          "count": 77,
           "reveals": [
             "size_concrete"
           ]
@@ -74,7 +74,7 @@
         {
           "label": "CLC block",
           "sublabel": "cellular lightweight concrete",
-          "count": 25,
+          "count": 23,
           "reveals": [
             "size_concrete"
           ],
@@ -155,7 +155,7 @@
           "label": "230×110×75",
           "sublabel": "IS 1077 modular",
           "unit": "mm",
-          "count": 286
+          "count": 259
         },
         {
           "label": "230×110×70",
@@ -302,7 +302,7 @@
           "count": 2
         }
       ],
-      "note": "Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12.",
+      "note": "Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 8 shown with search-within-facet for the rest. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 11 brands present, top 6 shown with search-within-facet for the remaining 5. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 12 brands present, top 6 shown with search-within-facet for the remaining 6. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12. Roster rewritten from collected data: 18 brands present, top 6 shown with search-within-facet for the remaining 12.",
       "data_backed": true
     },
     {
@@ -315,29 +315,29 @@
       "sort_order": 50,
       "source": "price_current.normalised_paise WHERE normalised_unit='piece'",
       "why": "₹/piece is the only band on which a ₹7 clay brick and a ₹58 AAC block are the same kind of number. Freight dominates here — a lorry of bricks is mostly transport — so the band is on the delivered figure.",
-      "note": "Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
+      "note": "Bands derived from the actual in-zone distribution at reconcile time. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers. Bands derived from the actual in-zone distribution (quartiles), not round numbers.",
       "default_open": true,
       "visibility": "primary",
       "values": [
         {
           "label": "Under ₹14",
           "unit": "₹/piece delivered",
-          "count": 182
+          "count": 176
         },
         {
-          "label": "₹14 – ₹30",
+          "label": "₹14 – ₹28",
           "unit": "₹/piece delivered",
-          "count": 128
+          "count": 106
         },
         {
-          "label": "₹30 – ₹48",
+          "label": "₹28 – ₹48",
           "unit": "₹/piece delivered",
-          "count": 157
+          "count": 144
         },
         {
           "label": "Over ₹48",
           "unit": "₹/piece delivered",
-          "count": 158
+          "count": 137
         }
       ],
       "data_backed": true
@@ -413,7 +413,7 @@
         {
           "label": "Not applicable",
           "sublabel": "no standard applies to this product",
-          "count": 595
+          "count": 533
         }
       ],
       "data_backed": true
@@ -434,18 +434,18 @@
         {
           "label": "Tomorrow",
           "unit": "days",
-          "count": 162,
+          "count": 152,
           "disabled": true
         },
         {
           "label": "Within 3 days",
           "unit": "days",
-          "count": 407
+          "count": 356
         },
         {
           "label": "Within a week",
           "unit": "days",
-          "count": 56,
+          "count": 55,
           "disabled": true
         },
         {
@@ -535,8 +535,8 @@
         }
       ],
       "data_backed": false,
-      "no_data_reason": "`attrs.finish` is populated on 1 of 625 listings in hyderabad, but as uncontrolled seller text (\"Manufacturer\") which matches none of this filter's values. The gap is normalisation, not collection: shipped disabled rather than deleted, and rather than mapped by guess.",
-      "no_data_kind": "unnormalised"
+      "no_data_reason": "No collected listing in hyderabad populates `attrs.finish`. The facet is retained and shipped disabled rather than deleted, so the gap is visible rather than silently absent.",
+      "no_data_kind": "uncollected"
     },
     {
       "id": "density_class",
@@ -567,7 +567,7 @@
           "label": "Over 1,500 kg/m³",
           "sublabel": "clay, solid concrete",
           "unit": "kg/m³",
-          "count": 293
+          "count": 265
         }
       ],
       "data_backed": true
@@ -588,17 +588,17 @@
         {
           "label": "IS 1077",
           "sublabel": "burnt clay",
-          "count": 293
+          "count": 265
         },
         {
           "label": "IS 2185 Pt 3",
           "sublabel": "AAC",
-          "count": 165
+          "count": 157
         },
         {
           "label": "IS 2185 Pt 1",
           "sublabel": "concrete",
-          "count": 165
+          "count": 157
         },
         {
           "label": "IS 12894",
@@ -627,7 +627,7 @@
         },
         {
           "label": "Exclusive of GST",
-          "count": 610,
+          "count": 548,
           "disabled": true
         }
       ],
@@ -649,7 +649,7 @@
         {
           "label": "Verified today",
           "unit": "hours",
-          "count": 498,
+          "count": 453,
           "disabled": true
         },
         {
@@ -691,6 +691,6 @@
       "reason": "Held back until there is a real ratings corpus."
     }
   ],
-  "reconciled_at": "2026-08-17T02:20:01.865Z",
+  "reconciled_at": "2026-08-17T07:18:12.732Z",
   "reconciled_region": "hyderabad"
 }

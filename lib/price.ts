@@ -196,7 +196,6 @@ export function rollUpByVendor(offers: OfferView[], quotes: ResolvedQuote[]): {
 
 function priceOne(o: any, dest: { pincode: string; region_id: string; geo: Geo }, qtyIn?: number): ResolvedQuote {
   const vGeo: Geo | null = o.v_lat != null && o.v_lon != null ? { lat: o.v_lat, lon: o.v_lon } : null;
-  const qty = qtyIn ?? (o.moq_qty && o.moq_qty > 0 ? o.moq_qty : 1);
 
   const r = landedFor(
     {
@@ -209,6 +208,9 @@ function priceOne(o: any, dest: { pincode: string; region_id: string; geo: Geo }
     vGeo, dest.geo,
     qtyIn,
   );
+  // The quantity this quote is for is the one the trip was amortised over —
+  // the buyer's, or else the category's reference order (never a lone unit).
+  const qty = r.amortiseQty;
 
   const slaHours = SLA_HOURS[CATEGORY_VOLATILITY[o.category] ?? 'V1'];
   const fresh = assess(o.fetched_at, slaHours);

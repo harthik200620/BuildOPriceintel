@@ -129,10 +129,14 @@ function LiveCard({
         onOpen();
       }}
       className="cat-card lift group"
-      title={entry.tagline}
+      title={
+        stat
+          ? `${entry.tagline}. Typical ${rupees(stat.median_paise, stat.median_paise < 10_000)}${suffix} across ${stat.offers.toLocaleString('en-IN')} offers; the lowest is ${rupees(stat.lo_paise, stat.lo_paise < 10_000)}${suffix}.`
+          : entry.tagline
+      }
       aria-label={
         stat
-          ? `${entry.label}: ${stat.offers.toLocaleString('en-IN')} offers from ${stat.sellers.toLocaleString('en-IN')} sellers, from ${rupees(stat.lo_paise)} ${spoken}. Open the listing.`
+          ? `${entry.label}: ${stat.offers.toLocaleString('en-IN')} offers from ${stat.sellers.toLocaleString('en-IN')} sellers, typically ${rupees(stat.median_paise)} ${spoken}, from ${rupees(stat.lo_paise)} ${spoken}. Open the listing.`
           : `${entry.label}. Open the listing.`
       }
     >

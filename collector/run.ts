@@ -158,7 +158,10 @@ export function loadOffers(runId: string, raws: RawOffer[]): LoadStats {
        base_paise=excluded.base_paise, base_paise_canonical=excluded.base_paise_canonical,
        listing_title=excluded.listing_title,
        stock_state=excluded.stock_state, fetched_at=excluded.fetched_at,
-       collection_run_id=excluded.collection_run_id, is_active=1`,
+       collection_run_id=excluded.collection_run_id, is_active=1,
+       -- Seen again and it passed normalise (which applies the plausibility
+       -- rules first), so a quarantine from an earlier rebuild no longer holds.
+       quarantine_reason=NULL`,
   );
   const upSpec = db().prepare(
     `INSERT INTO spec_value (product_id,offer_id,field,label,value,unit,source_url,fetched_at,confidence,derivation)
@@ -397,6 +400,11 @@ async function main() {
   const indexed = rebuildSearchIndex();
   log(`  price_current ${pr.rows} rows over ${pr.products} (product,region) pairs; ` +
     `price_history +${pr.historyRows}; search index ${indexed} products`);
+  if (pr.implausible.length) {
+    const n = pr.implausible.reduce((s, r) => s + r.count, 0);
+    log(`  plausibility rules took ${n} offer(s) out of the surface — kept, inactive, reason on the row:`);
+    for (const r of pr.implausible.slice(0, 12)) log(`    ${String(r.count).padStart(4)}× ${r.reason}  e.g. ${r.examples.map((e) => `"${e}"`).join(' · ')}`);
+  }
   if (pr.quarantined.length) {
     log(`  absurdity gate quarantined ${pr.quarantined.length} price(s) outside [0.1x, 10x] of their category median — never published:`);
     for (const q of pr.quarantined.slice(0, 8)) {

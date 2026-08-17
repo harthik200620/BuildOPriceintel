@@ -25,6 +25,8 @@ import { CATEGORIES } from '../lib/types';
 import { CATEGORY_CANONICAL_UNIT } from '../lib/units';
 import { parseLoc, buildUrl } from '../lib/route';
 import { categoryStats } from '../lib/meta';
+import { offTopicReason, basisReason, bandReason, implausibleReason, PRICE_BAND } from '../lib/plausibility';
+import { median } from '../lib/money';
 
 let pass = 0, fail = 0;
 const failures: string[] = [];
@@ -389,8 +391,17 @@ console.log('\nEXPORTERSINDIA — parsed from an archived page, no network');
   eq('source_ref is stable across two parses of the same body',
     again.map((o) => o.source_ref).join(','), offers.map((o) => o.source_ref).join(','));
 
-  ok('every priced listing survives normalisation',
-    priced.every((o) => (normalise(o) as any).ok !== false));
+  // Every priced listing either becomes a price or is refused for a stated
+  // plausibility reason — never for a parse or unit failure. This fixture
+  // carries five refractory bricks (cold-face, hot-face, alumina fire brick),
+  // which are the wrong product class for a masonry catalogue and say so.
+  const outcomes = priced.map((o) => normalise(o) as any);
+  const refused = outcomes.filter((n) => n.ok === false);
+  ok('every priced listing survives normalisation or is refused as implausible',
+    refused.every((n) => /different product class|plausible band|retail pouch|coil length|bore is outside/.test(n.reason)),
+    refused.map((n) => n.reason).join(' | '));
+  ok('the fixture\'s refractory bricks are refused as a different product class',
+    refused.length === 5 && refused.every((n) => /different product class/.test(n.reason)), String(refused.length));
 }
 
 // ── the base-row cache must not change any answer ──────────────────────────
@@ -922,6 +933,132 @@ console.log('\nCATALOGUE — the home page and the listing agree, and nothing is
     contrast(rgb('--ink'), pill) >= AA_TEXT);
   ok(`--accent clears AA on the coming-soon pill over a white photograph — ${contrast(rgb('--accent'), pill).toFixed(2)}`,
     contrast(rgb('--accent'), pill) >= AA_TEXT);
+}
+
+
+
+// ── PLAUSIBILITY: what may become a price, and whether the two cities agree ──
+// The listing opened on ₹47.84 a bag of "cement" (a solvent-cement glue) in
+// Vijayawada and ₹286 in Hyderabad; TMT on ₹30 a kg (an FRP bar); pipes on ₹1 a
+// metre (a coupler read as a 3 m length). Every one of those passed the
+// relative absurdity gate. These rules are the reason they no longer reach a
+// card, and the last block is the reason a reader comparing the two cities
+// sees the same market twice, not two different mistakes.
+console.log('\nPLAUSIBILITY — the rules, the store they leave behind, and the two cities');
+{
+  const refused = (cat: string, title: string) => offTopicReason(cat, title) !== null;
+  // The wrong product class, by title.
+  for (const [cat, t] of [
+    ['cement', 'Welcoseal UPVC Solvent Cement, Feature : High Quality'],
+    ['cement', 'Wall Doctor White Cement Powder, For Constructional'],
+    ['cement', 'Jainco High Alumina Refractory Cement, Form : Powder'],
+    ['cement', 'Myk Arment Rearm Fix 10S Fast Setting Cement'],
+    ['tmt_steel', '40mm FRP Reinforcement Bars'],
+    ['tmt_steel', 'Basalt Rebars, For Construction'],
+    ['tmt_steel', 'Mild Steel Round Rod, For Construction, EN 8'],
+    ['water_pipes', 'Cpvc Pipe Coupler'],
+    ['water_pipes', 'TOMSON CPVC Male Adapter, MTA'],
+    ['water_pipes', 'JOTON IVERY CPVC PLAIN F.T.A, for HOT & COLD WATER'],
+    ['water_pipes', 'PVC 120ml Stand Up Tube, Color : Blue'],
+    ['water_pipes', 'Lay Flat Pipe 750micron - 50 Meter Roll / Dia 75 mm'],
+    ['bricks_blocks', 'Concrete Cover Blocks, For Construction'],
+    ['bricks_blocks', 'Alumina Standard Fire Brick, Size : 9 X 4 X 3 Inch'],
+    ['bricks_blocks', 'Polished Solid Concrete Interlocking Paver Blocks'],
+    ['bricks_blocks', 'Cold Face Insulation Bricks, Size : 9*4.5*3'],
+  ] as const) ok(`refused as off-topic: ${cat} / "${t.slice(0, 44)}"`, refused(cat, t));
+
+  // The right product, described the way sellers describe it — kept.
+  for (const [cat, t] of [
+    ['cement', 'UltraTech PPC Cement, 50 kg'],
+    ['cement', 'Birla White Cement, 50 Kg'],
+    ['tmt_steel', 'SS Gold 600+ TMT Steel Bar'],
+    ['tmt_steel', 'Beekay 10mm Fe 550D TMT Bar -Tough and Reliable for Structural Integrity'],
+    ['tmt_steel', '6mm MS Ribbed TMT Coil, For Construction'],
+    ['water_pipes', 'Truflo SWR Ringfit Pipe Type A Grey 90 mm (6 Feet) Double Socket'],
+    ['water_pipes', '3 inch Astral Foamcore UPVC Drainage Piping'],
+    ['water_pipes', 'Dripfit Pvc 75Mm Swr Pipe 3 Metre'],
+    ['water_pipes', 'Finolex Grey PVC Agricultural Pipe'],
+    ['bricks_blocks', 'Rectangular Clay Wire Cut Bricks, Color : Red'],
+    ['bricks_blocks', 'Clay Polished Interlocking Bricks, Brand Name : Mookambika'],
+    ['bricks_blocks', 'NCL AAC Blocks - LightWeight FlyAsh Blocks, Size: 600*200*225Mm'],
+    ['bricks_blocks', 'Fly Ash Bricks, For Compound Wall, Color : Grey'],
+  ] as const) ok(`kept: ${cat} / "${t.slice(0, 44)}"`, !refused(cat, t), offTopicReason(cat, t) ?? '');
+
+  // The basis.
+  ok('a 5 kg cement pouch is not a bag', basisReason({ category: 'cement', title: 'x', pack_size_kg: 5 }) !== null);
+  ok('a 25 kg cement bag is a bag', basisReason({ category: 'cement', title: 'x', pack_size_kg: 25 }) === null);
+  ok('a coil with no stated length cannot be priced per metre',
+    basisReason({ category: 'water_pipes', title: 'PVC Flexible Pipes, Colour: Grey', quoted_unit: 'coil' }) !== null);
+  ok('a coil with a stated length can',
+    basisReason({ category: 'water_pipes', title: 'HDPE Pipe 25 mm, 100 m coil', quoted_unit: 'coil' }) === null);
+  ok('a 6 mm bore is tubing, not plumbing (parser trusted)', basisReason({ category: 'water_pipes', title: 'x', nominal_bore_mm: 6, bore_trusted: true }) !== null);
+  ok('a 6 mm bore is let through when the parser is not trusted', basisReason({ category: 'water_pipes', title: 'x', nominal_bore_mm: 6, bore_trusted: false }) === null);
+  ok('a 600 mm bore is infrastructure either way', basisReason({ category: 'water_pipes', title: 'x', nominal_bore_mm: 600, bore_trusted: false }) !== null);
+
+  // The bands, on the seller's own figure per canonical unit.
+  const band = (cat: string, paise: number, cement_type: string | null = null) =>
+    bandReason({ category: cat, title: 'x', cement_type, base_paise_per_canonical: paise });
+  ok('₹47.84 a bag of cement is refused', band('cement', 47_84) !== null);
+  ok('₹120 a bag of cement is refused', band('cement', 120_00) !== null);
+  ok('₹386 a bag of cement is kept', band('cement', 386_00) === null);
+  ok('₹1,550 a bag of grey cement is refused', band('cement', 1550_00) !== null);
+  ok('₹1,150 a bag of white cement is kept', band('cement', 1150_00, 'White cement') === null);
+  ok('₹30 a kg of TMT is refused', band('tmt_steel', 30_00) !== null);
+  ok('₹65 a kg of TMT is kept', band('tmt_steel', 65_00) === null);
+  ok('₹550 a kg of TMT is refused', band('tmt_steel', 550_00) !== null);
+  ok('₹1 a metre of pipe is refused', band('water_pipes', 1_00) !== null);
+  ok('₹1 a brick is refused', band('bricks_blocks', 1_00) !== null);
+
+  // The store the rules leave behind: every published price sits inside its
+  // category's band once GST and logistics are on top, in both regions.
+  const surface = prep(`
+    SELECT p.category, op.region_id, op.normalised_paise, op.freight_paise + op.handling_paise + op.loading_paise AS logistics
+      FROM offer_price op JOIN offer o ON o.offer_id = op.offer_id JOIN product p ON p.product_id = op.product_id
+     WHERE o.is_active = 1`).all() as Array<{ category: string; region_id: string; normalised_paise: number; logistics: number }>;
+  const LOGISTICS_CAP: Record<string, number> = { cement: 60_00, tmt_steel: 5_00, water_pipes: 20_00, bricks_blocks: 25_00 };
+  const by = new Map<string, number[]>();
+  for (const r of surface) (by.get(`${r.category}|${r.region_id}`) ?? by.set(`${r.category}|${r.region_id}`, []).get(`${r.category}|${r.region_id}`)!).push(r.normalised_paise);
+  for (const [k, vals] of by) {
+    const [cat] = k.split('|');
+    const b = cat === 'cement' ? PRICE_BAND.cement_white : PRICE_BAND[cat];
+    const lo = Math.min(...vals), hi = Math.max(...vals);
+    ok(`${k}: lowest published price ₹${(lo / 100).toFixed(2)} is at or above the band floor`, lo >= b.lo);
+    ok(`${k}: highest published price ₹${(hi / 100).toFixed(2)} is within band × 1.5 (GST and logistics)`, hi <= b.hi * 1.5);
+  }
+  const worstLogistics = new Map<string, number>();
+  for (const r of surface) worstLogistics.set(r.category, Math.max(worstLogistics.get(r.category) ?? 0, r.logistics));
+  for (const [cat, cap] of Object.entries(LOGISTICS_CAP)) {
+    const w = worstLogistics.get(cat) ?? 0;
+    ok(`${cat}: no unit carries more than ₹${cap / 100} of logistics (worst ₹${(w / 100).toFixed(2)})`, w <= cap);
+  }
+  ok('no active offer is one the rules would refuse', (prep(`
+    SELECT o.listing_title, o.base_unit, o.base_paise_canonical, p.category, p.pack_size, p.attrs, p.title AS ptitle
+      FROM offer o JOIN product p ON p.product_id = o.product_id WHERE o.is_active = 1`).all() as any[])
+    .every((r) => implausibleReason({
+      category: r.category, title: r.listing_title ?? r.ptitle, cement_type: JSON.parse(r.attrs || '{}').cement_type ?? null,
+      pack_size_kg: r.pack_size, quoted_unit: r.base_unit, bore_trusted: false, base_paise_per_canonical: r.base_paise_canonical,
+    }) === null));
+  ok('a quarantined offer carries its reason on the row',
+    ((prep(`SELECT COUNT(*) AS n FROM offer WHERE is_active = 0 AND quarantine_reason IS NOT NULL`).get() as any).n as number) > 0);
+
+  // The two cities describe the same market. Coverage differs (Hyderabad has
+  // more sellers); the level should not. Medians and floors within a factor
+  // of two of each other, every category — the reader's complaint was that
+  // they were not.
+  for (const cat of CATEGORIES) {
+    const h = (by.get(`${cat}|hyderabad`) ?? []).sort((a, b) => a - b);
+    const v = (by.get(`${cat}|vijayawada`) ?? []).sort((a, b) => a - b);
+    if (!h.length || !v.length) { ok(`${cat}: both cities have prices`, false); continue; }
+    const mr = median(h) / median(v), lr = h[0] / v[0];
+    ok(`${cat}: medians agree across the two cities (Hyd ₹${(median(h) / 100).toFixed(2)} vs Vja ₹${(median(v) / 100).toFixed(2)}, ×${mr.toFixed(2)})`, mr >= 0.5 && mr <= 2);
+    ok(`${cat}: floors agree across the two cities (Hyd ₹${(h[0] / 100).toFixed(2)} vs Vja ₹${(v[0] / 100).toFixed(2)}, ×${lr.toFixed(2)})`, lr >= 0.5 && lr <= 2);
+  }
+
+  // And the catalogue card carries the median, so a reader compares cities on
+  // the middle of the market, not on one seller's teaser.
+  const st = categoryStats();
+  ok('every category stat carries a median between its floor and ceiling',
+    st.every((s) => s.median_paise >= s.lo_paise && s.median_paise <= s.hi_paise));
 }
 
 

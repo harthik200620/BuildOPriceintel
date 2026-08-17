@@ -14,7 +14,7 @@ import {
   ResultsSkeleton, ZeroResult, NoDataYet, EmptyCategory, ErrorState, OfflineBanner, DegradedBanner,
 } from '@/components/States';
 import { rupees, UNIT_SPOKEN } from '@/components/primitives';
-import { LIVE_CATALOGUE, catalogueById, type CatalogueEntry } from '@/lib/catalogue';
+import { LIVE_CATALOGUE, catalogueById, unitSuffix, type CatalogueEntry } from '@/lib/catalogue';
 import { parseLoc, buildUrl, viewKey, type Loc } from '@/lib/route';
 import { readWhere, writeWhere } from '@/lib/prefs';
 import { CategoryIcon, IconChevronRight, IconFilter } from '@/components/icons';
@@ -299,6 +299,7 @@ export default function Explorer({
      phone listing shifted 0.15 CLS before this. */
   const regionMeta = meta?.regions?.find((r: any) => r.region_id === regionId);
   const sorAnchor = data ? data.sor_anchor : (entry ? regionMeta?.sor?.[entry.id] ?? null : null);
+  const catStat = entry ? (regionMeta?.stats?.find((s: any) => s.category === entry.id) ?? null) : null;
   const sortExplain = data ? data.disclosure.explanation : meta?.sorts?.[sort]?.explain;
   const countSlot = (label: string) => (
     data
@@ -392,6 +393,16 @@ export default function Explorer({
                             </button>
                           </>
                         )}
+                      </p>
+                    )}
+                    {/* Where the market sits, from meta — the same rows the card
+                        used, so the two never disagree. The typical figure is
+                        the one to compare a city on; the lowest is one seller. */}
+                    {!vendorFilter && !query && catStat && (
+                      <p className="text-[12px] mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5" style={{ color: 'var(--ink-2)' }}>
+                        <span>typical <span className="fig font-semibold" style={{ color: 'var(--ink)' }}>{rupees(catStat.median_paise, catStat.median_paise < 10_000)}</span><span style={{ color: 'var(--ink-3)' }}>{unitSuffix(entry.unit)}</span></span>
+                        <span>from <span className="fig font-semibold" style={{ color: 'var(--ink)' }}>{rupees(catStat.lo_paise, catStat.lo_paise < 10_000)}</span><span style={{ color: 'var(--ink-3)' }}>{unitSuffix(entry.unit)}</span></span>
+                        <span className="tnum" style={{ color: 'var(--ink-3)' }}>{catStat.offers.toLocaleString('en-IN')} offers · {catStat.sellers.toLocaleString('en-IN')} sellers in {regionName}</span>
                       </p>
                     )}
                     {!vendorFilter && (

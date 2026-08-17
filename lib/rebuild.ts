@@ -12,6 +12,7 @@ import { SLA_HOURS, CATEGORY_VOLATILITY } from './freshness';
 import { CATEGORY_LOGISTICS } from './freight';
 import { categoryForms } from './query/vocab';
 import { invalidateSearchCache } from './search';
+import { implausibleReason } from './plausibility';
 
 interface OfferRow {
   offer_id: string; product_id: string; vendor_id: string; region_id: string;
@@ -28,6 +29,58 @@ interface OfferRow {
 export interface RebuildStats {
   offers: number; priced: number; products: number; rows: number; historyRows: number; offerRows: number;
   quarantined: Array<{ key: string; paise: number; median: number; ratio: number }>;
+  /** Offers the plausibility rules took out of the surface on this rebuild, by reason. */
+  implausible: Array<{ reason: string; count: number; examples: string[] }>;
+}
+
+/**
+ * The plausibility pass. Every active offer is held against lib/plausibility
+ * from what the store already knows about it — the seller's own title, the
+ * resolved product attributes, the quoted unit, the seller's figure per
+ * canonical unit — and one that fails is deactivated with the reason written
+ * on the row. Deactivated, not deleted: the source is kept, and a later
+ * collection that sees the listing again and finds it passing (the seller
+ * fixed a price, or a rule was loosened) reactivates it.
+ *
+ * Runs before the price surface is built, so search, the vendor table, the
+ * card figures and the chat tools — every reader of `is_active = 1` — agree.
+ * The relative absurdity gate below stays as the second line.
+ */
+export function quarantineImplausible(): RebuildStats['implausible'] {
+  const rows = prep(`
+    SELECT o.offer_id, o.listing_title, o.base_unit, o.base_paise_canonical,
+           p.category, p.title AS product_title, p.pack_size, p.attrs
+      FROM offer o JOIN product p ON p.product_id = o.product_id
+     WHERE o.is_active = 1`).all() as any[];
+  const byReason = new Map<string, { count: number; examples: string[] }>();
+  const mark = db().prepare(`UPDATE offer SET is_active = 0, quarantine_reason = ? WHERE offer_id = ?`);
+  tx(() => {
+    for (const r of rows) {
+      let attrs: any = {};
+      try { attrs = JSON.parse(r.attrs || '{}'); } catch { /* attrs are ours; never malformed, but never fatal */ }
+      const reason = implausibleReason({
+        category: r.category,
+        title: r.listing_title ?? r.product_title ?? '',
+        cement_type: attrs.cement_type ?? null,
+        pack_size_kg: r.pack_size ?? attrs.pack_size_kg ?? null,
+        nominal_bore_mm: attrs.nominal_bore_mm ?? null,
+        quoted_unit: r.base_unit,
+        // Stored bores may predate the thickness-aware parser; only the
+        // infrastructure end of the range is enforced on them.
+        bore_trusted: false,
+        base_paise_per_canonical: r.base_paise_canonical,
+      });
+      if (!reason) continue;
+      mark.run(reason, r.offer_id);
+      // Family, not the full sentence — the sentence carries the figure.
+      const family = reason.replace(/\("[^"]*"\)/, '').replace(/₹[\d,.]+/g, '₹…').replace(/\d+(\.\d+)? (kg|mm)/g, 'N $2');
+      const e = byReason.get(family) ?? { count: 0, examples: [] };
+      e.count++;
+      if (e.examples.length < 3) e.examples.push(String(r.listing_title ?? r.product_title).slice(0, 60));
+      byReason.set(family, e);
+    }
+  });
+  return [...byReason.entries()].map(([reason, v]) => ({ reason, ...v })).sort((a, b) => b.count - a.count);
 }
 
 /**
@@ -51,7 +104,15 @@ export function landedFor(
   const gst = gstOn(baseEx, o.gst_rate_bp);
 
   const logistics = CATEGORY_LOGISTICS[o.category] ?? CATEGORY_LOGISTICS.cement;
-  const amortiseQty = qtyOverride ?? (o.moq_qty && o.moq_qty > 0 ? o.moq_qty : logistics.referenceQty);
+  // The trip is amortised over the category's reference order — 50 bags,
+  // 1,000 kg, 20 lengths, 1,000 pieces — so every seller's landed figure is
+  // on the same basis. A seller whose MOQ is LARGER than that cannot be bought
+  // from in smaller lots, so their trip spreads over the MOQ, which is honest
+  // and cheaper per unit. A seller whose MOQ is smaller ("MOQ: 1 piece") used
+  // to be amortised over that MOQ, which put a whole parcel trip and the
+  // minimum handling charge on a single ₹7 brick: ₹149.85 landed, top of the
+  // Vijayawada list, against ₹8 for the same brick from the seller beside it.
+  const amortiseQty = qtyOverride ?? Math.max(o.moq_qty && o.moq_qty > 0 ? o.moq_qty : 0, logistics.referenceQty);
 
   const f = computeFreight({
     vendorId: o.vendor_id,
@@ -92,6 +153,10 @@ export function rebuildPrices(runId: string, trigger: PriceTrigger = 'schedule')
     const pin = prep(`SELECT lat, lon FROM pincode WHERE pincode = ?`).get(r.default_pincode) as any;
     destByRegion.set(r.region_id, pin ? { lat: pin.lat, lon: pin.lon } : { lat: r.centroid_lat, lon: r.centroid_lon });
   }
+
+  // First the plausibility pass, so the rows below are the ones that may
+  // become prices at all.
+  const implausible = quarantineImplausible();
 
   const offers = prep(OFFER_SQL).all() as OfferRow[];
   const now = new Date().toISOString();
@@ -270,7 +335,7 @@ export function rebuildPrices(runId: string, trigger: PriceTrigger = 'schedule')
     );
   }
 
-  return { offers: offers.length, priced, products: grouped.size, rows, historyRows, offerRows, quarantined };
+  return { offers: offers.length, priced, products: grouped.size, rows, historyRows, offerRows, quarantined, implausible };
 }
 
 /**
