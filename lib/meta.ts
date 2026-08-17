@@ -34,11 +34,16 @@ export interface CategoryStat {
   offers: number;
   /** Distinct sellers, which is what the listing shows one card per. */
   sellers: number;
-  /** Lowest landed price per canonical unit, in paise. */
-  lo_paise: number;
-  hi_paise: number;
-  /** The middle offer — the figure to compare two cities on; a minimum is one seller. */
-  median_paise: number;
+  /** Lowest landed price per canonical unit, in paise — over QUOTABLE offers
+      only. A price past three times its refresh window cannot be quoted, and a
+      card that said "from ₹268" on the strength of one would be advertising a
+      price no buyer can get. Null when nothing in the category is quotable. */
+  lo_paise: number | null;
+  hi_paise: number | null;
+  /** The middle quotable offer — the figure to compare two cities on; a minimum is one seller. */
+  median_paise: number | null;
+  /** How many of the offers are quotable — what the figures above are over. */
+  quotable: number;
   /** Offers whose price is FRESH or AGEING, i.e. still counts toward a headline. */
   fresh: number;
   /** Most recent priced_as_of across the offers, ISO. */
@@ -72,10 +77,13 @@ export function categoryStats(now: Date = new Date()): CategoryStat[] {
     a.products.add(r.product_id);
     a.sellers.add(r.vendor_id);
     a.offers += 1;
-    a.prices.push(r.normalised_paise);
-    if (r.normalised_paise < a.lo) a.lo = r.normalised_paise;
-    if (r.normalised_paise > a.hi) a.hi = r.normalised_paise;
-    if (countsTowardHeadline(assess(r.priced_as_of, r.sla_hours, now))) a.fresh += 1;
+    const f = assess(r.priced_as_of, r.sla_hours, now);
+    if (f.quotable) {
+      a.prices.push(r.normalised_paise);
+      if (r.normalised_paise < a.lo) a.lo = r.normalised_paise;
+      if (r.normalised_paise > a.hi) a.hi = r.normalised_paise;
+    }
+    if (countsTowardHeadline(f)) a.fresh += 1;
     if (!a.seen || r.priced_as_of > a.seen) a.seen = r.priced_as_of;
   }
 
@@ -84,7 +92,9 @@ export function categoryStats(now: Date = new Date()): CategoryStat[] {
     return {
       category, region_id,
       products: a.products.size, offers: a.offers, sellers: a.sellers.size,
-      lo_paise: a.lo, hi_paise: a.hi, median_paise: median(a.prices), fresh: a.fresh, seen_at: a.seen,
+      lo_paise: a.prices.length ? a.lo : null, hi_paise: a.prices.length ? a.hi : null,
+      median_paise: a.prices.length ? median(a.prices) : null,
+      quotable: a.prices.length, fresh: a.fresh, seen_at: a.seen,
     };
   });
 }

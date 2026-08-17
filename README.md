@@ -679,7 +679,11 @@ published price sits inside its band with GST and logistics on top, and that **H
 agree within a factor of two on every category's median and floor** — after the pass: cement ₹383 vs ₹387
 typical, TMT ₹65 vs ₹58, pipes ₹113 vs ₹90, bricks ₹28 vs ₹16. `npm run rebuild` re-applies all of it and
 prints what moved. The catalogue card and the listing header carry the median as well as the floor, because
-the middle of a market compares between cities and one seller's teaser does not.
+the middle of a market compares between cities and one seller's teaser does not — and both are measured
+over **quotable** offers only: a price past three times its refresh window cannot be quoted, so it is
+neither a card's "from" nor the head of a lowest-price listing (it sorts after every current one, still
+shown, still struck). Vijayawada cement had opened on a ₹268.50 bag priced eleven days earlier; it now
+opens on ₹351.10, which a buyer can order today.
 
 **Collection ran against real sources and recorded every refusal.** `data/logs/collection-<date>.md` lists every source hit, what it returned, and an estimate of the volume behind each block. Nothing was capped silently and no offer was ever invented.
 

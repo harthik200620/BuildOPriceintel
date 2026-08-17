@@ -884,8 +884,8 @@ console.log('\nCATALOGUE — the home page and the listing agree, and nothing is
         !!st && st.sellers === r.total);
       ok(`${c.label} / ${region_id}: card offers is the candidate count and ≥ sellers`,
         !!st && st.offers >= st.sellers && st.products > 0);
-      ok(`${c.label} / ${region_id}: from-price is a real landed figure`,
-        !!st && Number.isFinite(st.lo_paise) && st.lo_paise > 0 && st.lo_paise <= st.hi_paise);
+      ok(`${c.label} / ${region_id}: from-price is a real, quotable landed figure`,
+        !!st && st.lo_paise != null && st.hi_paise != null && st.lo_paise > 0 && st.lo_paise <= st.hi_paise && st.quotable > 0);
     }
   }
 
@@ -1058,7 +1058,23 @@ console.log('\nPLAUSIBILITY — the rules, the store they leave behind, and the 
   // the middle of the market, not on one seller's teaser.
   const st = categoryStats();
   ok('every category stat carries a median between its floor and ceiling',
-    st.every((s) => s.median_paise >= s.lo_paise && s.median_paise <= s.hi_paise));
+    st.every((s) => s.median_paise != null && s.lo_paise != null && s.hi_paise != null && s.median_paise >= s.lo_paise && s.median_paise <= s.hi_paise));
+  // The card's floor is a price a buyer can get: never an EXPIRED one.
+  {
+    const expiredFloor = (prep(`
+      SELECT p.category, op.region_id, MIN(op.normalised_paise) AS lo
+        FROM offer_price op JOIN offer o ON o.offer_id = op.offer_id JOIN product p ON p.product_id = op.product_id
+       WHERE o.is_active = 1 GROUP BY 1, 2`).all() as any[])
+      .some((r) => { const s = st.find((x) => x.category === r.category && x.region_id === r.region_id); return !!s && s.lo_paise != null && s.lo_paise < r.lo; });
+    ok('the card floor is never below the cheapest stored price (it is over a subset)', !expiredFloor);
+    const cementV = st.find((x) => x.category === 'cement' && x.region_id === 'vijayawada');
+    ok(`Vijayawada cement floor is a quotable price (₹${cementV && cementV.lo_paise != null ? (cementV.lo_paise / 100).toFixed(2) : '?'}), not the ₹268.50 priced eleven days ago`,
+      !!cementV && cementV.lo_paise != null && cementV.lo_paise !== 26850);
+    // And a price-low listing opens on a quotable price.
+    const low = search({ q: '', pincode: '520001', region_id: 'vijayawada', category: 'cement', sort: 'price_low' });
+    ok('a lowest-price listing opens on a quotable price, expired ones after',
+      low.results.length > 0 && low.results[0].freshness_state !== 'EXPIRED');
+  }
 }
 
 

@@ -130,12 +130,12 @@ function LiveCard({
       }}
       className="cat-card lift group"
       title={
-        stat
-          ? `${entry.tagline}. Typical ${rupees(stat.median_paise, stat.median_paise < 10_000)}${suffix} across ${stat.offers.toLocaleString('en-IN')} offers; the lowest is ${rupees(stat.lo_paise, stat.lo_paise < 10_000)}${suffix}.`
+        stat && stat.median_paise != null && stat.lo_paise != null
+          ? `${entry.tagline}. Typical ${rupees(stat.median_paise, stat.median_paise < 10_000)}${suffix} across ${stat.quotable.toLocaleString('en-IN')} current offers; the lowest is ${rupees(stat.lo_paise, stat.lo_paise < 10_000)}${suffix}.`
           : entry.tagline
       }
       aria-label={
-        stat
+        stat && stat.median_paise != null && stat.lo_paise != null
           ? `${entry.label}: ${stat.offers.toLocaleString('en-IN')} offers from ${stat.sellers.toLocaleString('en-IN')} sellers, typically ${rupees(stat.median_paise)} ${spoken}, from ${rupees(stat.lo_paise)} ${spoken}. Open the listing.`
           : `${entry.label}. Open the listing.`
       }
@@ -159,9 +159,17 @@ function LiveCard({
           {stat ? (
             <>
               <span className="cat-from">
-                <span className="cat-from-label">from</span>{' '}
-                <span className="fig">{rupees(stat.lo_paise, stat.lo_paise < 10_000)}</span>
-                <span className="cat-from-unit">{suffix}</span>
+                {stat.lo_paise != null ? (
+                  <>
+                    <span className="cat-from-label">from</span>{' '}
+                    <span className="fig">{rupees(stat.lo_paise, stat.lo_paise < 10_000)}</span>
+                    <span className="cat-from-unit">{suffix}</span>
+                  </>
+                ) : (
+                  // Every price in the category is past its refresh window.
+                  // Said plainly, rather than headlining a figure nobody can get.
+                  <span className="cat-from-label">no current price</span>
+                )}
               </span>
               <span className="cat-counts tnum">
                 {stat.offers.toLocaleString('en-IN')} offers · {stat.sellers.toLocaleString('en-IN')} sellers

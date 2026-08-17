@@ -205,7 +205,7 @@ export const SORTS: Record<string, { label: string; explain: string }> = {
   },
   price_low: {
     label: 'Lowest delivered price',
-    explain: 'sorted on the landed price per canonical unit, delivered to your pincode — not on the seller\'s quoted figure',
+    explain: 'sorted on the landed price per canonical unit, delivered to your pincode — not on the seller\'s quoted figure; a price past its refresh window cannot be quoted and is listed after every current one',
   },
   best_value: {
     label: 'Best value',

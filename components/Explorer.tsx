@@ -400,9 +400,17 @@ export default function Explorer({
                         the one to compare a city on; the lowest is one seller. */}
                     {!vendorFilter && !query && catStat && (
                       <p className="text-[12px] mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5" style={{ color: 'var(--ink-2)' }}>
-                        <span>typical <span className="fig font-semibold" style={{ color: 'var(--ink)' }}>{rupees(catStat.median_paise, catStat.median_paise < 10_000)}</span><span style={{ color: 'var(--ink-3)' }}>{unitSuffix(entry.unit)}</span></span>
-                        <span>from <span className="fig font-semibold" style={{ color: 'var(--ink)' }}>{rupees(catStat.lo_paise, catStat.lo_paise < 10_000)}</span><span style={{ color: 'var(--ink-3)' }}>{unitSuffix(entry.unit)}</span></span>
-                        <span className="tnum" style={{ color: 'var(--ink-3)' }}>{catStat.offers.toLocaleString('en-IN')} offers · {catStat.sellers.toLocaleString('en-IN')} sellers in {regionName}</span>
+                        {catStat.median_paise != null && catStat.lo_paise != null ? (
+                          <>
+                            <span>typical <span className="fig font-semibold" style={{ color: 'var(--ink)' }}>{rupees(catStat.median_paise, catStat.median_paise < 10_000)}</span><span style={{ color: 'var(--ink-3)' }}>{unitSuffix(entry.unit)}</span></span>
+                            <span>from <span className="fig font-semibold" style={{ color: 'var(--ink)' }}>{rupees(catStat.lo_paise, catStat.lo_paise < 10_000)}</span><span style={{ color: 'var(--ink-3)' }}>{unitSuffix(entry.unit)}</span></span>
+                          </>
+                        ) : (
+                          <span>no current price — every offer here is past its refresh window</span>
+                        )}
+                        <span className="tnum" style={{ color: 'var(--ink-3)' }}>
+                          {catStat.quotable.toLocaleString('en-IN')} current of {catStat.offers.toLocaleString('en-IN')} offers · {catStat.sellers.toLocaleString('en-IN')} sellers in {regionName}
+                        </span>
                       </p>
                     )}
                     {!vendorFilter && (

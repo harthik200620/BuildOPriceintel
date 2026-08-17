@@ -752,7 +752,15 @@ export function search(input: SearchInput): SearchResponse {
     }
     const byId = new Map(afterFacets.map(({ r }) => [r.offer_id, r]));
     const g = (id: string) => byId.get(id)!;
-    if (input.sort === 'price_low') ranked = [...ranked].sort((a, b) => a.normalised_paise - b.normalised_paise);
+    if (input.sort === 'price_low') {
+      // A price past three times its refresh window cannot be quoted, so it
+      // cannot be the cheapest available — it sorts after every current one,
+      // still shown, still struck. Before this a ₹302 BigBMart bag priced ten
+      // days earlier opened the Vijayawada list under "lowest delivered price"
+      // ahead of a ₹351 bag a buyer could actually order.
+      const expired = (r: Scored) => (assess(g(r.offer_id).priced_as_of, g(r.offer_id).sla_hours).state === 'EXPIRED' ? 1 : 0);
+      ranked = [...ranked].sort((a, b) => expired(a) - expired(b) || a.normalised_paise - b.normalised_paise);
+    }
     else if (input.sort === 'fastest') ranked = [...ranked].sort((a, b) => (g(a.offer_id).lead_time_days ?? 9) - (g(b.offer_id).lead_time_days ?? 9));
     else if (input.sort === 'freshest') ranked = [...ranked].sort((a, b) => (g(b.offer_id).priced_as_of > g(a.offer_id).priced_as_of ? 1 : -1));
     else if (input.sort === 'best_value') {
