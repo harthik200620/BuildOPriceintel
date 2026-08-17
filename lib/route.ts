@@ -4,6 +4,10 @@
  *   /                 the catalogue
  *   /c/<slug>         one category: every seller in it, with the filter rail
  *   /search?q=…       a query across categories
+ *   /logo             the mark — the stitched "b" — laid over whatever view
+ *                     was showing. It names no listing of its own, so it never
+ *                     round-trips through buildUrl(); the explorer pushes it as
+ *                     an entry of its own and back/× close it, like a sheet.
  *
  * Query, sort and facet selections ride in the query string, so a narrowed
  * listing is a link that can be sent and a back button that works. What stays
@@ -17,6 +21,7 @@ export type View =
   | { kind: 'home' }
   | { kind: 'search' }
   | { kind: 'category'; entry: CatalogueEntry }
+  | { kind: 'logo' }
   | { kind: 'missing' };
 
 export interface Loc {
@@ -30,6 +35,17 @@ export interface Loc {
 
 export const DEFAULT_SORT = 'recommended';
 
+/** The mark's own URL. Pushed directly by the explorer, never built from a Loc. */
+export const LOGO_PATH = '/logo';
+
+/** The catalogue with nothing narrowed — what a hard-loaded /logo lays over. */
+export const HOME_LOC: Loc = { view: { kind: 'home' }, q: '', sort: DEFAULT_SORT, selections: {}, sku: null };
+
+/** What is on the page under the mark. /logo names no listing, so it is the
+    pristine catalogue — a `?sku=` or `?q=` riding on /logo must not open a
+    sheet or a search underneath the overlay. Any other Loc is itself. */
+export const underlay = (l: Loc): Loc => (l.view.kind === 'logo' ? HOME_LOC : l);
+
 export function parseLoc(pathname: string, search: string): Loc {
   const sp = new URLSearchParams(search);
   const segs = pathname.split('/').filter(Boolean);
@@ -37,6 +53,7 @@ export function parseLoc(pathname: string, search: string): Loc {
   let view: View;
   if (segs.length === 0) view = q ? { kind: 'search' } : { kind: 'home' };
   else if (segs.length === 1 && segs[0] === 'search') view = { kind: 'search' };
+  else if (segs.length === 1 && segs[0] === 'logo') view = { kind: 'logo' };
   else if (segs.length === 2 && segs[0] === 'c') {
     const e = catalogueBySlug(segs[1]);
     view = e ? { kind: 'category', entry: e } : { kind: 'missing' };
@@ -48,6 +65,8 @@ export function parseLoc(pathname: string, search: string): Loc {
 }
 
 export function buildUrl(loc: Loc): string {
+  // 'logo' deliberately falls through to '/': the mark is an overlay the
+  // explorer pushes by hand (LOGO_PATH), never a view it writes from state.
   const path =
     loc.view.kind === 'search' ? '/search'
     : loc.view.kind === 'category' ? `/c/${loc.view.entry.slug}`

@@ -12,6 +12,16 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8737", "--directory", "typeface"],
       "port": 8737
+    },
+    {
+      "name": "stitch-clone",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["stitch-clone/serve.mjs"],
+      "port": 5178
+    },
+    {
+      "name": "buildo-attached",
+      "url": "http://localhost:3001"
     }
   ]
 }

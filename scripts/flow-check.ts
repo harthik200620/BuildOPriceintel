@@ -128,6 +128,33 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
     await page.waitForURL(BASE + '/');
     ok('wordmark returns home client-side', path(page) === '/');
 
+    // The mark → /logo: the stitched "b" over the page, its own history entry;
+    // Escape walks back, focus returns to the mark. (This context runs with
+    // reduced motion, so the engine is in static mode — a canvas, or the SVG
+    // fallback where headless Chromium has no WebGL — either is the mark.)
+    await page.locator('header a[href="/logo"]').click();
+    await page.waitForURL('**/logo');
+    ok('the mark opens /logo without reload', path(page) === '/logo');
+    await page.locator('[role="dialog"][aria-modal="true"]').waitFor();
+    await page.waitForSelector('[role="dialog"] canvas, [role="dialog"] svg:not([aria-hidden])', { timeout: 30000 });
+    ok('the stitched mark has a surface (canvas, or the svg fallback)',
+      await page.locator('[role="dialog"] canvas, [role="dialog"] svg:not([aria-hidden])').count() >= 1);
+    ok('the page behind the mark is inert', await page.locator('header.sticky').evaluate((el) => !!el.closest('[inert]')));
+    ok('the mark takes the title and a white theme-color',
+      (await page.title()) === 'Build Objects — the mark'
+      && (await page.getAttribute('meta[name="theme-color"]', 'content')) === '#ffffff');
+    await page.keyboard.press('Escape');
+    await page.waitForURL(BASE + '/');
+    ok('Escape walks back to the previous URL and drops the dialog', path(page) === '/' && await page.locator('[role="dialog"]').count() === 0);
+    ok('focus returned to the mark', await page.evaluate(() => document.activeElement?.getAttribute('href') === '/logo'));
+    ok('theme-color is restored', (await page.getAttribute('meta[name="theme-color"]', 'content')) === '#04141a');
+    const rl = await page.goto(BASE + '/logo', { waitUntil: 'networkidle' });
+    await hydrated(page);
+    ok('hard-loaded /logo is a 200 with the dialog', rl?.status() === 200 && await page.locator('[role="dialog"]').isVisible());
+    await page.locator('[role="dialog"] a[aria-label^="Close"]').click();
+    await page.waitForURL(BASE + '/');
+    ok('× on a hard-loaded /logo goes home (nothing to walk back to)', path(page) === '/' && await page.locator('[role="dialog"]').count() === 0);
+
     ok('no console/page errors on desktop', errors.length === 0, errors.slice(0, 3).join(' | '));
 
     // A 404 for a coming-soon slug. (After the error check — these two

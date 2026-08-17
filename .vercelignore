@@ -18,3 +18,7 @@ collector/fixtures
 data/snapshots
 screenshots
 tests
+
+# The stitch research folder: the reverse-engineered originals, proof captures
+# and brand fonts behind lib/stitch/. Nothing on the site imports it.
+stitch-clone

@@ -23,7 +23,9 @@ import {
 import { CATALOGUE, LIVE_CATALOGUE, catalogueBySlug } from '../lib/catalogue';
 import { CATEGORIES } from '../lib/types';
 import { CATEGORY_CANONICAL_UNIT } from '../lib/units';
-import { parseLoc, buildUrl } from '../lib/route';
+import { parseLoc, buildUrl, underlay, LOGO_PATH } from '../lib/route';
+import { LOGO_OUTLINE } from '../lib/stitch/logo-outline';
+import { buildLogoSegments, clipToRings, pointInRings } from '../lib/stitch/logo-composition';
 import { categoryStats } from '../lib/meta';
 import { offTopicReason, basisReason, bandReason, implausibleReason, PRICE_BAND } from '../lib/plausibility';
 import { median } from '../lib/money';
@@ -910,6 +912,38 @@ console.log('\nCATALOGUE — the home page and the listing agree, and nothing is
   ok('an open product sheet rides in the URL and round-trips',
     parseLoc('/c/cement', '?sku=p_abc').sku === 'p_abc' && buildUrl(parseLoc('/c/cement', '?sku=p_abc')) === '/c/cement?sku=p_abc'
     && parseLoc('/c/cement', '').sku === null);
+  // The mark: /logo is a view the parser knows, never one buildUrl writes,
+  // and what lies under it is the pristine catalogue.
+  ok('/logo is the mark, never round-trips into a URL, and lays over a pristine catalogue',
+    parseLoc('/logo', '').view.kind === 'logo' && buildUrl(parseLoc('/logo', '')) === '/' && parseLoc('/logo/x', '').view.kind === 'missing'
+    && underlay(parseLoc('/logo', '?sku=p1&q=x')).sku === null && underlay(parseLoc('/logo', '?sku=p1&q=x')).q === ''
+    && underlay(parseLoc('/logo', '')).view.kind === 'home' && underlay(parseLoc('/c/cement', '?sku=p1')).sku === 'p1'
+    && LOGO_PATH === '/logo');
+
+  // The traced mark: five separate strokes, no counters, each a real area.
+  {
+    const rings = LOGO_OUTLINE.rings;
+    const area = (r: number[]) => { let s = 0; for (let i = 0; i < r.length; i += 2) { const j = (i + 2) % r.length; s += r[i] * r[j + 1] - r[j] * r[i + 1]; } return Math.abs(s / 2); };
+    const inRing = (x: number, y: number, r: number[]) => { let inside = false; for (let i = 0, j = r.length - 2; i < r.length; j = i, i += 2) { const xi = r[i], yi = r[i + 1], xj = r[j], yj = r[j + 1]; if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside; } return inside; };
+    const nested = rings.some((a, i) => rings.some((b, j) => i !== j && inRing(a[0], a[1], b)));
+    ok('the traced mark is five separate strokes with no counters',
+      rings.length === 5 && !nested && rings.every((r) => area(r) > 0.01 * LOGO_OUTLINE.w * LOGO_OUTLINE.h),
+      `${rings.length} rings, nested=${nested}`);
+  }
+  // The clipper that trims every thread to that outline.
+  {
+    const sq: [number, number][][] = [[[0, 0], [10, 0], [10, 10], [0, 10]]];
+    const j = (v: unknown) => JSON.stringify(v);
+    ok('a thread inside a ring is kept whole', j(clipToRings([2, 2], [8, 8], sq)) === '[[0,1]]');
+    ok('a thread crossing one edge keeps the inside half', j(clipToRings([5, 5], [15, 5], sq)) === '[[0,0.5]]');
+    ok('a thread through two vertices toggles twice, one outside is dropped',
+      j(clipToRings([-5, -5], [15, 15], sq)) === '[[0.25,0.75]]' && j(clipToRings([20, 20], [30, 30], sq)) === '[]');
+    const mark = buildLogoSegments({ cols: 48 });
+    ok('the stitched mark at 48 columns is a few thousand threads on a 48×46 grid, all inside the outline',
+      mark.grid.cols === 48 && mark.grid.rows === 46 && mark.segments.length > 6000 && mark.segments.length < 10000
+      && mark.segments.every((s) => pointInRings([(s.ax + s.bx) / 2, (s.ay + s.by) / 2], mark.rings)),
+      `${mark.segments.length} threads, ${mark.grid.rows} rows`);
+  }
 
   // The two opaque surfaces the cards add, in the contrast suite.
   const css = fs.readFileSync(path.join(process.cwd(), 'app', 'globals.css'), 'utf8');

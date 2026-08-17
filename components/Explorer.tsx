@@ -15,8 +15,9 @@ import {
 } from '@/components/States';
 import { rupees, UNIT_SPOKEN } from '@/components/primitives';
 import { LIVE_CATALOGUE, catalogueById, unitSuffix, type CatalogueEntry } from '@/lib/catalogue';
-import { parseLoc, buildUrl, viewKey, type Loc } from '@/lib/route';
+import { parseLoc, buildUrl, viewKey, underlay, LOGO_PATH, type Loc } from '@/lib/route';
 import { readWhere, writeWhere } from '@/lib/prefs';
+import LogoStitchOverlay, { preloadStitchCanvas } from '@/components/LogoStitchOverlay';
 import { CategoryIcon, IconChevronRight, IconFilter } from '@/components/icons';
 
 const DEBOUNCE_MS = 80;
@@ -27,7 +28,9 @@ const PAGE = 24;
 
 /* The URL is the view — see lib/route.ts for the grammar. The explorer holds
    the parsed location as state, writes it back with pushState/replaceState,
-   and re-parses on popstate. Nothing else moves the URL from outside. */
+   and re-parses on popstate. Nothing else moves the URL from outside — the
+   one URL that is not a view, /logo, is pushed by openLogo() below and lays
+   the mark over whatever `loc` is showing without touching it. */
 
 export default function Explorer({
   initialMeta, initialPath, initialSearch,
@@ -41,7 +44,12 @@ export default function Explorer({
   const [pincode, setPincode] = React.useState('500001');
   const [pincodeError, setPincodeError] = React.useState<string | null>(null);
 
-  const [loc, setLoc] = React.useState<Loc>(() => parseLoc(initialPath, initialSearch));
+  // A hard-loaded /logo is the pristine catalogue with the mark over it: the
+  // overlay is its own state, and `loc` never holds the logo view.
+  const [loc, setLoc] = React.useState<Loc>(() => underlay(parseLoc(initialPath, initialSearch)));
+  const [logoOpen, setLogoOpen] = React.useState(() => parseLoc(initialPath, initialSearch).view.kind === 'logo');
+  const logoPushed = React.useRef(false);
+  const logoRef = React.useRef<HTMLAnchorElement>(null);
   const { view, q: query, sort, selections } = loc;
   const category = view.kind === 'category' ? view.entry.id : null;
   const entry = view.kind === 'category' ? view.entry : null;
@@ -93,19 +101,26 @@ export default function Explorer({
   }, []);
 
   // Back and forward. Nothing else moves the URL from outside: every link in
-  // this tree goes through navigate(), and a full load re-parses on mount.
+  // this tree goes through navigate() (or openLogo, below), and a full load
+  // re-parses on mount.
   React.useEffect(() => {
     const onPop = () => {
       const next = parseLoc(window.location.pathname, window.location.search);
+      // Forward onto /logo: the mark comes back over whatever is showing;
+      // `loc` stays as it is, so nothing underneath re-fetches or moves.
+      if (next.view.kind === 'logo') { logoPushed.current = true; setLogoOpen(true); return; }
+      setLogoOpen(false);
       if (!next.sku) sheetPushed.current = false;
-      setLoc(next);
+      // Same URL, same object — closing the mark must not re-render the listing.
+      setLoc((cur) => (buildUrl(cur) === buildUrl(next) ? cur : next));
     };
     window.addEventListener('popstate', onPop);
     // The URL can move before this listener exists — a back press during a
     // slow hydration, say. The server rendered the URL it was asked for; if
     // the address bar now says something else, the address bar is right.
     const here = parseLoc(window.location.pathname, window.location.search);
-    setLoc((cur) => (buildUrl(cur) === buildUrl(here) ? cur : here));
+    setLogoOpen(here.view.kind === 'logo');
+    if (here.view.kind !== 'logo') setLoc((cur) => (buildUrl(cur) === buildUrl(here) ? cur : here));
     // A marker for tests and tooling: the tree is live from here on.
     document.documentElement.dataset.hydrated = '1';
     return () => window.removeEventListener('popstate', onPop);
@@ -129,6 +144,35 @@ export default function Explorer({
       navigate({ ...loc, sku: null }, 'replace', false);
     }
   }, [loc, navigate]);
+
+  /** The mark. Its own history entry at /logo, laid over the view already
+      showing — the listing, tray, thread and scroll all stay put underneath.
+      Closing walks back over that entry when we made it; a hard-loaded /logo
+      has nothing to walk back to, so × just becomes the catalogue's URL. */
+  const openLogo = React.useCallback(() => {
+    logoPushed.current = true;
+    setLogoOpen(true);
+    if (window.location.pathname !== LOGO_PATH) window.history.pushState(null, '', LOGO_PATH);
+  }, []);
+
+  const closeLogo = React.useCallback(() => {
+    setLogoOpen(false);
+    if (logoPushed.current && window.history.length > 1) {
+      logoPushed.current = false;
+      window.history.back();
+    } else {
+      logoPushed.current = false;
+      window.history.replaceState(null, '', buildUrl(loc));
+    }
+  }, [loc]);
+
+  // Focus goes back to the mark once the page is no longer inert — after the
+  // commit, not inside closeLogo, where the root would still swallow it.
+  const wasLogoOpen = React.useRef(logoOpen);
+  React.useEffect(() => {
+    if (wasLogoOpen.current && !logoOpen) logoRef.current?.focus({ preventScroll: true });
+    wasLogoOpen.current = logoOpen;
+  }, [logoOpen]);
 
   const leaveListing = React.useCallback(() => {
     setVendorFilter(null);
@@ -277,11 +321,12 @@ export default function Explorer({
   const regionName = meta?.regions?.find((r: Region) => r.region_id === regionId)?.name ?? 'Hyderabad';
   React.useEffect(() => {
     document.title =
-      view.kind === 'category' ? `${view.entry.label} prices in ${regionName} — Build Objects`
+      logoOpen ? 'Build Objects — the mark'
+      : view.kind === 'category' ? `${view.entry.label} prices in ${regionName} — Build Objects`
       : view.kind === 'search' ? (query ? `“${query}” — Build Objects` : 'Search — Build Objects')
       : view.kind === 'missing' ? 'Not found — Build Objects'
       : 'Build Objects Price Intelligence — construction material prices, Hyderabad & Vijayawada';
-  }, [view, query, regionName]);
+  }, [view, query, regionName, logoOpen]);
 
   /* ── derived ────────────────────────────────────────────────────────── */
 
@@ -311,7 +356,10 @@ export default function Explorer({
   const openCard = (c: Card) => { setOpenVendor(c.vendor_id); setOpenOffer(c.offer_id); openSheet(c.product_id); };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
+    {/* While the mark is up the whole page is inert: no focus, no clicks, no
+        assistive-tech tree — the overlay is the page. */}
+    <div className="min-h-screen flex flex-col" inert={logoOpen || undefined}>
       {offline && <OfflineBanner />}
       {meta?.degraded && !noData && <DegradedBanner lastRun={meta?.last_run?.finished_at ?? null} />}
 
@@ -322,6 +370,7 @@ export default function Explorer({
         searchRef={searchRef} pincodeError={pincodeError}
         onHome={goHome}
         atHome={view.kind === 'home'}
+        onLogo={openLogo} onLogoHover={preloadStitchCanvas} logoRef={logoRef}
       />
 
       <main className="mx-auto w-full max-w-[1680px] px-5 sm:px-6 lg:px-10 pt-5 sm:pt-6 pb-32 flex-1">
@@ -724,6 +773,10 @@ export default function Explorer({
         onApplySearch={(q) => searchEverywhere(q)}
       />
     </div>
+
+    {/* The mark — a sibling of the inert root, never inside it. */}
+    {logoOpen && <LogoStitchOverlay onClose={closeLogo} />}
+    </>
   );
 }
 

@@ -12,6 +12,7 @@ export interface Region {
 export default function TopBar({
   regions, regionId, pincode, onRegion, onPincode,
   query, onQuery, onSubmit, searchRef, pincodeError, onHome, atHome,
+  onLogo, onLogoHover, logoRef,
 }: {
   regions: Region[]; regionId: string; pincode: string;
   onRegion: (r: string) => void; onPincode: (p: string) => void;
@@ -20,6 +21,10 @@ export default function TopBar({
   pincodeError: string | null;
   onHome: () => void;
   atHome: boolean;
+  /** The "b" opens the mark's page (/logo); onLogoHover warms its chunk. */
+  onLogo: () => void;
+  onLogoHover: () => void;
+  logoRef: React.RefObject<HTMLAnchorElement | null>;
 }) {
   const [whereOpen, setWhereOpen] = React.useState(false);
   const region = regions.find((r) => r.region_id === regionId);
@@ -76,32 +81,47 @@ export default function TopBar({
     >
       <div className="mx-auto max-w-[1680px] px-4 sm:px-6 lg:px-10">
         <div className="flex items-center gap-3 sm:gap-6 h-[64px] sm:h-[68px]">
-          {/* Wordmark. The 'b' monogram, in the accent aqua, beside the name set
-              in Audiowide — the title voice — with "Price Intelligence" as the
-              sub-title in Encode Sans. The mark is a PNG lifted off its scan onto
-              transparency (public/logo-mark.png), served at 2x for the 28 px slot
-              so it stays crisp on a retina display. */}
-          <a
-            href="/"
-            onClick={(e) => {
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-              e.preventDefault();
-              onHome();
-            }}
-            className="flex items-center gap-3 shrink-0 group"
-            aria-label="Build Objects Price Intelligence, home"
-            aria-current={atHome ? 'page' : undefined}
-          >
-            <img
-              src="/logo-mark-128.png"
-              width={28} height={28}
-              alt=""
-              aria-hidden
-              className="shrink-0 select-none"
-              style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 10px rgba(92,225,230,.28))' }}
-              draggable={false}
-            />
-            <span className="flex items-baseline gap-2.5 leading-none">
+          {/* Wordmark, in two links. The 'b' monogram, in the accent aqua, opens
+              the mark's own page — the stitched "b" at /logo — and the name set
+              in Audiowide (the title voice, with "Price Intelligence" as the
+              sub-title in Encode Sans) is the way home. The mark is a PNG lifted
+              off its scan onto transparency (public/logo-mark.png), served at
+              128 px for the 28 px slot so it stays crisp on any display. */}
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              ref={logoRef}
+              href="/logo"
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                e.preventDefault();
+                onLogo();
+              }}
+              onPointerEnter={onLogoHover}
+              onFocus={onLogoHover}
+              className="flex shrink-0 rounded-md"
+              aria-label="The Build Objects mark"
+            >
+              <img
+                src="/logo-mark-128.png"
+                width={28} height={28}
+                alt=""
+                aria-hidden
+                className="shrink-0 select-none"
+                style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 10px rgba(92,225,230,.28))' }}
+                draggable={false}
+              />
+            </a>
+            <a
+              href="/"
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                e.preventDefault();
+                onHome();
+              }}
+              className="flex items-baseline gap-2.5 leading-none group"
+              aria-label="Build Objects Price Intelligence, home"
+              aria-current={atHome ? 'page' : undefined}
+            >
               <span className="display text-[16px] sm:text-[17px] whitespace-nowrap" style={{ color: 'var(--ink)', letterSpacing: '.01em' }}>
                 Build Objects
               </span>
@@ -111,8 +131,8 @@ export default function TopBar({
               >
                 Price Intelligence
               </span>
-            </span>
-          </a>
+            </a>
+          </div>
 
           <SearchField
             value={query} onChange={onQuery} onSubmit={onSubmit}

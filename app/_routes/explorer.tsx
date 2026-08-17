@@ -32,6 +32,9 @@ export function resolveRoute(slug: string[] | undefined) {
   const s = slug ?? [];
   if (s.length === 0) return { kind: 'home' as const };
   if (s.length === 1 && s[0] === 'search') return { kind: 'search' as const };
+  // The mark. Same tree: the explorer renders the catalogue underneath and
+  // the stitched "b" over it, so × and back land on a live page.
+  if (s.length === 1 && s[0] === 'logo') return { kind: 'logo' as const };
   if (s.length === 2 && s[0] === 'c') {
     const entry = catalogueBySlug(s[1]);
     if (entry) return { kind: 'category' as const, entry };
@@ -42,6 +45,7 @@ export function resolveRoute(slug: string[] | undefined) {
 export function metadataFor(slug: string[] | undefined): Metadata {
   const route = resolveRoute(slug);
   if (!route) return { title: 'Not found — Build Objects' };
+  if (route.kind === 'logo') return { title: 'Build Objects — the mark', robots: { index: false, follow: true } };
   if (route.kind === 'category') {
     const { label, tagline } = route.entry;
     return {

@@ -38,7 +38,7 @@ async function axe(page: Page, label: string) {
   for (const [name, vp] of [['desktop', { width: 1440, height: 900 }], ['phone', { width: 390, height: 844 }]] as const) {
     const ctx = await browser.newContext({ viewport: vp, reducedMotion: 'reduce', isMobile: name === 'phone', hasTouch: name === 'phone' });
     const page = await ctx.newPage();
-    for (const p of ['/', '/c/cement', '/search?q=8mm%20tmt']) {
+    for (const p of ['/', '/c/cement', '/search?q=8mm%20tmt', '/logo']) {
       await page.goto(BASE + p, { waitUntil: 'networkidle' });
       await page.waitForTimeout(500);
       await axe(page, `${name} ${p}`);
