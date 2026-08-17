@@ -515,7 +515,7 @@ export default function Explorer({
         )}
 
         {view.kind === 'categories' && (
-          <div className="mx-auto max-w-[720px] pb-4">
+          <div className="mx-auto max-w-[980px] pb-4">
             <h1 className="display text-[22px] mt-1 mb-1 hidden md:block">Categories</h1>
             <p className="text-[12.5px] mb-4" style={{ color: 'var(--ink-3)' }}>
               {CATALOGUE.filter((c) => c.live).length} tracked in {regionName} ·{' '}

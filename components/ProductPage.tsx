@@ -63,16 +63,41 @@ export default function ProductPage({ productId, pincode, onBack, onAdd, inList,
     return l.length ? l : p?.image_url ? [p.image_url] : [];
   }, [data, p]);
 
-  /** The typed attributes, as the reference's highlight checklist. */
+  /**
+   * The typed attributes, as the reference's highlight checklist.
+   *
+   * Read as a phrase, not as a key. `cement_type: PPC` is the shape the store
+   * holds it in and "PPC cement" is the shape a buyer reads, so the unit and
+   * the noun are put back — a checklist of database keys is a schema dump with
+   * ticks beside it.
+   */
   const highlights: string[] = React.useMemo(() => {
+    const PHRASE: Record<string, (v: string) => string> = {
+      cement_type: (v) => `${v} cement`,
+      grade: (v) => `Grade ${v}`,
+      strength_class: (v) => `${v} strength class`,
+      diameter_mm: (v) => `${v} mm diameter`,
+      bore_mm: (v) => `${v} mm bore`,
+      length_m: (v) => `${v} m length`,
+      pack_size_kg: (v) => `${v} kg bag`,
+      block_type: (v) => `${v} block`,
+      pipe_material: (v) => `${v} pipe`,
+      pressure_class: (v) => `${v} pressure class`,
+      finish: (v) => `${v} finish`,
+      colour: (v) => `${v} colour`,
+    };
     const out: string[] = [];
     const a = p?.attrs ?? {};
     for (const [k, v] of Object.entries(a)) {
       if (k.startsWith('_') || v === null || v === '' || v === undefined) continue;
-      out.push(`${k.replace(/_/g, ' ')}: ${v}`);
+      const s = String(v);
+      const phrase = PHRASE[k];
+      // Anything without a phrase falls back to "key: value" with the
+      // underscores opened out — still readable, never a raw identifier.
+      out.push(phrase ? phrase(s) : `${k.replace(/_/g, ' ')} ${s}`);
       if (out.length === 5) break;
     }
-    for (const s of p?.cert_standards ?? []) if (out.length < 6) out.push(String(s));
+    for (const s of p?.cert_standards ?? []) if (out.length < 6) out.push(`Conforms to ${s}`);
     return out;
   }, [p]);
 

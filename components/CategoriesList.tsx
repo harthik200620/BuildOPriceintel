@@ -50,7 +50,9 @@ export default function CategoriesList({
   counts?: Record<string, { sellers: number } | undefined>;
 }) {
   return (
-    <ul className="flex flex-col gap-2.5">
+    // One column on a phone, two above 640: nine rows in a 720 px column is a
+    // stripe of content down the middle of a desktop with the rest empty.
+    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
       {CATALOGUE.map((c) => {
         const n = c.live ? counts?.[c.id]?.sellers : undefined;
         const inner = (
