@@ -24,7 +24,8 @@
     "test:core": "tsx tests/run.ts",
     "check:flow": "tsx scripts/flow-check.ts",
     "check:a11y": "tsx scripts/a11y-check.ts",
-    "shots:theme": "tsx scripts/shots-theme.ts"
+    "shots:theme": "tsx scripts/shots-theme.ts",
+    "check:vitals": "tsx scripts/vitals-check.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.2",

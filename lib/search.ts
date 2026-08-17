@@ -16,7 +16,7 @@ import {
   type Candidate, type Scored, type SortableRow,
 } from './rank';
 import { assess, SLA_HOURS, CATEGORY_VOLATILITY } from './freshness';
-import { CATEGORY_LABEL, type FacetView, type FacetValueView, type ProductCard, type SearchResponse, type SorAnchor } from './types';
+import { CATEGORY_LABEL, type FacetView, type FacetValueView, type ProductCard, type SearchResponse, type SorAnchor, COMPARABILITY_NOTE } from './types';
 
 export interface SearchInput {
   q: string;
@@ -975,9 +975,7 @@ export function search(input: SearchInput): SearchResponse {
     results,
     total: ranked.length,
     facets: facetViews,
-    comparability_note:
-      'Every price on this page is a delivered total to your pincode, inclusive of GST at the stated HSN rate, ' +
-      'expressed per canonical unit. Prices are only ever sorted against each other on that one basis.',
+    comparability_note: COMPARABILITY_NOTE,
     sor_anchor: sor,
     zero_result: zero,
     // Rule 5(3)(f) — the disclosed order must be the applied one. When a column
@@ -1052,7 +1050,7 @@ function buildIntentChips(
     .sort((a, b) => b.count - a.count);
 }
 
-function sorAnchorFor(region_id: string, category: string | null): SorAnchor | null {
+export function sorAnchorFor(region_id: string, category: string | null): SorAnchor | null {
   if (!category) return null;
   const state = region_id === 'hyderabad' ? 'TS' : 'AP';
   const r = prep(`SELECT * FROM sor_rate WHERE state_code=? AND category=? LIMIT 1`).get(state, category) as any;

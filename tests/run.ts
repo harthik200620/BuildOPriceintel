@@ -896,6 +896,9 @@ console.log('\nCATALOGUE — the home page and the listing agree, and nothing is
     parseLoc('/', '').view.kind === 'home' && parseLoc('/', '?q=x').view.kind === 'search' && parseLoc('/search', '').view.kind === 'search');
   ok('a coming-soon slug and a junk path are missing', parseLoc('/c/aggregates', '').view.kind === 'missing' && parseLoc('/x/y/z', '').view.kind === 'missing');
   ok('the default sort is not written into the URL', buildUrl(parseLoc('/c/tmt-steel', '')) === '/c/tmt-steel');
+  ok('an open product sheet rides in the URL and round-trips',
+    parseLoc('/c/cement', '?sku=p_abc').sku === 'p_abc' && buildUrl(parseLoc('/c/cement', '?sku=p_abc')) === '/c/cement?sku=p_abc'
+    && parseLoc('/c/cement', '').sku === null);
 
   // The two opaque surfaces the cards add, in the contrast suite.
   const css = fs.readFileSync(path.join(process.cwd(), 'app', 'globals.css'), 'utf8');

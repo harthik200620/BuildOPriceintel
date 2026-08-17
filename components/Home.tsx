@@ -35,10 +35,10 @@ export default function Home({
       {/* ── the heading ──────────────────────────────────────────────────── */}
       <header className="text-center pt-6 sm:pt-8 lg:pt-9 pb-6 sm:pb-7">
         <p className="eyebrow">Explore</p>
-        <h1 className="display home-title mt-2.5">
+        <h1 className="display home-title mt-2.5" style={{ textWrap: 'balance' }}>
           Product <span style={{ color: 'var(--accent-ink)' }}>categories</span>
         </h1>
-        <p className="mx-auto mt-3 max-w-[58ch] text-[14.5px] sm:text-[15.5px] leading-relaxed" style={{ color: 'var(--ink-2)' }}>
+        <p className="mx-auto mt-3 max-w-[58ch] text-[14.5px] sm:text-[15.5px] leading-relaxed" style={{ color: 'var(--ink-2)', textWrap: 'balance' }}>
           Landed prices for every step of your build — delivered to your pincode, GST stated, per unit.
         </p>
         <p className="mt-1.5 text-[12.5px] tnum" style={{ color: 'var(--ink-3)' }}>

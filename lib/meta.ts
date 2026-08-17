@@ -12,7 +12,8 @@ import { prep, lastSuccessfulRun } from './db';
 import { guardState, allowedHosts } from './no-network';
 import { hasKey, GEMINI_MODEL } from './chat/gemini';
 import { SORTS, COLUMN_SORTS } from './rank';
-import { CATEGORY_LABEL } from './types';
+import { CATEGORY_LABEL, CATEGORIES } from './types';
+import { sorAnchorFor } from './search';
 import { assess, countsTowardHeadline } from './freshness';
 
 /**
@@ -127,6 +128,9 @@ export function buildMeta() {
       categories: counts.filter((c) => c.region_id === r.region_id),
       // Per-category card figures, measured over the search candidate set.
       stats: stats.filter((s) => s.region_id === r.region_id),
+      // The government reference line per category, so a listing can print
+      // it on first paint. The same function the search API calls.
+      sor: Object.fromEntries(CATEGORIES.map((c) => [c, sorAnchorFor(r.region_id, c)])),
     })),
     totals,
     category_labels: CATEGORY_LABEL,

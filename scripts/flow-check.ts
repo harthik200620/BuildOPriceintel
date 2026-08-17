@@ -35,6 +35,16 @@ const path = (p: Page) => new URL(p.url()).pathname + new URL(p.url()).search;
     ok('a live card prints a from-price and counts', await page.locator('a.cat-card .cat-from .fig').first().textContent().then((t) => /₹/.test(t ?? '')));
     ok('a coming-soon card prints no rupee figure', !(await page.locator('.cat-card--soon').first().textContent())?.includes('₹'));
 
+    // Switching region re-measures every card (Vijayawada is a different set of rows).
+    const hydCard = (await page.locator('a.cat-card').first().textContent()) ?? '';
+    await page.locator('header [role="group"][aria-label="Region"] button:has-text("Vijayawada")').click();
+    await page.waitForFunction((prev) => document.querySelector('a.cat-card')?.textContent !== prev, hydCard);
+    const vjaCard = (await page.locator('a.cat-card').first().textContent()) ?? '';
+    ok('region switch re-measures the cards', vjaCard !== hydCard && /sellers/.test(vjaCard));
+    ok('the subtitle names the region', ((await page.textContent('header + main, main')) ?? '').includes('Vijayawada'));
+    await page.locator('header [role="group"][aria-label="Region"] button:has-text("Hyderabad")').click();
+    await page.waitForFunction((prev) => document.querySelector('a.cat-card')?.textContent === prev, hydCard);
+
     // The seller count on the card equals the listing's heading count.
     const cardText = (await page.locator('a.cat-card').first().textContent()) ?? '';
     const cardSellers = Number(cardText.match(/·\s*([\d,]+)\s*sellers/)?.[1]?.replace(/,/g, ''));
@@ -62,6 +72,24 @@ const path = (p: Page) => new URL(p.url()).pathname + new URL(p.url()).search;
     await page.reload({ waitUntil: 'networkidle' });
     ok('reload keeps the facet selection', await page.locator(`aside .facet-val:has-text("${label.split(/\s/)[0]}") input`).first().isChecked(), label);
     ok('reload keeps the URL', page.url() === urlWithFacet);
+
+    // A product sheet is a link: open → ?sku= → reload keeps it open → back closes it.
+    const openBtn = page.locator('button[aria-label$="Open full detail."]').first();
+    await openBtn.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await openBtn.click();
+    await page.waitForFunction(() => location.search.includes('sku='));
+    ok('opening a product puts ?sku= in the URL', /sku=/.test(page.url()));
+    await page.waitForSelector('[role="dialog"], aside[aria-modal], .sheet-in', { timeout: 10000 });
+    const skuUrl = page.url();
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    ok('reload with ?sku= reopens the sheet', await page.locator('.sheet-in').count() > 0 || await page.locator('[role="dialog"]').count() > 0);
+    await page.goBack();
+    await page.waitForFunction(() => !location.search.includes('sku='));
+    await page.waitForTimeout(300);
+    ok('back closes the sheet and drops ?sku=', !/sku=/.test(page.url()) && (await page.locator('.sheet-in').count()) === 0);
+    ok('…and the facet is still applied', page.url().includes('f.'), page.url());
+    void skuUrl;
 
     // Sideways to another category, then back twice → home.
     await page.locator('.cat-strip-item:has-text("TMT steel")').click();

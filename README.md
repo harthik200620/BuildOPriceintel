@@ -88,7 +88,15 @@ lib/
   rank.ts             nine features, four penalties (no vendor damping — see below)
   search.ts           retrieval, faceting, the zero-result ladder
   query/parse.ts      typed-constraint grammar (units, trade terms, te/hi)
+  catalogue.ts        the eight category cards — four live, four coming soon
+  meta.ts             what the app says about itself; the card figures, measured
+  route.ts            the URL grammar: / · /c/<slug> · /search?q= · ?f. ?sort= ?sku=
 app/                  Next.js routes and the UI
+  page.tsx, [...slug]/  the two route files, one shared server route (_routes/explorer.tsx)
+components/
+  Explorer.tsx        the persistent client tree — every view, URL-driven
+  Home.tsx            the catalogue: heading, cards, trust bar
+  icons.tsx           one line-icon family for the catalogue and the trust bar
 docs/
   how-it-works.html   the pipeline end to end
   columns-and-filters.html  every proposed column, with a measured status
@@ -130,10 +138,18 @@ punched through a dark page. They are damped at rest and released to true colour
 on a card; the detail sheet's gallery renders its own `<img>` and is never damped at all, because that is
 where the purchase decision is made.
 
-Type is **Geist** for UI text and the hero price, **Geist Mono** for every figure that sits in a column, and
-**Fraunces** for the display voice — headings and section titles. `next/font` downloads them at build time
-and serves them from this origin, so there is no runtime request to a font CDN and "nothing here touches the
-cloud" still holds.
+**Type today is the Build Objects program**, shipped from `public/fonts/` with its licences via
+`next/font/local`: **Audiowide** (Display 2) for titles — it has no `₹` and so never sets a figure;
+**Encode Sans** (Sans 5) for every figure and for the capitals of labels and sub-titles, `tabular-nums`; and
+**Arimo** (Sans 3, Arial-metric) for body and UI text. Each role's metrics are measured into
+`public/fonts/metrics.json` by `scripts/font-metrics.py` and asserted by `tests/run.ts`. The paragraphs
+below record the generation before it — Geist, Geist Mono and Fraunces — and the measurements that were made
+then; the corrections they describe still hold.
+
+Type was **Geist** for UI text and the hero price, **Geist Mono** for every figure that sits in a column, and
+**Fraunces** for the display voice — headings and section titles. `next/font` downloaded them at build time
+and served them from this origin, so there was no runtime request to a font CDN and "nothing here touches the
+cloud" still held.
 
 **The hero price is the one number not set in the mono, and the reason is function.** A monospace earns its
 constant advance in a *column*, where every row has to align on the decimal. The hero sits alone in a card
@@ -229,6 +245,43 @@ five pane alphas. Worst case throughout is `.glass-strong` over the silver bloom
 at 18.66 px bold. The old copper `#A8431B` measures **1.76:1** here: it fails not only AA text but the 3:1
 non-text bar on every surface, which is why the accent could not simply be carried over. These ratios are a
 property of the stack, not of the hex, which is exactly why the test composites rather than compares.
+
+### The catalogue, and the URL as the view
+
+The site opens on the catalogue: a heading, eight category cards, and a bar of the four things every price
+here carries. A card is a photograph over an opaque teal face, a lighter band beneath it with the line icon,
+the name in capitals and an arrow — and, printed over the foot of the photograph, the figures the listing
+will open on: the lowest landed price per canonical unit, offers, sellers, and how old the newest price is
+against the category's own SLA. Four cards are live. Four (aggregates, sand, ready-mix, electricals) are
+**coming soon**: shown so the catalogue reads whole, labelled, not links, and printing no figure at all —
+a card that said "from ₹—" for a category with no offers would break the one rule the site is built on.
+
+Every number on a live card is measured by `lib/meta.ts` over **exactly the candidate set `lib/search.ts`
+ranks**, so the "159 sellers" on the cement card and the "159 sellers" at the top of the listing it opens
+are the same number from the same rows. `tests/run.ts` asserts that for every category in both regions. The
+photographs are crops of the reference design (`public/categories/`, ~20 KB each as WebP); the icons are one
+hand-drawn line family in `components/icons.tsx`, because no icon pack has a 50 kg bag, a rebar mesh and a
+pipe elbow drawn at the same stroke.
+
+The explorer is one persistent client tree, and **the URL is the view** (`lib/route.ts`):
+
+```
+/                     the catalogue
+/c/<slug>             one category — every seller in it, with the filter rail
+/search?q=…           a query across categories, with the intent chips
+?sort= ?f.<facet>=    the applied order and every facet selection, so a narrowed listing is a link
+?sku=                 an open product sheet — a product is a link, and on a phone back closes it
+```
+
+Moving between them is a `pushState`, not a remount: the search field keeps focus, the compare tray keeps its
+items, the assistant keeps its thread. Where the buyer is — region and pincode — persists in `localStorage`
+rather than the URL. `app/page.tsx` and `app/[...slug]/page.tsx` share one server route
+(`app/_routes/explorer.tsx`) that 404s anything the catalogue does not name and hands the client the
+metadata already computed, so the catalogue paints with its counts in it and nothing shifts when the first
+fetch lands (CLS measures 0.000 on the catalogue and on a listing, desktop and phone —
+`scripts/vitals-check.ts`). Below `lg` the facets render as a bottom sheet, and a pill in the top bar
+exposes region and pincode. `scripts/flow-check.ts` walks the whole flow in a real browser and
+`scripts/a11y-check.ts` runs axe over the three views (zero violations) plus a keyboard walk of the cards.
 
 ### Pictures
 

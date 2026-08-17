@@ -24,6 +24,8 @@ export interface Loc {
   q: string;
   sort: string;
   selections: Record<string, string[]>;
+  /** An open product sheet, so a product is a link and back closes it. */
+  sku: string | null;
 }
 
 export const DEFAULT_SORT = 'recommended';
@@ -42,7 +44,7 @@ export function parseLoc(pathname: string, search: string): Loc {
 
   const selections: Record<string, string[]> = {};
   for (const [k, v] of sp.entries()) if (k.startsWith('f.') && v) (selections[k.slice(2)] ??= []).push(v);
-  return { view, q, sort: sp.get('sort') ?? DEFAULT_SORT, selections };
+  return { view, q, sort: sp.get('sort') ?? DEFAULT_SORT, selections, sku: sp.get('sku') || null };
 }
 
 export function buildUrl(loc: Loc): string {
@@ -54,6 +56,7 @@ export function buildUrl(loc: Loc): string {
   if (loc.q) sp.set('q', loc.q);
   if (loc.sort && loc.sort !== DEFAULT_SORT) sp.set('sort', loc.sort);
   for (const [f, vals] of Object.entries(loc.selections)) for (const v of vals) sp.append(`f.${f}`, v);
+  if (loc.sku) sp.set('sku', loc.sku);
   const s = sp.toString();
   return s ? `${path}?${s}` : path;
 }

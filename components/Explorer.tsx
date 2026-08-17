@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { SearchResponse, ProductCard as Card } from '@/lib/types';
+import { COMPARABILITY_NOTE, type SearchResponse, type ProductCard as Card } from '@/lib/types';
 import TopBar, { type Region } from '@/components/TopBar';
 import FilterRail, { FilterSheet } from '@/components/FilterRail';
 import ProductCardView from '@/components/ProductCard';
@@ -60,7 +60,10 @@ export default function Explorer({
   const [error, setError] = React.useState<string | null>(null);
   const [offline, setOffline] = React.useState(false);
 
-  const [openSku, setOpenSku] = React.useState<string | null>(null);
+  // The open product sheet is the URL's `sku` — a product is a link, and on a
+  // phone the back button closes it.
+  const openSku = loc.sku;
+  const sheetPushed = React.useRef(false);
   // Which seller's card opened the sheet, so their row can be marked in the table.
   const [openVendor, setOpenVendor] = React.useState<string | null>(null);
   // And which listing — a seller can post the same product twice at two prices.
@@ -75,7 +78,7 @@ export default function Explorer({
 
   /* ── navigation ─────────────────────────────────────────────────────── */
 
-  const navigate = React.useCallback((next: Loc, mode: 'push' | 'replace') => {
+  const navigate = React.useCallback((next: Loc, mode: 'push' | 'replace', scrollTop = true) => {
     setLoc(next);
     if (typeof window === 'undefined') return;
     const url = buildUrl(next);
@@ -83,7 +86,7 @@ export default function Explorer({
     // A push to the URL already shown would only stack a duplicate entry.
     if (mode === 'push' && url !== here) {
       window.history.pushState(null, '', url);
-      window.scrollTo({ top: 0 });
+      if (scrollTop) window.scrollTo({ top: 0 });
     } else if (url !== here) {
       window.history.replaceState(null, '', url);
     }
@@ -92,10 +95,33 @@ export default function Explorer({
   // Back and forward. Nothing else moves the URL from outside: every link in
   // this tree goes through navigate(), and a full load re-parses on mount.
   React.useEffect(() => {
-    const onPop = () => setLoc(parseLoc(window.location.pathname, window.location.search));
+    const onPop = () => {
+      const next = parseLoc(window.location.pathname, window.location.search);
+      if (!next.sku) sheetPushed.current = false;
+      setLoc(next);
+    };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
+
+  /** Open a product sheet: a history entry of its own, so back closes it and
+      the URL can be sent. Closing from the sheet's own control walks back over
+      that entry when it exists, and otherwise just drops the parameter. */
+  const openSheet = React.useCallback((productId: string) => {
+    if (loc.sku === productId) return;
+    sheetPushed.current = true;
+    navigate({ ...loc, sku: productId }, 'push', false);
+  }, [loc, navigate]);
+
+  const closeSheet = React.useCallback(() => {
+    setOpenVendor(null); setOpenOffer(null);
+    if (sheetPushed.current && window.history.length > 1) {
+      sheetPushed.current = false;
+      window.history.back();
+    } else {
+      navigate({ ...loc, sku: null }, 'replace', false);
+    }
+  }, [loc, navigate]);
 
   const leaveListing = React.useCallback(() => {
     setVendorFilter(null);
@@ -105,17 +131,17 @@ export default function Explorer({
 
   const goHome = React.useCallback(() => {
     leaveListing();
-    navigate({ view: { kind: 'home' }, q: '', sort: 'recommended', selections: {} }, 'push');
+    navigate({ view: { kind: 'home' }, q: '', sort: 'recommended', selections: {}, sku: null }, 'push');
   }, [navigate, leaveListing]);
 
   const openCategory = React.useCallback((e: CatalogueEntry, keepQuery = false) => {
     leaveListing();
-    navigate({ view: { kind: 'category', entry: e }, q: keepQuery ? loc.q : '', sort: 'recommended', selections: {} }, 'push');
+    navigate({ view: { kind: 'category', entry: e }, q: keepQuery ? loc.q : '', sort: 'recommended', selections: {}, sku: null }, 'push');
   }, [navigate, leaveListing, loc.q]);
 
   const searchEverywhere = React.useCallback((q: string) => {
     leaveListing();
-    navigate({ view: { kind: 'search' }, q, sort: 'recommended', selections: {} }, 'push');
+    navigate({ view: { kind: 'search' }, q, sort: 'recommended', selections: {}, sku: null }, 'push');
   }, [navigate, leaveListing]);
 
   /** Typing. The first character on the catalogue is a navigation into search;
@@ -124,7 +150,7 @@ export default function Explorer({
   const setQuery = React.useCallback((q: string) => {
     if (view.kind === 'home' || view.kind === 'missing') {
       if (!q) return;
-      navigate({ view: { kind: 'search' }, q, sort: 'recommended', selections: {} }, 'push');
+      navigate({ view: { kind: 'search' }, q, sort: 'recommended', selections: {}, sku: null }, 'push');
       return;
     }
     navigate({ ...loc, q }, 'replace');
@@ -168,7 +194,7 @@ export default function Explorer({
   /* ── events from the sheet and the search dropdown ──────────────────── */
 
   React.useEffect(() => {
-    function openSkuEv(e: Event) { setOpenSku((e as CustomEvent).detail); }
+    function openSkuEv(e: Event) { openSheet((e as CustomEvent).detail); }
     // The suggest dropdown's category intents: keep the typed words, move into
     // the category. Changing category clears the vendor drill-down as well as
     // the facets — "water pipes from BigBMart" is a legitimate query with no
@@ -184,7 +210,7 @@ export default function Explorer({
       window.removeEventListener('buildobjects:open-sku', openSkuEv);
       window.removeEventListener('buildobjects:set-category', setCatEv);
     };
-  }, [openCategory]);
+  }, [openCategory, openSheet]);
 
   /* ── the fetch ──────────────────────────────────────────────────────── */
 
@@ -260,9 +286,21 @@ export default function Explorer({
 
   const regions: Region[] = meta?.regions ?? [];
   const catLabel = (c: string | null) => (c ? (meta?.category_labels?.[c] ?? c) : 'All categories');
+  /* What the listing prints before its first fetch lands. Everything here is
+     known from meta or is a constant, and it is the SAME text the fetch will
+     confirm — so nothing under it moves when the data arrives. Measured: the
+     phone listing shifted 0.15 CLS before this. */
+  const regionMeta = meta?.regions?.find((r: any) => r.region_id === regionId);
+  const sorAnchor = data ? data.sor_anchor : (entry ? regionMeta?.sor?.[entry.id] ?? null : null);
+  const sortExplain = data ? data.disclosure.explanation : meta?.sorts?.[sort]?.explain;
+  const countSlot = (label: string) => (
+    data
+      ? `${data.total.toLocaleString('en-IN')} ${label}`
+      : <span className="skel inline-block h-3 w-16 align-middle" aria-hidden />
+  );
   const noData = meta && !meta.last_run;
   const activeFacets = Object.values(selections).flat().length;
-  const openCard = (c: Card) => { setOpenSku(c.product_id); setOpenVendor(c.vendor_id); setOpenOffer(c.offer_id); };
+  const openCard = (c: Card) => { setOpenVendor(c.vendor_id); setOpenOffer(c.offer_id); openSheet(c.product_id); };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -321,7 +359,7 @@ export default function Explorer({
                       <span className="fig text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>
                         {/* Sellers, not products — the list is one card per vendor,
                             except when drilled into one seller's stock. */}
-                        {data ? `${data.total.toLocaleString('en-IN')} ${vendorFilter ? 'items from this seller' : data.total === 1 ? 'seller' : 'sellers'}` : ''}
+                        {countSlot(vendorFilter ? 'items from this seller' : data?.total === 1 ? 'seller' : 'sellers')}
                       </span>
                     </h1>
                     {vendorFilter ? (
@@ -349,8 +387,8 @@ export default function Explorer({
                         )}
                       </p>
                     )}
-                    {data?.comparability_note && !vendorFilter && (
-                      <p className="text-[11.5px] mt-1 max-w-[80ch]" style={{ color: 'var(--ink-3)' }}>{data.comparability_note}</p>
+                    {!vendorFilter && (
+                      <p className="text-[11.5px] mt-1 max-w-[80ch]" style={{ color: 'var(--ink-3)' }}>{data?.comparability_note ?? COMPARABILITY_NOTE}</p>
                     )}
                   </div>
                 </div>
@@ -380,7 +418,7 @@ export default function Explorer({
                 <h1 className="display text-[22px] sm:text-[26px] leading-tight mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   {vendorFilter ? vendorFilter.name : query ? <>“{query}”</> : 'All sellers, all categories'}
                   <span className="fig text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>
-                    {data ? `${data.total.toLocaleString('en-IN')} ${vendorFilter ? 'items from this seller' : 'sellers'}` : ''}
+                    {countSlot(vendorFilter ? 'items from this seller' : 'sellers')}
                   </span>
                 </h1>
                 {vendorFilter ? (
@@ -393,7 +431,7 @@ export default function Explorer({
                     </button>
                   </p>
                 ) : (
-                  <p className="text-[11.5px] mt-1 max-w-[80ch]" style={{ color: 'var(--ink-3)' }}>{data?.comparability_note}</p>
+                  <p className="text-[11.5px] mt-1 max-w-[80ch]" style={{ color: 'var(--ink-3)' }}>{data?.comparability_note ?? COMPARABILITY_NOTE}</p>
                 )}
 
                 {/* Category intent chips — tapping one is a navigation, not a filter. */}
@@ -433,8 +471,9 @@ export default function Explorer({
                 {/* ── the toolbar ───────────────────────────────────────── */}
                 <div className="flex flex-wrap items-center gap-2 pb-3 rule-b mb-3">
                   {/* Filters, on a phone. The rail is desktop-only. */}
-                  {!!data?.facets?.length && (
-                    <button onClick={() => setSheetOpen(true)} className="chip anim h-8 px-3 text-[12.5px] inline-flex items-center gap-1.5 lg:hidden"
+                  {(entry || !!data?.facets?.length) && (
+                    <button onClick={() => setSheetOpen(true)} disabled={!data?.facets?.length}
+                      className="chip anim h-8 px-3 text-[12.5px] inline-flex items-center gap-1.5 lg:hidden"
                       aria-haspopup="dialog" aria-expanded={sheetOpen}>
                       <IconFilter size={13} />
                       Filters{activeFacets ? <span className="tnum" style={{ color: 'var(--accent)' }}>{activeFacets}</span> : null}
@@ -469,13 +508,13 @@ export default function Explorer({
                     When a column header is driving, `disclosure.sort` names the
                     column — printing the dropdown's label here would disclose an
                     order that is not the one applied. */}
-                {data && (
+                {sortExplain && (
                   <p className="text-[11px] -mt-1 mb-4" style={{ color: 'var(--ink-3)' }}>
                     Sorted on{' '}
                     <strong style={{ color: 'var(--ink-2)' }}>
-                      {colSort ? data.disclosure.sort : meta?.sorts?.[sort]?.label ?? sort}
+                      {colSort && data ? data.disclosure.sort : meta?.sorts?.[sort]?.label ?? sort}
                     </strong>{' '}
-                    = {data.disclosure.explanation}
+                    = {sortExplain}
                     {colSort && (
                       <button onClick={() => setColSort(null)}
                         className="ml-2 anim hover:opacity-70 underline decoration-dotted underline-offset-2"
@@ -504,17 +543,17 @@ export default function Explorer({
                 )}
 
                 {/* The government reference line — no competitor shows this. */}
-                {data?.sor_anchor && (
+                {sorAnchor && (
                   <div className="mb-4 px-3 py-2 text-[11.5px] flex items-start gap-2"
                     style={{ border: '1px solid var(--rule)', borderRadius: '10px', background: 'var(--wash)' }}>
                     <span className="shrink-0 mt-[2px]" style={{ color: 'var(--ink-3)' }}>⌖</span>
                     <span style={{ color: 'var(--ink-2)' }}>
-                      <strong>Government reference</strong> — {data.sor_anchor.item}, {data.sor_anchor.state_code}{' '}
-                      {data.sor_anchor.effective_period}.{' '}
-                      <a href={data.sor_anchor.source_url} target="_blank" rel="noreferrer noopener"
+                      <strong>Government reference</strong> — {sorAnchor.item}, {sorAnchor.state_code}{' '}
+                      {sorAnchor.effective_period}.{' '}
+                      <a href={sorAnchor.source_url} target="_blank" rel="noreferrer noopener"
                         className="underline decoration-dotted underline-offset-2">source</a>.
-                      {data.sor_anchor.note && (
-                        <span className="block mt-0.5 text-[11px]" style={{ color: 'var(--ink-3)' }}>{data.sor_anchor.note}</span>
+                      {sorAnchor.note && (
+                        <span className="block mt-0.5 text-[11px]" style={{ color: 'var(--ink-3)' }}>{sorAnchor.note}</span>
                       )}
                     </span>
                   </div>
@@ -644,7 +683,7 @@ export default function Explorer({
       />
 
       {openSku && <DetailSheet productId={openSku} pincode={pincode} highlightVendorId={openVendor} highlightOfferId={openOffer}
-        onClose={() => { setOpenSku(null); setOpenVendor(null); setOpenOffer(null); }} />}
+        onClose={closeSheet} />}
 
       {/*
         The assistant, docked. It shares the page's pincode so a price it

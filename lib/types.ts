@@ -17,6 +17,15 @@ export const CATEGORY_LABEL: Record<string, string> = {
 };
 
 /**
+ * The basis every listing states. A constant, and client-safe, so the page
+ * can print it on its first paint rather than after the first fetch — the
+ * same words arriving later would shift everything under them.
+ */
+export const COMPARABILITY_NOTE =
+  'Every price on this page is a delivered total to your pincode, inclusive of GST at the stated HSN rate, ' +
+  'expressed per canonical unit. Prices are only ever sorted against each other on that one basis.';
+
+/**
  * The price object. Nothing in this application may state a rupee figure
  * without one of these, and it cannot be constructed without a unit, a
  * delivery scope, a GST treatment and a timestamp — which is law 2 enforced
