@@ -184,7 +184,7 @@ export default function FilterRail({
             below. This read "offers" while the number handed to it was the
             seller count and the facets underneath counted listings — three
             units on one screen, none of which agreed. */}
-        <p className="pt-1.5 pb-1 text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} sellers</p>
+        <p className="pt-1.5 pb-1 text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} products</p>
 
         <FacetList facets={facets} selections={selections} onToggle={onToggle} />
       </div>
@@ -194,7 +194,7 @@ export default function FilterRail({
 
 /**
  * The same facets on a phone, as a bottom sheet. Below `lg` the rail does not
- * render at all, which left a phone with no way to narrow 232 sellers — the
+ * render at all, which left a phone with no way to narrow 232 products — the
  * one screen where narrowing matters most.
  */
 export function FilterSheet({
@@ -236,7 +236,7 @@ export function FilterSheet({
         <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5 rule-b">
           <div className="flex items-baseline gap-2">
             <h2 className="display text-[15px]">Narrow by</h2>
-            <span className="text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} sellers</span>
+            <span className="text-[11px] tnum" style={{ color: 'var(--ink-3)' }}>on {total} products</span>
           </div>
           <div className="flex items-center gap-3">
             {activeCount > 0 && (
@@ -254,7 +254,7 @@ export function FilterSheet({
         </div>
         <div className="px-4 py-3 rule-t" style={{ background: 'var(--wash-strong)' }}>
           <button onClick={onClose} className="btn-primary w-full h-11 text-[14px]" disabled={loading}>
-            {loading ? 'Updating…' : `Show ${total.toLocaleString('en-IN')} ${total === 1 ? 'seller' : 'sellers'}`}
+            {loading ? 'Updating…' : `Show ${total.toLocaleString('en-IN')} ${total === 1 ? 'product' : 'products'}`}
           </button>
         </div>
       </div>

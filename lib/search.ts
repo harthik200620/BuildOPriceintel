@@ -40,10 +40,11 @@ export interface SearchInput {
   /**
    * Show every matching offer from ONE seller, ungrouped.
    *
-   * The results list is one card per vendor, which means a category supplied by
-   * a single seller collapses to a single card. Without this, that seller's
-   * other 31 listings would be unreachable — the roll-up would be hiding stock
-   * rather than organising it. The card's "+N more from this seller" sets it.
+   * Still supported, and still reachable by URL — a seller's whole shelf is a
+   * real question. It is no longer set from a card: the list is one card per
+   * product, so a card no longer belongs to a seller and has nothing to roll
+   * up. Nothing is hidden by that, because the product's page names every
+   * seller who carries it.
    */
   vendor_id?: string;
 }
@@ -566,30 +567,54 @@ function ctxMatches(ctx: RowCtx, v: CompiledValue, isPrice: boolean): boolean {
 }
 
 /**
- * One card per vendor — the results list is a list of sellers.
+ * One card per PRODUCT — the results list is a list of things to buy.
  *
- * Applied AFTER scoring and AFTER the facet selections, which is the whole
- * point: filtering to "Brand = UltraTech" narrows which offers qualify, and the
- * page is still one row per seller rather than one seller's twelve listings.
- * Each vendor is represented by their best-scoring qualifying offer, and the
- * count of what was rolled up rides along so nothing is hidden.
+ * The list used to be one card per vendor, so the same 50 kg bag appeared
+ * three times under three business names and the name was the only thing
+ * telling the rows apart. That is a sourcing view, and it is not what a buyer
+ * scanning a category is doing: they are choosing a product, and the seller is
+ * a consequence of that choice. So the product leads, the cheapest qualifying
+ * offer supplies the figure, and the sellers who also carry it are counted —
+ * `sellers_for_product` — with the whole list one tap away on its page.
+ *
+ * Cheapest rather than best-scoring, unlike the vendor roll-up this replaces:
+ * once a card stands for a product, the number on it is a claim about that
+ * product's floor, and the floor is the lowest price a buyer can actually get.
+ * A stale offer cannot be quoted, so it never wins the card while a current one
+ * exists — the same rule `price_low` applies.
+ *
+ * Applied AFTER scoring and AFTER the facet selections, so narrowing to
+ * "Brand = UltraTech" changes which offers qualify and the page is still one
+ * row per product.
  */
-function groupByVendor(scored: Scored[]): Scored[] {
+function groupByProduct(scored: Scored[]): Scored[] {
   const best = new Map<string, Scored>();
-  const extra = new Map<string, number>();
+  const sellers = new Map<string, Set<string>>();
+
   for (const s of scored) {
-    const cur = best.get(s.vendor_id);
-    if (!cur) best.set(s.vendor_id, s);
-    else extra.set(s.vendor_id, (extra.get(s.vendor_id) ?? 0) + 1);
+    let set = sellers.get(s.product_id);
+    if (!set) { set = new Set(); sellers.set(s.product_id, set); }
+    set.add(s.vendor_id);
+
+    const cur = best.get(s.product_id);
+    if (!cur) { best.set(s.product_id, s); continue; }
+    // A quotable price always beats one that has aged out, whatever it says.
+    const curDead = !assess(cur.priced_as_of, cur.sla_hours).quotable;
+    const sDead = !assess(s.priced_as_of, s.sla_hours).quotable;
+    if (curDead !== sDead) { if (curDead) best.set(s.product_id, s); continue; }
+    if (s.normalised_paise < cur.normalised_paise) best.set(s.product_id, s);
   }
-  // `scored` is already in rank order, so first-seen is best-scoring and the
-  // surviving rows come out in that same order without a re-sort.
+
+  // `scored` is in rank order, so emitting on first sight of each product keeps
+  // the page in that order rather than re-sorting it by price.
+  const seen = new Set<string>();
   const out: Scored[] = [];
   for (const s of scored) {
-    if (best.get(s.vendor_id) === s) {
-      (s as any).also_from_vendor = extra.get(s.vendor_id) ?? 0;
-      out.push(s);
-    }
+    if (seen.has(s.product_id)) continue;
+    seen.add(s.product_id);
+    const win = best.get(s.product_id)!;
+    (win as any).sellers_for_product = sellers.get(s.product_id)?.size ?? 1;
+    out.push(win);
   }
   return out;
 }
@@ -676,8 +701,10 @@ export function search(input: SearchInput): SearchResponse {
      * called them "offers". Three numbers, three units, one screen.
      *
      * A facet count is a promise about what clicking it leaves you looking at,
-     * so it has to be counted in the thing you end up looking at. Distinct
-     * vendor per value does that, and matches groupByVendor below.
+     * so it has to be counted in the thing you end up looking at. That used to
+     * be distinct VENDOR, matching the per-vendor roll-up; the list is one card
+     * per PRODUCT now, so it is distinct product and the promise holds again.
+     * The rail said "OPC 115" and the click produced 168 rows until it did.
      */
     const perValue = defs.map(() => new Set<string>());
     for (let ri = 0; ri < constrained.length; ri++) {
@@ -687,7 +714,7 @@ export function search(input: SearchInput): SearchResponse {
       const row = constrained[ri].r;
       const ctx = rowCtx(row, c);
       for (let vi = 0; vi < c.vals.length; vi++) {
-        if (ctxMatches(ctx, c.vals[vi], c.isPrice)) perValue[vi].add(row.vendor_id);
+        if (ctxMatches(ctx, c.vals[vi], c.isPrice)) perValue[vi].add(row.product_id);
       }
     }
     const counts = perValue.map((s) => s.size);
@@ -737,9 +764,9 @@ export function search(input: SearchInput): SearchResponse {
     }))
     .filter((c) => !hardFiltered(c).blocked);
 
-  // Drilling into one seller shows their offers individually; everywhere
-  // else the list is one card per vendor.
-  let ranked: Scored[] = input.vendor_id ? score(candidates) : groupByVendor(score(candidates));
+  // Drilling into one seller shows their offers individually; everywhere else
+  // the list is one card per product.
+  let ranked: Scored[] = input.vendor_id ? score(candidates) : groupByProduct(score(candidates));
 
   if (input.sort && input.sort !== 'recommended') {
     // An unrecognised key used to fall through this chain and leave the list in
@@ -815,7 +842,7 @@ export function search(input: SearchInput): SearchResponse {
           priced_as_of: r.priced_as_of, sla_hours: r.sla_hours, moq_qty: r.moq_qty,
           deliverable: true, requestedQty,
         })));
-        recovered = groupByVendor(recovered);
+        recovered = groupByProduct(recovered);
         break;
       }
     }
@@ -828,7 +855,7 @@ export function search(input: SearchInput): SearchResponse {
         qco_regulated: !!r.qco_regulated, priced_as_of: r.priced_as_of,
         sla_hours: r.sla_hours, moq_qty: r.moq_qty, deliverable: true, requestedQty,
       })));
-      recovered = groupByVendor(recovered);
+      recovered = groupByProduct(recovered);
     }
     ranked = recovered;
     zero = {
@@ -949,6 +976,10 @@ export function search(input: SearchInput): SearchResponse {
       offer_id: r.offer_id, vendor_id: r.vendor_id, vendor_locality: r.vendor_locality,
       platform: r.platform, listing_title: r.listing_title, source_url: r.source_url,
       also_from_vendor: (s as any).also_from_vendor ?? 0,
+      // Sellers carrying THIS product within the current filters — counted by
+      // groupByProduct over the qualifying rows, so it moves with the facets
+      // rather than reporting the catalogue-wide figure `vendor_count` holds.
+      sellers_for_product: (s as any).sellers_for_product ?? 1,
       lead_time_days: r.lead_time_days, cert_state: r.cert_state as any,
       qco_regulated: !!r.qco_regulated,
       priced_as_of: r.priced_as_of, freshness_state: f.state, freshness_dot: f.dot,
@@ -1050,7 +1081,9 @@ function buildIntentChips(
     if (hasQuery && !matchesConstraints(r, parsed.constraints).ok) continue;
     let s = per.get(r.category);
     if (!s) { s = new Set<string>(); per.set(r.category, s); }
-    s.add(r.vendor_id);
+    // Distinct product, for the same reason the facet counts are: the chip
+    // promises the size of the listing it opens.
+    s.add(r.product_id);
   }
   return [...per]
     .map(([c, s]) => ({ label: CATEGORY_LABEL[c] ?? c, category: c, count: s.size }))

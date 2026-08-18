@@ -53,24 +53,19 @@ export const COLUMNS: ColumnDef[] = [
           style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 4, background: 'var(--glass-quiet)', filter: DAMPED }} />
       : <span style={{ width: 30, height: 30, borderRadius: 4, background: 'var(--glass-quiet)', display: 'block' }} />),
   },
+  /* The product leads here too. This table opened with the seller's business
+     name and their platform, which made sense when a row was one seller's
+     offer; a row is one product now, and the name of the thing is what a
+     column of prices is being compared across. Which seller holds the price,
+     and every other seller of the same product, is on the product's page. */
   {
-    key: 'seller', id: 'seller', label: 'Seller', w: 190, core: true,
+    key: 'product', id: 'product', label: 'Product', w: 300, core: true,
     has: () => true,
     render: (c) => (
-      <span className="truncate" title={c.best_vendor}>
-        <span style={{ color: 'var(--ink)' }}>{c.best_vendor}</span>
-        {c.vendor_locality && <span className="ml-1.5 text-[10.5px]" style={{ color: 'var(--ink-3)' }}>{c.vendor_locality}</span>}
+      <span className="truncate" style={{ color: 'var(--ink)' }} title={c.listing_title ?? c.title}>
+        {c.title}
       </span>
     ),
-  },
-  {
-    key: 'platform', id: 'platform', label: 'Platform', w: 104, core: true,
-    has: () => true, render: (c) => <span className="truncate">{c.platform}</span>,
-  },
-  {
-    key: 'product', id: 'product', label: 'Product', w: 240, core: true,
-    has: () => true,
-    render: (c) => <span className="truncate" title={c.listing_title ?? c.title}>{c.title}</span>,
   },
   {
     key: 'brand', id: 'brand', label: 'Brand', w: 116, core: true,
@@ -138,7 +133,7 @@ export const COLUMNS: ColumnDef[] = [
     render: (c) => <FreshnessDot dot={c.freshness_dot} label={c.freshness_label} exact={c.priced_as_of} />,
   },
   { key: 'eta', id: 'eta', label: 'ETA', w: 84, has: (c) => c.lead_time_days != null, render: (c) => (c.lead_time_days == null ? dash : c.lead_time_days <= 1 ? 'tomorrow' : `${c.lead_time_days} d`) },
-  { key: 'sellers', id: 'sellers', label: 'Sellers', w: 78, align: 'right', has: () => true, render: (c) => <span className="fig">{c.vendor_count}</span> },
+  { key: 'sellers', id: 'sellers', label: 'Sellers', w: 78, align: 'right', has: () => true, render: (c) => <span className="fig">{c.sellers_for_product}</span> },
   { key: 'offers', id: 'offers', label: 'Offers', w: 76, align: 'right', has: () => true, render: (c) => <span className="fig">{c.offer_count}</span> },
   { key: 'origin', id: 'origin', label: 'Origin', w: 96, has: (c) => !!c.country_of_origin, render: (c) => txt(c.country_of_origin) },
   { key: 'supply_type', id: 'supply_type', label: 'Supply', w: 108, has: (c) => attr(c, 'supply_type') != null, render: (c) => txt(attr(c, 'supply_type')) },
@@ -204,8 +199,8 @@ export default function ResultsTable({
       <div className="flex items-center justify-between gap-3 mb-2">
         <p className="text-[11.5px]" style={{ color: 'var(--ink-3)' }}>
           {cards.length === total
-            ? <>All <span className="fig">{total}</span> sellers</>
-            : <><span className="fig">{cards.length}</span> of <span className="fig">{total}</span> sellers</>}
+            ? <>All <span className="fig">{total}</span> products</>
+            : <><span className="fig">{cards.length}</span> of <span className="fig">{total}</span> products</>}
           {' '}· click a column to sort every matching result, not just what is loaded
         </p>
         <div className="relative">

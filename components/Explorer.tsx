@@ -32,7 +32,7 @@ import { CategoryIcon, IconChevronRight, IconFilter } from '@/components/icons';
 const DEBOUNCE_MS = 80;
 /* No spinner under 150 ms — otherwise it is only ever a flash. */
 const SPINNER_AFTER_MS = 150;
-/** How many sellers to fetch. 24 is a page; the control below shows all. */
+/** How many products to fetch. 24 is a page; the control below shows all. */
 const PAGE = 24;
 
 /* The URL is the view — see lib/route.ts for the grammar. The explorer holds
@@ -614,7 +614,7 @@ export default function Explorer({
                       <span className="fig text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>
                         {/* Sellers, not products — the list is one card per vendor,
                             except when drilled into one seller's stock. */}
-                        {countSlot(vendorFilter ? 'items from this seller' : data?.total === 1 ? 'seller' : 'sellers')}
+                        {countSlot(vendorFilter ? 'items from this seller' : data?.total === 1 ? 'product' : 'products')}
                       </span>
                     </h1>
                     {vendorFilter ? (
@@ -689,9 +689,9 @@ export default function Explorer({
                   <span aria-current="page">Search</span>
                 </nav>
                 <h1 className="display text-[22px] sm:text-[26px] leading-tight mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  {vendorFilter ? vendorFilter.name : query ? <>“{query}”</> : 'All sellers, all categories'}
+                  {vendorFilter ? vendorFilter.name : query ? <>“{query}”</> : 'Everything we track'}
                   <span className="fig text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>
-                    {countSlot(vendorFilter ? 'items from this seller' : 'sellers')}
+                    {countSlot(vendorFilter ? 'items from this seller' : 'products')}
                   </span>
                 </h1>
                 {vendorFilter ? (
@@ -739,7 +739,7 @@ export default function Explorer({
                     phone it does not render and the cards' h3s would hang off
                     the h1. This heading keeps the outline whole either way. */}
                 <h2 id="results-heading" className="sr-only">
-                  {vendorFilter ? 'Items from this seller' : 'Sellers'}
+                  {vendorFilter ? 'Items from this seller' : 'Products'}
                 </h2>
                 {/* ── the toolbar ───────────────────────────────────────── */}
                 <div className="flex flex-wrap items-center gap-2 pb-3 rule-b mb-3">
@@ -867,7 +867,6 @@ export default function Explorer({
                         key={c.offer_id}
                         card={c}
                         onOpen={() => openCard(c)}
-                        onShowVendor={() => setVendorFilter({ id: c.vendor_id, name: c.best_vendor })}
                         compared={compare.some((x) => x.offer_id === c.offer_id)}
                         onCompare={() => setCompare((s) =>
                           s.some((x) => x.offer_id === c.offer_id)
@@ -893,7 +892,7 @@ export default function Explorer({
                     <span className="text-[12.5px]" style={{ color: 'var(--ink-3)' }}>
                       Showing <span className="fig" style={{ color: 'var(--ink-2)' }}>{results.length}</span> of{' '}
                       <span className="fig" style={{ color: 'var(--ink-2)' }}>{data.total}</span>{' '}
-                      {vendorFilter ? 'items from this seller' : 'sellers'}
+                      {vendorFilter ? 'items from this seller' : 'products'}
                     </span>
                     <button onClick={() => setLimit((n) => n + PAGE)} disabled={loading} className="chip anim px-3 h-8 text-[12.5px]">
                       Show {Math.min(PAGE, data.total - results.length)} more
@@ -910,7 +909,7 @@ export default function Explorer({
                     the reader to wonder whether the list simply stopped. */}
                 {!error && data && results.length > 0 && data.total <= results.length && data.total > PAGE && (
                   <p className="mt-5 text-center text-[12px]" style={{ color: 'var(--ink-3)' }}>
-                    All <span className="fig">{data.total}</span> {vendorFilter ? 'items' : 'sellers'} shown.
+                    All <span className="fig">{data.total}</span> {vendorFilter ? 'items' : 'products'} shown.
                   </p>
                 )}
 
@@ -947,7 +946,8 @@ export default function Explorer({
 
       <CompareTray
         items={compare}
-        // Keyed by OFFER: the list is one card per seller, so two sellers of
+        // Keyed by OFFER: a card still stands for one seller's listing of the
+        // product, so two sellers of
         // the same product are two distinct compare items. Removing on
         // product_id removed both of them.
         onRemove={(id) => setCompare((s) => s.filter((x) => x.offer_id !== id))}

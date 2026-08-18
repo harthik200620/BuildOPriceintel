@@ -256,8 +256,8 @@ console.log('\nPICTURES — capped, deduplicated, and this seller\'s first');
   }
 }
 
-// ── the results list is a list of SELLERS ───────────────────────────────────
-console.log('\nVENDOR-LED RESULTS — a different seller on every row');
+// ── the results list is a list of PRODUCTS ───────────────────────────────────
+console.log('\nPRODUCT-LED RESULTS — a different product on every row');
 {
   const base = { pincode: '500001', region_id: 'hyderabad' };
   const cases: Array<[string, any]> = [
@@ -270,13 +270,19 @@ console.log('\nVENDOR-LED RESULTS — a different seller on every row');
   ];
   for (const [label, input] of cases) {
     const r = search(input);
-    const ids = r.results.map((x) => x.vendor_id);
-    ok(`no seller appears twice — ${label}`, new Set(ids).size === ids.length,
-      `${ids.length} rows, ${new Set(ids).size} distinct sellers`);
+    const ids = r.results.map((x) => x.product_id);
+    ok(`no product appears twice — ${label}`, new Set(ids).size === ids.length,
+      `${ids.length} rows, ${new Set(ids).size} distinct products`);
   }
   const r = search({ ...base, q: 'cement' });
-  ok('every card names its seller and its offer', r.results.every((x) => !!x.best_vendor && !!x.offer_id));
-  ok('a rolled-up card says how much it rolled up', r.results.every((x) => typeof x.also_from_vendor === 'number'));
+  ok('every card still carries the offer behind its price', r.results.every((x) => !!x.offer_id && !!x.vendor_id));
+  ok('every card counts the sellers it stands for', r.results.every((x) => Number.isInteger(x.sellers_for_product) && x.sellers_for_product >= 1));
+  // The figure on a product card is that product's floor, so the row must not
+  // sit above the ceiling of the offers it stands for.
+  const withRivals = r.results.filter((x) => x.sellers_for_product > 1);
+  ok('a product card carries the lowest price among its sellers',
+    withRivals.every((x) => x.normalised_paise <= x.ceiling_paise),
+    `${withRivals.length} multi-seller rows checked`);
 }
 
 // ── the vendor table is one row per vendor, and hides nothing ───────────────
@@ -882,8 +888,11 @@ console.log('\nCATALOGUE — the home page and the listing agree, and nothing is
       const st = stats.find((s) => s.category === c.id && s.region_id === region_id);
       const pincode = region_id === 'hyderabad' ? '500001' : '520001';
       const r = search({ q: '', pincode, region_id, category: c.id });
-      ok(`${c.label} / ${region_id}: card sellers == listing sellers (${st?.sellers} vs ${r.total})`,
-        !!st && st.sellers === r.total);
+      // The card's leading figure must be the listing's row count. It was
+      // sellers on both sides; the list is one card per product now, so it is
+      // products on both sides — and this check is what caught the drift.
+      ok(`${c.label} / ${region_id}: card products == listing rows (${st?.products} vs ${r.total})`,
+        !!st && st.products === r.total);
       ok(`${c.label} / ${region_id}: card offers is the candidate count and ≥ sellers`,
         !!st && st.offers >= st.sellers && st.products > 0);
       ok(`${c.label} / ${region_id}: from-price is a real, quotable landed figure`,

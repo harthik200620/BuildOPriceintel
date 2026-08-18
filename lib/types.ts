@@ -160,9 +160,10 @@ export interface ProductCard {
   best_vendor: string;
   /**
    * A card is one SELLER'S offer, so these say whose price this is. The results
-   * list emits one card per vendor; `also_from_vendor` counts this seller's
-   * other listings that matched the same query and the same filters, so a
-   * rolled-up row still tells you what it rolled up.
+   * list emits one card per PRODUCT, and these name the offer whose price the
+   * card is showing — the cheapest qualifying one. `also_from_vendor` is a
+   * leftover of the per-vendor list and is always 0 outside a vendor
+   * drill-down; `sellers_for_product` is the count a product card reports.
    */
   offer_id: string;
   vendor_id: string;
@@ -171,6 +172,13 @@ export interface ProductCard {
   listing_title: string | null;
   source_url: string;
   also_from_vendor: number;
+  /**
+   * How many sellers carry this product among the rows that survived the
+   * current query and facets. The list is one card per product, so this is
+   * what the card counts; `vendor_count` is the catalogue-wide figure and does
+   * not narrow with a filter.
+   */
+  sellers_for_product: number;
   lead_time_days: number | null;
   cert_state: CertState;
   qco_regulated: boolean;

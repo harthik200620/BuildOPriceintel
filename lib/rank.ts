@@ -177,12 +177,21 @@ export function score(
   // Diversity damping used to live here — a vendor's 3rd result scored ×0.85,
   // its 5th ×0.70, and no seller could hold more than 4 of the first 10.
   //
-  // It has been REMOVED, not disabled. The results list now emits one card per
-  // vendor (see groupByVendor in lib/search.ts), so a seller cannot hold a
-  // second position at all and every one of those rules is unreachable. Leaving
-  // it in place would be worse than dead code: CP(E-Commerce) Rule 5(3)(f)
-  // requires the ranking parameters disclosed to a customer to be the ones
-  // actually applied, and the "why this is here" chip reads from this function.
+  // It was REMOVED, not disabled, and the reason has since changed. It went
+  // because the list emitted one card per vendor, which made every one of those
+  // rules unreachable. The list is one card per PRODUCT now (groupByProduct in
+  // lib/search.ts), so a seller CAN hold many positions again — and it still
+  // does not come back, for a different and better reason: a card is won by
+  // having the lowest landed price for that product, not by how many listings
+  // the seller posted. A seller who occupies the first ten rows is the seller
+  // who is cheapest on ten different products, which is the answer this page
+  // exists to give. Damping that would be suppressing the result to flatter
+  // the ranking.
+  //
+  // Either way it stays out of the code rather than sitting disabled: CP
+  // (E-Commerce) Rule 5(3)(f) requires the ranking parameters disclosed to a
+  // customer to be the ones actually applied, and the "why this is here" chip
+  // reads from this function.
   return scored;
 }
 

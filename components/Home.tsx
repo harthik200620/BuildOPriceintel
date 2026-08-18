@@ -205,7 +205,7 @@ function LiveCard({
       }
       aria-label={
         stat && stat.median_paise != null && stat.lo_paise != null
-          ? `${entry.label}: ${stat.offers.toLocaleString('en-IN')} offers from ${stat.sellers.toLocaleString('en-IN')} sellers, typically ${rupees(stat.median_paise)} ${spoken}, from ${rupees(stat.lo_paise)} ${spoken}. Open the listing.`
+          ? `${entry.label}: ${stat.products.toLocaleString('en-IN')} products from ${stat.sellers.toLocaleString('en-IN')} sellers, typically ${rupees(stat.median_paise)} ${spoken}, from ${rupees(stat.lo_paise)} ${spoken}. Open the listing.`
           : `${entry.label}. Open the listing.`
       }
     >
@@ -249,8 +249,13 @@ function LiveCard({
                   <span className="cat-from-label">no current price</span>
                 )}
               </span>
+              {/* Products, then sellers — in that order, because the first
+                  figure has to be the one the listing opens with. The card said
+                  "162 sellers" and the listing then showed 241 rows, since it
+                  is one card per product now; the same number on both sides is
+                  the whole point of taking these from categoryStats. */}
               <span className="cat-counts tnum">
-                {stat.offers.toLocaleString('en-IN')} offers · {stat.sellers.toLocaleString('en-IN')} sellers
+                {stat.products.toLocaleString('en-IN')} products · {stat.sellers.toLocaleString('en-IN')} sellers
               </span>
             </>
           ) : (
@@ -318,7 +323,7 @@ function TrustBar({ meta }: { meta: any | null }) {
     {
       Icon: IconStorefront, title: 'Sellers compared',
       body: t
-        ? <>{n(t.sellers)} sellers · {n(t.offers)} live offers across Hyderabad and Vijayawada, one card per seller.</>
+        ? <>{n(t.sellers)} sellers · {n(t.offers)} live offers across Hyderabad and Vijayawada, one card per product.</>
         : <span className="skel inline-block h-3 w-44 align-middle" aria-hidden />,
     },
     {

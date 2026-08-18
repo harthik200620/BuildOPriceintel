@@ -3,6 +3,7 @@
 import React from 'react';
 import type { ProductCard as Card } from '@/lib/types';
 import { Money, FreshnessDot, CertBadge } from './primitives';
+import { IconChevronRight } from './icons';
 import CardGallery from './CardGallery';
 
 /**
@@ -14,7 +15,7 @@ import CardGallery from './CardGallery';
  * one place the terracotta accent is spent.
  */
 export default function ProductCard({
-  card, onOpen, onCompare, compared, saved, onSave, onShowVendor,
+  card, onOpen, onCompare, compared, saved, onSave,
 }: {
   card: Card;
   onOpen: () => void;
@@ -22,8 +23,6 @@ export default function ProductCard({
   compared: boolean;
   saved: boolean;
   onSave: () => void;
-  /** Show every matching offer from this seller, ungrouped. */
-  onShowVendor?: () => void;
 }) {
   const stale = card.freshness_state === 'STALE' || card.freshness_state === 'EXPIRED';
   // Rotation follows attention on the whole card — pointer or keyboard.
@@ -57,9 +56,9 @@ export default function ProductCard({
         onClick={onOpen}
         className="absolute inset-0 z-0"
         aria-label={
-          `${card.best_vendor}${card.vendor_locality ? `, ${card.vendor_locality}` : ''}. ${card.title}. ` +
+          `${card.title}. ` +
           `${(card.normalised_paise / 100).toFixed(2)} rupees per ${card.unit_canonical}, delivered. ` +
-          `${card.vendor_count > 1 ? `${card.vendor_count} sellers carry it. ` : ''}` +
+          `${card.sellers_for_product > 1 ? `Lowest of ${card.sellers_for_product} sellers. ` : 'One seller. '}` +
           `${card.why.length ? `Ranked here on ${card.why.join(', ')}. ` : ''}` +
           `Open full detail.`
         }
@@ -72,29 +71,29 @@ export default function ProductCard({
           <CardGallery images={card.images} alt={card.title} size={92} active={hovered} />
 
           <div className="min-w-0 flex-1">
-            {/* The seller leads. A card is one vendor's offer, and the results
-                list is a list of sellers — so the name a buyer is choosing
-                between is the headline, and the product sits under it. */}
+            {/* The PRODUCT leads.
+                The seller's business name used to be the headline, because the
+                list was one card per vendor — which meant the same 50 kg bag
+                appeared three times under three company names, and the name was
+                the only thing telling those rows apart. The list is one card per
+                product now, so the thing being bought is the heading and the
+                seller is a consequence of it: which seller, and the rest of
+                them, is on the product's own page. */}
             <h3
-              className="text-[13.5px] leading-[1.3] truncate"
-              style={{ color: 'var(--ink)' }}
-              title={card.best_vendor}
-            >
-              {card.best_vendor}
-            </h3>
-            <div className="text-[10px] uppercase tracking-[0.11em] mt-0.5 truncate" style={{ color: 'var(--ink-3)' }}>
-              {[card.vendor_locality, card.platform].filter(Boolean).join(' · ')}
-            </div>
-            {/* What they are selling, capped at two lines. */}
-            <p
-              className="text-[11.5px] leading-[1.3] mt-1.5"
+              className="text-[13.5px] leading-[1.35]"
               style={{
-                color: 'var(--ink-2)', display: '-webkit-box', WebkitLineClamp: 2,
+                color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical', overflow: 'hidden',
               }}
+              title={card.title}
             >
               {card.title}
-            </p>
+            </h3>
+            {card.brand && (
+              <div className="text-[10px] uppercase tracking-[0.11em] mt-1 truncate" style={{ color: 'var(--ink-3)' }}>
+                {card.brand}
+              </div>
+            )}
             {/* The spec chips used to sit here — PPC, 50 kg — under a title
                 that already reads "UltraTech PPC cement — 50 kg bag". They
                 were a row of type restating the row above them, so they went;
@@ -117,6 +116,9 @@ export default function ProductCard({
               product page prints it under the same figure — so it belongs
               there and this line stays one row wherever the card is. */}
           <div className="text-[10.5px] mt-1.5 uppercase tracking-[.07em]" style={{ color: 'var(--ink-3)' }}>
+            {/* "lowest of N" only where there is more than one — on a product a
+                single seller carries, "lowest of 1" is a boast about nothing. */}
+            {card.sellers_for_product > 1 ? <>lowest of {card.sellers_for_product} sellers · </> : null}
             delivered · incl {(card.gst_rate_bp / 100).toFixed(0)}% GST
           </div>
         </div>
@@ -150,17 +152,22 @@ export default function ProductCard({
           </span>
         </div>
 
-        {/* The one roll-up that must stay a control: with one card per vendor, a
-            category supplied by a single seller would otherwise leave the rest
-            of their stock unreachable, and a roll-up that hides is not one. */}
-        {card.also_from_vendor > 0 && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onShowVendor?.(); }}
-            className="anim hover:opacity-70 underline decoration-dotted underline-offset-2 pointer-events-auto mt-1 text-[11px] inline-flex items-center min-h-8"
-            style={{ color: 'var(--accent)' }}
+        {/* Where the card goes, said plainly.
+            This used to read "+N more from this seller" — the roll-up a
+            per-vendor list needed. What a product card rolls up is the other
+            SELLERS of the same product, and they are on the product's page,
+            which is where the whole card already leads. So this is a label in
+            --ink-3 with a chevron, not accent-coloured text: an accent span
+            that cannot be focused or clicked reads as a second control sitting
+            inside the first one, and there is only one target here. */}
+        {card.sellers_for_product > 1 && (
+          <span
+            className="mt-1 text-[11px] inline-flex items-center gap-1 min-h-8"
+            style={{ color: 'var(--ink-3)' }}
           >
-            +{card.also_from_vendor} more from this seller
-          </button>
+            Compare {card.sellers_for_product} sellers
+            <IconChevronRight size={11} />
+          </span>
         )}
       </div>
 

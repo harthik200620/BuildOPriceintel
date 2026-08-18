@@ -104,22 +104,22 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
     await page.locator('header [role="group"][aria-label="Region"] button:has-text("Vijayawada")').click();
     await page.waitForFunction((prev) => document.querySelector('a.cat-card')?.textContent !== prev, hydCard);
     const vjaCard = (await page.locator('a.cat-card').first().textContent()) ?? '';
-    ok('region switch re-measures the cards', vjaCard !== hydCard && /sellers/.test(vjaCard));
+    ok('region switch re-measures the cards', vjaCard !== hydCard && /products/.test(vjaCard));
     ok('the subtitle names the region', ((await page.textContent('header + main, main')) ?? '').includes('Vijayawada'));
     await page.locator('header [role="group"][aria-label="Region"] button:has-text("Hyderabad")').click();
     await page.waitForFunction((prev) => document.querySelector('a.cat-card')?.textContent === prev, hydCard);
 
-    // The seller count on the card equals the listing's heading count.
+    // The card's leading figure equals the listing's row count.
     const cardText = (await page.locator('a.cat-card').first().textContent()) ?? '';
-    const cardSellers = Number(cardText.match(/·\s*([\d,]+)\s*sellers/)?.[1]?.replace(/,/g, ''));
+    const cardProducts = Number(cardText.match(/([\d,]+)\s*products/)?.[1]?.replace(/,/g, ''));
     await page.locator('a.cat-card').first().click();
     await page.waitForURL('**/c/cement**');
     ok('card click navigates to /c/cement without reload', path(page) === '/c/cement');
     await page.waitForSelector('h1:has-text("Cement")');
-    await page.waitForFunction(() => /\d+ sellers/.test(document.querySelector('h1')?.textContent ?? ''));
+    await page.waitForFunction(() => /\d+ products/.test(document.querySelector('h1')?.textContent ?? ''));
     const h1 = (await page.textContent('h1')) ?? '';
-    const headSellers = Number(h1.match(/([\d,]+)\s*sellers/)?.[1]?.replace(/,/g, ''));
-    ok(`card sellers (${cardSellers}) == listing sellers (${headSellers})`, cardSellers === headSellers);
+    const headProducts = Number(h1.match(/([\d,]+)\s*products/)?.[1]?.replace(/,/g, ''));
+    ok(`card products (${cardProducts}) == listing rows (${headProducts})`, cardProducts === headProducts);
     ok('breadcrumb present', await page.locator('nav[aria-label="Breadcrumb"]').count() === 1);
     ok('filter rail present with facets', await page.locator('aside .facet-val').count() > 5);
     ok('category strip marks the current category', await page.locator('.cat-strip-item[aria-current="page"]').textContent().then((t) => t?.includes('Cement')));
@@ -180,7 +180,7 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
     ok('typing on home lands in /search?q=', path(page).startsWith('/search?q=8mm'), path(page));
     ok('the search field kept focus', await page.evaluate(() => document.activeElement?.tagName === 'INPUT'));
     ok('typed value survives the view change', (await input.inputValue()) === '8mm tmt');
-    await page.waitForFunction(() => /\d+ sellers/.test(document.querySelector('h1')?.textContent ?? ''));
+    await page.waitForFunction(() => /\d+ products/.test(document.querySelector('h1')?.textContent ?? ''));
     ok('search heading quotes the query', ((await page.textContent('h1')) ?? '').includes('8mm tmt'));
 
     // Wordmark → home, client-side.
