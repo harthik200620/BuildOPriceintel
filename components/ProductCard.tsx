@@ -139,11 +139,16 @@ export default function ProductCard({
             onto a second line in some cards and not others, so a grid of cards
             came out at two different heights on the same row. The chip is the
             one element allowed to shrink. */}
-        <div className="mt-3.5 pt-3 rule-t flex items-center gap-2 text-[11px] min-w-0">
+        <div className="mt-3.5 pt-3 rule-t flex items-center gap-x-2 gap-y-1.5 text-[11px] min-w-0 flex-wrap md:flex-nowrap">
           <span className="shrink-0">
             <FreshnessDot dot={card.freshness_dot} label={card.freshness_label} exact={card.priced_as_of} />
           </span>
-          <span className="min-w-0 truncate">
+          {/* Truncated only where the row may not wrap. On a phone the cards
+              are a single column, so an extra line costs nothing and two cards
+              cannot come out at different heights beside each other — and
+              clipping a certification to "BIS-LICENSED BRAN" is worse than any
+              amount of wrapping. */}
+          <span className="min-w-0 md:truncate">
             <CertBadge state={card.cert_state} qco={card.qco_regulated} />
           </span>
           <span className="ml-auto shrink-0" style={{ color: 'var(--ink-3)' }}>

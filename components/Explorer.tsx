@@ -66,6 +66,21 @@ export default function Explorer({
   // Drilling into one seller's stock — set by a card's "+N more from this seller".
   const [vendorFilter, setVendorFilter] = React.useState<{ id: string; name: string } | null>(null);
   const [inStockOnly, setInStockOnly] = React.useState(false);
+  /**
+   * The explanatory prose, folded away on a phone.
+   *
+   * Measured, the first result card on /c/cement started 584 px into <main> at
+   * 390 px — under the 64 px top bar that is 648 px of an 844 px screen, so a
+   * category opened on almost no catalogue. Three blocks are most of it: the
+   * comparability note, the ranking disclosure and the government reference.
+   * None can be deleted — two of them are what this site promises and one is
+   * Rule 5(3)(f) — so on a phone they sit behind one labelled control and stay
+   * in the DOM either way. Above 768 px they are always shown and the control
+   * does not render.
+   */
+  const [infoOpen, setInfoOpen] = React.useState(false);
+  /** Applied to each folded block: hidden on a phone until asked for. */
+  const foldCls = infoOpen ? '' : 'hidden md:block';
   const [layout, setLayout] = React.useState<'cards' | 'table'>('cards');
   const [limit, setLimit] = React.useState(PAGE);
   /** A table column header. Drives the server sort, not a client reorder. */
@@ -661,7 +676,7 @@ export default function Explorer({
                       </p>
                     )}
                     {!vendorFilter && (
-                      <p className="text-[11.5px] mt-1 max-w-[80ch]" style={{ color: 'var(--ink-3)' }}>{data?.comparability_note ?? COMPARABILITY_NOTE}</p>
+                      <p id="listing-note" className={`text-[11.5px] mt-1 max-w-[80ch] ${foldCls}`} style={{ color: 'var(--ink-3)' }}>{data?.comparability_note ?? COMPARABILITY_NOTE}</p>
                     )}
                   </div>
                 </div>
@@ -704,7 +719,7 @@ export default function Explorer({
                     </button>
                   </p>
                 ) : (
-                  <p className="text-[11.5px] mt-1 max-w-[80ch]" style={{ color: 'var(--ink-3)' }}>{data?.comparability_note ?? COMPARABILITY_NOTE}</p>
+                  <p id="listing-note" className={`text-[11.5px] mt-1 max-w-[80ch] ${foldCls}`} style={{ color: 'var(--ink-3)' }}>{data?.comparability_note ?? COMPARABILITY_NOTE}</p>
                 )}
 
                 {/* Category intent chips — tapping one is a navigation, not a filter. */}
@@ -757,6 +772,20 @@ export default function Explorer({
                       onChange={() => setInStockOnly((v) => !v)} />
                     quotable only
                   </label>
+                  {/* The one control for the folded prose — phone only, because
+                      above 768 px all three blocks are always shown. */}
+                  <button
+                    onClick={() => setInfoOpen((v) => !v)}
+                    aria-expanded={infoOpen}
+                    aria-controls="listing-note listing-sort listing-sor"
+                    className="chip anim h-8 px-3 text-[12px] inline-flex items-center gap-1.5 md:hidden"
+                  >
+                    How these prices work
+                    <svg width="9" height="9" viewBox="0 0 24 24" aria-hidden className="anim"
+                      style={{ transform: infoOpen ? 'rotate(180deg)' : 'none' }}>
+                      <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                    </svg>
+                  </button>
                   <span className="flex-1" />
                   <select
                     value={sort}
@@ -782,7 +811,7 @@ export default function Explorer({
                     column — printing the dropdown's label here would disclose an
                     order that is not the one applied. */}
                 {sortExplain && (
-                  <p className="text-[11px] -mt-1 mb-4" style={{ color: 'var(--ink-3)' }}>
+                  <p id="listing-sort" className={`text-[11px] -mt-1 mb-4 ${foldCls}`} style={{ color: 'var(--ink-3)' }}>
                     Sorted on{' '}
                     <strong style={{ color: 'var(--ink-2)' }}>
                       {colSort && data ? data.disclosure.sort : meta?.sorts?.[sort]?.label ?? sort}
@@ -817,7 +846,7 @@ export default function Explorer({
 
                 {/* The government reference line — no competitor shows this. */}
                 {sorAnchor && (
-                  <div className="mb-4 px-3 py-2 text-[11.5px] flex items-start gap-2"
+                  <div id="listing-sor" className={`mb-4 px-3 py-2 text-[11.5px] flex items-start gap-2 ${infoOpen ? '' : 'hidden md:flex'}`}
                     style={{ border: '1px solid var(--rule)', borderRadius: '10px', background: 'var(--wash)' }}>
                     <span className="shrink-0 mt-[2px]" style={{ color: 'var(--ink-3)' }}>⌖</span>
                     <span style={{ color: 'var(--ink-2)' }}>

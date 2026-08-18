@@ -163,6 +163,38 @@ async function settle(page: Page) {
       });
       if (facts != null) add(v.name, p, 'card-rows', String(facts), facts <= 8);
 
+      /*
+       * 4b. Is the first result actually on screen?
+       *
+       * A category page opens on its catalogue or it opens on prose. The header
+       * used to run 584 px into <main> on a 390 px phone — under a 64 px top
+       * bar, that is 648 px of an 844 px screen spent before the first card.
+       *
+       * The budget is not a fraction of the viewport: a third of 1366 px is a
+       * different demand from a third of 844, and the question is the same at
+       * every size. It is whether enough of the first card is above the fold to
+       * read it — 120 px, about a title and a price.
+       */
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(120);
+      if (p.startsWith('/c/') || p.startsWith('/search')) {
+        const fold = await page.evaluate(() => {
+          const card = document.querySelector('article.glass-card');
+          const main = document.querySelector('main');
+          if (!card || !main) return null;
+          const r = card.getBoundingClientRect();
+          return {
+            viewportTop: Math.round(r.top),
+            intoMain: Math.round((r.top + scrollY) - (main.getBoundingClientRect().top + scrollY)),
+            vh: Math.round(innerHeight),
+          };
+        });
+        if (fold) {
+          const visible = fold.vh - fold.viewportTop;
+          add(v.name, p, 'first-card-visible', `${Math.max(0, visible)}px of it (header ${fold.intoMain}px)`, visible >= 120);
+        }
+      }
+
       // 5. Native controls render as OS widgets and break a dark theme.
       const native = await page.evaluate(() =>
         Array.from(document.querySelectorAll('select, input[type=checkbox]'))
