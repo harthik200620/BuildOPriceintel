@@ -8,6 +8,19 @@ import { chromium, type Page } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
 
+/**
+ * Every harness browser is a brand-new profile, so without this each one is a
+ * first-time visitor and "/" bounces to the welcome screen. Seeding the flag
+ * puts these runs in the returning-buyer state, which is the one they are
+ * about to assert on. The first-run redirect has its own check in flow-check.
+ */
+async function seedStarted(ctx: import('playwright').BrowserContext) {
+  await ctx.addInitScript(() => {
+    try { window.localStorage.setItem('buildobjects:started', '1'); } catch { /* private mode */ }
+  });
+}
+
+
 const BASE = process.env.BUILDOBJECTS_URL ?? 'http://localhost:3000';
 const AXE = fs.readFileSync(path.join(process.cwd(), 'node_modules', 'axe-core', 'axe.min.js'), 'utf8');
 let failures = 0;
@@ -37,6 +50,7 @@ async function axe(page: Page, label: string) {
   const browser = await chromium.launch();
   for (const [name, vp] of [['desktop', { width: 1440, height: 900 }], ['phone', { width: 390, height: 844 }]] as const) {
     const ctx = await browser.newContext({ viewport: vp, reducedMotion: 'reduce', isMobile: name === 'phone', hasTouch: name === 'phone' });
+    await seedStarted(ctx);
     const page = await ctx.newPage();
     for (const p of ['/', '/c/cement', '/search?q=8mm%20tmt', '/logo']) {
       await page.goto(BASE + p, { waitUntil: 'networkidle' });
@@ -49,6 +63,7 @@ async function axe(page: Page, label: string) {
   // Keyboard walk on the catalogue.
   {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    await seedStarted(ctx);
     const page = await ctx.newPage();
     await page.goto(BASE + '/', { waitUntil: 'networkidle' });
     // Tab until the first category card has focus, counting hops.

@@ -16,7 +16,7 @@ import {
 import { rupees, UNIT_SPOKEN } from '@/components/primitives';
 import { LIVE_CATALOGUE, catalogueById, unitSuffix, type CatalogueEntry } from '@/lib/catalogue';
 import { parseLoc, buildUrl, viewKey, underlay, tabOf, LOGO_PATH, type Loc, type Tab } from '@/lib/route';
-import { readWhere, writeWhere } from '@/lib/prefs';
+import { readWhere, writeWhere, hasStarted, markStarted } from '@/lib/prefs';
 import { readCart, writeCart, lineOf, totals, clampQty, type CartLine } from '@/lib/cart';
 import TabBar from '@/components/TabBar';
 import AppBar from '@/components/AppBar';
@@ -213,6 +213,18 @@ export default function Explorer({
     navigate({ view: { kind: 'home' }, q: '', sort: 'recommended', selections: {}, sku: null }, 'push');
   }, [navigate, leaveListing]);
 
+  /**
+   * Through the front door. Records that this browser has been welcomed, so
+   * the next visit opens on the catalogue, and replaces rather than pushes —
+   * back from the first listing should leave the site, not return to a door
+   * that has already been walked through.
+   */
+  const startFromWelcome = React.useCallback(() => {
+    markStarted();
+    leaveListing();
+    navigate({ view: { kind: 'home' }, q: '', sort: 'recommended', selections: {}, sku: null }, 'replace');
+  }, [navigate, leaveListing]);
+
   const openCategory = React.useCallback((e: CatalogueEntry, keepQuery = false) => {
     leaveListing();
     navigate({ view: { kind: 'category', entry: e }, q: keepQuery ? loc.q : '', sort: 'recommended', selections: {}, sku: null }, 'push');
@@ -314,6 +326,18 @@ export default function Explorer({
   React.useEffect(() => {
     const w = readWhere();
     if (w) { setRegionId(w.regionId); setPincode(w.pincode); }
+    /*
+     * The front door, once.
+     *
+     * Checked here rather than on the server because it is a fact about this
+     * browser, and the server renders the same HTML for everyone — so "/" is
+     * still the catalogue for a crawler and for a returning buyer, and only a
+     * first-time visitor is moved. `replace`, so the entry they arrived on
+     * becomes the welcome and back does not bounce between the two.
+     */
+    if (window.location.pathname === '/' && !window.location.search && !hasStarted()) {
+      navigate({ view: { kind: 'welcome' }, q: '', sort: 'recommended', selections: {}, sku: null }, 'replace');
+    }
     if (!meta) fetch('/api/meta').then((r) => r.json()).then(setMeta).catch(() => setError('Could not load app metadata.'));
     const on = () => setOffline(false), off = () => setOffline(true);
     setOffline(!navigator.onLine);
@@ -494,7 +518,7 @@ export default function Explorer({
           <Welcome
             regions={regions} regionId={regionId} pincode={pincode}
             onRegion={setRegionId} onPincode={setPincode} pincodeError={pincodeError}
-            onStart={goHome}
+            onStart={startFromWelcome}
           />
         )}
 
@@ -941,12 +965,17 @@ export default function Explorer({
         whole application is built to avoid, and a chat bubble with its own
         idea of "here" would reintroduce it.
       */}
-      <ChatPanel
-        pincode={pincode}
-        regionName={regionName}
-        onApplySearch={(q) => searchEverywhere(q)}
-        openSignal={askSignal}
-      />
+      {/* Not on the front door: the assistant answers questions about a
+          catalogue the buyer has not been shown yet, and the welcome screen
+          carries no other chrome either. */}
+      {view.kind !== 'welcome' && (
+        <ChatPanel
+          pincode={pincode}
+          regionName={regionName}
+          onApplySearch={(q) => searchEverywhere(q)}
+          openSignal={askSignal}
+        />
+      )}
 
       {/* The five places, phone only. Not on welcome: that screen is the way
           in, and it has nothing to navigate between yet. */}

@@ -28,7 +28,7 @@ function colsFromUrl(): number {
   return Number.isFinite(v) && v >= 24 && v <= 120 ? Math.round(v) : LOGO_DEFAULT_COLS;
 }
 
-export default function LogoStitchCanvas({ cols: colsProp }: { cols?: number }) {
+export default function LogoStitchCanvas({ cols: colsProp, color }: { cols?: number; color?: string }) {
   const host = React.useRef<HTMLDivElement>(null);
   const [cols] = React.useState(() => colsProp ?? colsFromUrl());
   const grid = React.useMemo(() => logoGrid(cols), [cols]);
@@ -36,7 +36,10 @@ export default function LogoStitchCanvas({ cols: colsProp }: { cols?: number }) 
   React.useEffect(() => {
     const el = host.current;
     if (!el) return;
-    const art = buildLogoSegments({ cols });
+    // The mark's own blue on /logo's white sheet; the site's aqua when the
+    // welcome screen sews it onto the dark ground. Same geometry either way —
+    // only the thread changes.
+    const art = buildLogoSegments({ cols, ...(color ? { color } : {}) });
     const inst = mountStitch(el, {
       cols: art.grid.cols, rows: art.grid.rows, cell: art.grid.cell, pad: 0,
       load: (engine, animate) => engine.loadSegments(art.segments, { material: SITE_THREAD_MATERIAL, width: 4, schedule: animate }),
@@ -50,7 +53,7 @@ export default function LogoStitchCanvas({ cols: colsProp }: { cols?: number }) 
     const w = window as Window & { __logoStitch?: unknown };
     if (process.env.NODE_ENV !== 'production') w.__logoStitch = { ...inst, art };
     return () => { inst.dispose(); if (w.__logoStitch && (w.__logoStitch as { engine?: unknown }).engine === inst.engine) delete w.__logoStitch; };
-  }, [cols]);
+  }, [cols, color]);
 
   // The box keeps the grid's aspect so every cell is square on screen; the
   // engine stretches its W×H space over whatever the box measures.

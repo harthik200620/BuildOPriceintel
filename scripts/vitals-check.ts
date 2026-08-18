@@ -11,6 +11,19 @@
  */
 import { chromium } from 'playwright';
 
+/**
+ * Every harness browser is a brand-new profile, so without this each one is a
+ * first-time visitor and "/" bounces to the welcome screen. Seeding the flag
+ * puts these runs in the returning-buyer state, which is the one they are
+ * about to assert on. The first-run redirect has its own check in flow-check.
+ */
+async function seedStarted(ctx: import('playwright').BrowserContext) {
+  await ctx.addInitScript(() => {
+    try { window.localStorage.setItem('buildobjects:started', '1'); } catch { /* private mode */ }
+  });
+}
+
+
 const BASE = process.env.BUILDOBJECTS_URL ?? 'http://localhost:3000';
 let failures = 0;
 const ok = (n: string, c: unknown, d = '') => { console.log(`${c ? '  ok ' : 'FAIL '} ${n}${c || !d ? '' : ` — ${d}`}`); if (!c) failures++; };
@@ -19,6 +32,7 @@ const ok = (n: string, c: unknown, d = '') => { console.log(`${c ? '  ok ' : 'FA
   const browser = await chromium.launch();
   for (const [label, vp, dpr] of [['desktop', { width: 1440, height: 900 }, 1], ['phone', { width: 390, height: 844 }, 2]] as const) {
     const ctx = await browser.newContext({ viewport: vp, deviceScaleFactor: dpr, isMobile: label === 'phone', hasTouch: label === 'phone' });
+    await seedStarted(ctx);
     for (const path of ['/', '/c/cement']) {
       const page = await ctx.newPage();
       const bytes: Record<string, number> = {};

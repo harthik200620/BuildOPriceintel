@@ -10,6 +10,19 @@
 import { chromium, type Page } from 'playwright';
 import { CATALOGUE } from '../lib/catalogue';
 
+/**
+ * Every harness browser is a brand-new profile, so without this each one is a
+ * first-time visitor and "/" bounces to the welcome screen. Seeding the flag
+ * puts these runs in the returning-buyer state, which is the one they are
+ * about to assert on. The first-run redirect has its own check in flow-check.
+ */
+async function seedStarted(ctx: import('playwright').BrowserContext) {
+  await ctx.addInitScript(() => {
+    try { window.localStorage.setItem('buildobjects:started', '1'); } catch { /* private mode */ }
+  });
+}
+
+
 const N_ALL = CATALOGUE.length;
 const N_LIVE = CATALOGUE.filter((c) => c.live).length;
 const N_SOON = N_ALL - N_LIVE;
@@ -28,9 +41,47 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
 (async () => {
   const browser = await chromium.launch();
 
+  /* ── the front door, once ───────────────────────────────────────────── */
+  {
+    // Deliberately NOT seeded: this is the only block that runs as a genuinely
+    // new browser, which is what the redirect is for.
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await hydrated(page);
+    await page.waitForURL('**/welcome', { timeout: 10000 }).catch(() => {});
+    ok('a first visit to / opens the welcome screen', path(page) === '/welcome', path(page));
+    ok('the mark is sewn beside it on a desktop', await page.locator('.welcome-root .welcome-figure canvas').count() >= 1);
+    // Exactly one of each: the two-tree version of this screen rendered every
+    // control twice, with `display:none` hiding one copy from the eye and from
+    // nothing else.
+    ok('Get started and Log in are offered once each',
+      await page.getByRole('button', { name: /Get started/i }).count() === 1
+      && await page.getByRole('button', { name: /Log in/i }).count() === 1);
+
+    // Log in has nothing behind it, and says so rather than taking a password.
+    await page.getByRole('button', { name: /Log in/i }).click();
+    const noAcc = (await page.locator('#welcome-no-accounts').textContent()) ?? '';
+    ok('Log in explains there are no accounts', /no accounts yet/i.test(noAcc), noAcc.slice(0, 60));
+    ok('…and asks for no password', await page.locator('input[type="password"]').count() === 0);
+
+    await page.getByRole('button', { name: /Get started/i }).click();
+    await page.waitForURL(BASE + '/', { timeout: 10000 });
+    ok('Get started lands on the catalogue', path(page) === '/');
+    ok('…and it is the catalogue, not the door', (await page.textContent('h1'))?.replace(/\s+/g, ' ').trim() === 'Product categories');
+
+    // Second visit goes straight in.
+    await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await hydrated(page);
+    await page.waitForTimeout(300);
+    ok('a second visit skips the door', path(page) === '/', path(page));
+    await ctx.close();
+  }
+
   /* ── desktop ────────────────────────────────────────────────────────── */
   {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    await seedStarted(ctx);
     const page = await ctx.newPage();
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));
@@ -178,6 +229,7 @@ const hydrated = (p: Page) => p.waitForFunction(() => document.documentElement.d
   /* ── phone ──────────────────────────────────────────────────────────── */
   {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+    await seedStarted(ctx);
     const page = await ctx.newPage();
     await page.goto(BASE + '/c/bricks-blocks', { waitUntil: 'networkidle' });
     await hydrated(page);

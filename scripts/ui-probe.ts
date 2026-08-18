@@ -10,6 +10,19 @@
  */
 import { chromium, type Page } from 'playwright';
 
+/**
+ * Every harness browser is a brand-new profile, so without this each one is a
+ * first-time visitor and "/" bounces to the welcome screen. Seeding the flag
+ * puts these runs in the returning-buyer state, which is the one they are
+ * about to assert on. The first-run redirect has its own check in flow-check.
+ */
+async function seedStarted(ctx: import('playwright').BrowserContext) {
+  await ctx.addInitScript(() => {
+    try { window.localStorage.setItem('buildobjects:started', '1'); } catch { /* private mode */ }
+  });
+}
+
+
 const BASE = process.env.BUILDOBJECTS_URL ?? 'http://localhost:3000';
 
 const VIEWS = [
@@ -35,6 +48,7 @@ async function settle(page: Page) {
   const browser = await chromium.launch();
   for (const v of VIEWS) {
     const ctx = await browser.newContext({ viewport: { width: v.width, height: v.height } });
+    await seedStarted(ctx);
     const page = await ctx.newPage();
     for (const p of PATHS) {
       await page.goto(BASE + p, { waitUntil: 'domcontentloaded' });
