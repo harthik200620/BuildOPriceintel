@@ -216,10 +216,12 @@ for (const cat of CATEGORIES) {
   const mr = h.median_paise / v.median_paise, lr = h.lo_paise / v.lo_paise;
   check(`${CATEGORY_LABEL[cat]}: typical ${rs(h.median_paise)} vs ${rs(v.median_paise)} (×${mr.toFixed(2)}), from ${rs(h.lo_paise)} vs ${rs(v.lo_paise)} (×${lr.toFixed(2)}) — within 2×`,
     mr >= 0.5 && mr <= 2 && lr >= 0.5 && lr <= 2);
-  // The card's seller count is the listing's heading count.
+  // The card's LEADING figure is the listing's row count. Both sides were
+  // sellers until the list became one card per product; the same drift was in
+  // tests/run.ts and this file kept its own copy of it.
   for (const [region, pincode, st] of [['hyderabad', '500001', h], ['vijayawada', '520001', v]] as const) {
     const r = search({ q: '', pincode, region_id: region, category: cat });
-    check(`${CATEGORY_LABEL[cat]} / ${region}: card sellers ${st.sellers} == listing sellers ${r.total}`, st.sellers === r.total);
+    check(`${CATEGORY_LABEL[cat]} / ${region}: card products ${st.products} == listing rows ${r.total}`, st.products === r.total);
   }
 }
 out('');
